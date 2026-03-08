@@ -1,0 +1,69 @@
+{
+  "name": "cashwerk – New Contact → Slack Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "events": ["contact.create"]
+      },
+      "id": "trigger-node",
+      "name": "cashwerk Trigger",
+      "type": "n8n-nodes-cashwerk.cashwerkTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "REPLACE_ME",
+      "credentials": {
+        "cashwerkApi": {
+          "id": "REPLACE_ME",
+          "name": "cashwerk API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "contact",
+        "operation": "get",
+        "contactId": "={{ $json.body.entityId }}"
+      },
+      "id": "get-contact",
+      "name": "cashwerk – Get Contact Details",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "REPLACE_ME",
+          "name": "cashwerk API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#crm-notifications",
+        "text": "=:wave: *New Contact Created*\n\n*Name:* {{ $json.firstName }} {{ $json.lastName }}\n*Email:* {{ $json.email || 'N/A' }}\n*Phone:* {{ $json.phone || 'N/A' }}\n*Company:* {{ $json.companyName || 'N/A' }}\n\n_Created at {{ $now.format('yyyy-MM-dd HH:mm') }}_",
+        "otherOptions": {}
+      },
+      "id": "slack-node",
+      "name": "Slack – Post Message",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [680, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_ME",
+          "name": "Slack"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "cashwerk Trigger": { "main": [[{ "node": "cashwerk – Get Contact Details", "type": "main", "index": 0 }]] },
+    "cashwerk – Get Contact Details": { "main": [[{ "node": "Slack – Post Message", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "templateId": "cashwerk-new-contact-slack",
+    "instanceId": ""
+  },
+  "tags": [{ "name": "cashwerk" }, { "name": "CRM" }, { "name": "Slack" }, { "name": "Notifications" }]
+}

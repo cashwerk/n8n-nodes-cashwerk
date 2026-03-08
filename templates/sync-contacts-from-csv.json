@@ -1,0 +1,70 @@
+{
+  "name": "cashwerk – Sync Contacts from CSV",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start-node",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "fromFile",
+        "fileFormat": "csv",
+        "options": {}
+      },
+      "id": "csv-node",
+      "name": "Read CSV",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "contact",
+        "operation": "create",
+        "firstName": "={{ $json.firstName }}",
+        "lastName": "={{ $json.lastName }}",
+        "additionalFields": {
+          "email": "={{ $json.email }}",
+          "phone": "={{ $json.phone }}"
+        }
+      },
+      "id": "cashwerk-create",
+      "name": "cashwerk – Create Contact",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "REPLACE_ME",
+          "name": "cashwerk API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const created = items.length;\nreturn [{ json: { message: `Successfully synced ${created} contacts`, count: created, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "summary-node",
+      "name": "Summary",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Start": { "main": [[{ "node": "Read CSV", "type": "main", "index": 0 }]] },
+    "Read CSV": { "main": [[{ "node": "cashwerk – Create Contact", "type": "main", "index": 0 }]] },
+    "cashwerk – Create Contact": { "main": [[{ "node": "Summary", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "templateId": "cashwerk-sync-contacts-csv",
+    "instanceId": ""
+  },
+  "tags": [{ "name": "cashwerk" }, { "name": "CRM" }, { "name": "Import" }]
+}

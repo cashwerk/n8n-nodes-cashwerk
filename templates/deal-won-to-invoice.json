@@ -1,0 +1,106 @@
+{
+  "name": "cashwerk – Deal Won → Create Invoice",
+  "nodes": [
+    {
+      "parameters": {
+        "events": ["deal.update"]
+      },
+      "id": "trigger-node",
+      "name": "cashwerk Trigger",
+      "type": "n8n-nodes-cashwerk.cashwerkTrigger",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "REPLACE_ME",
+      "credentials": {
+        "cashwerkApi": {
+          "id": "REPLACE_ME",
+          "name": "cashwerk API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.stage }}",
+              "operation": "equals",
+              "value2": "won"
+            }
+          ]
+        }
+      },
+      "id": "filter-node",
+      "name": "Filter Won Deals",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "contact",
+        "operation": "get",
+        "contactId": "={{ $json.body.contactId }}"
+      },
+      "id": "get-contact",
+      "name": "cashwerk – Get Contact",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [680, 200],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "REPLACE_ME",
+          "name": "cashwerk API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "invoice",
+        "operation": "create",
+        "contactId": "={{ $json.body.contactId }}",
+        "additionalFields": {
+          "title": "=Invoice for Deal: {{ $node['cashwerk Trigger'].json.body.name }}",
+          "amount": "={{ $node['cashwerk Trigger'].json.body.value }}"
+        }
+      },
+      "id": "create-invoice",
+      "name": "cashwerk – Create Invoice",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [900, 200],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "REPLACE_ME",
+          "name": "cashwerk API Key"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "noop-node",
+      "name": "Skip (Not Won)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [680, 400]
+    }
+  ],
+  "connections": {
+    "cashwerk Trigger": { "main": [[{ "node": "Filter Won Deals", "type": "main", "index": 0 }]] },
+    "Filter Won Deals": {
+      "main": [
+        [{ "node": "cashwerk – Get Contact", "type": "main", "index": 0 }],
+        [{ "node": "Skip (Not Won)", "type": "main", "index": 0 }]
+      ]
+    },
+    "cashwerk – Get Contact": { "main": [[{ "node": "cashwerk – Create Invoice", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {
+    "templateId": "cashwerk-deal-won-invoice",
+    "instanceId": ""
+  },
+  "tags": [{ "name": "cashwerk" }, { "name": "Sales" }, { "name": "Invoicing" }]
+}

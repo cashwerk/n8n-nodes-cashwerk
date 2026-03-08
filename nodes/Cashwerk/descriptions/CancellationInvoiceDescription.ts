@@ -1,0 +1,170 @@
+import { INodeProperties } from 'n8n-workflow';
+
+export const cancellationInvoiceOperations: INodeProperties[] = [
+    {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['cancellationInvoice'] } },
+        options: [
+            { name: 'Get', value: 'get', action: 'Get a Cancellation Invoice', description: 'Get a cancellation invoice by ID' },
+            { name: 'Get Many', value: 'getAll', action: 'Get Many Cancellation Invoices', description: 'Query cancellation invoices with pagination and filters' },
+            { name: 'Update', value: 'update', action: 'Update a Cancellation Invoice', description: 'Update a cancellation invoice by ID' },
+            { name: 'Archive', value: 'archive', action: 'Archive a Cancellation Invoice', description: 'Archive a cancellation invoice by ID' },
+            { name: 'Create X Invoice', value: 'createXInvoice', action: 'Create Cancellation XInvoice XML', description: 'Create XRechnung document for a cancellation invoice' },
+            { name: 'Create Zugferd', value: 'createZugferd', action: 'Create Cancellation ZUGFeRD', description: 'Create ZUGFeRD document for a cancellation invoice' },
+            { name: 'Create', value: 'create', action: 'Create a Cancellation Invoice', description: 'Create a new cancellation invoice' },
+            { name: 'Restore', value: 'restore', action: 'Restore a Cancellation Invoice', description: 'Restore an archived cancellation invoice by ID' },
+        ],
+        default: 'get',
+    },
+];
+
+export const cancellationInvoiceFields: INodeProperties[] = [
+    // ── get ──
+    {
+        displayName: 'Cancellation Invoice ID',
+        name: 'cancellationInvoiceId',
+        type: 'string',
+        required: true,
+        default: '',
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['get'] } },
+        description: 'The ID of the cancellation invoice',
+    },
+    // ── getAll ──
+    {
+        displayName: 'Return All',
+        name: 'returnAll',
+        type: 'boolean',
+        default: false,
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['getAll'] } },
+        description: 'Whether to return all results or only up to a given limit',
+    },
+    {
+        displayName: 'Limit',
+        name: 'limit',
+        type: 'number',
+        default: 50,
+        typeOptions: { minValue: 1 },
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['getAll'], returnAll: [false] } },
+        description: 'Max number of results to return',
+    },
+    {
+        displayName: 'Filters',
+        name: 'filters',
+        type: 'collection',
+        placeholder: 'Add Filter',
+        default: {},
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['getAll'] } },
+        options: [
+            { displayName: 'Skip', name: 'skip', type: 'number', default: 0, description: 'Skip' },
+            { displayName: 'Take', name: 'take', type: 'number', default: 0, description: 'Take' },
+            { displayName: 'SortBy', name: 'sortBy', type: 'string', default: '', description: 'SortBy' },
+            { displayName: 'SortType', name: 'sortType', type: 'string', default: '', description: 'SortType' },
+            { displayName: 'SearchQuery', name: 'searchQuery', type: 'string', default: '', description: 'SearchQuery' },
+            { displayName: 'ProjectIds', name: 'projectIds', type: 'json', default: '{}', description: 'ProjectIds' },
+            { displayName: 'UserIds', name: 'userIds', type: 'json', default: '{}', description: 'UserIds' },
+            { displayName: 'IncludeArchived', name: 'includeArchived', type: 'boolean', default: false, description: 'IncludeArchived' },
+            { displayName: 'StatusFilter', name: 'statusFilter', type: 'string', default: '', description: 'StatusFilter' },
+            { displayName: 'ProviderFilter', name: 'providerFilter', type: 'string', default: '', description: 'ProviderFilter' },
+            { displayName: 'DateFrom', name: 'dateFrom', type: 'dateTime', default: '', description: 'Filter from date' },
+            { displayName: 'DateTo', name: 'dateTo', type: 'dateTime', default: '', description: 'Filter to date' },
+            { displayName: 'RecipientFilter', name: 'recipientFilter', type: 'string', default: '', description: 'RecipientFilter' },
+            { displayName: 'SubjectFilter', name: 'subjectFilter', type: 'string', default: '', description: 'SubjectFilter' },
+        ],
+    },
+    // ── update ──
+    {
+        displayName: 'Cancellation Invoice ID',
+        name: 'cancellationInvoiceId',
+        type: 'string',
+        required: true,
+        default: '',
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['update'] } },
+        description: 'The ID of the cancellation invoice',
+    },
+    {
+        displayName: 'Update Fields',
+        name: 'updateFields',
+        type: 'collection',
+        placeholder: 'Add Field',
+        default: {},
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['update'] } },
+        options: [
+            { displayName: 'AssigneeIds', name: 'assigneeIds', type: 'json', default: '{}', description: 'AssigneeIds' },
+        ],
+    },
+    // ── archive ──
+    {
+        displayName: 'Cancellation Invoice ID',
+        name: 'cancellationInvoiceId',
+        type: 'string',
+        required: true,
+        default: '',
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['archive'] } },
+        description: 'The ID of the cancellation invoice',
+    },
+    // ── createXInvoice ──
+    {
+        displayName: 'Cancellation Invoice ID',
+        name: 'cancellationInvoiceId',
+        type: 'string',
+        required: true,
+        default: '',
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['createXInvoice'] } },
+        description: 'The ID of the cancellation invoice',
+    },
+    // ── createZugferd ──
+    {
+        displayName: 'Cancellation Invoice ID',
+        name: 'cancellationInvoiceId',
+        type: 'string',
+        required: true,
+        default: '',
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['createZugferd'] } },
+        description: 'The ID of the cancellation invoice',
+    },
+    // ── create ──
+    {
+        displayName: 'OriginalInvoiceId',
+        name: 'originalInvoiceId',
+        type: 'number',
+        default: 0,
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['create'] } },
+        description: 'OriginalInvoiceId',
+    },
+    {
+        displayName: 'Reason',
+        name: 'reason',
+        type: 'options',
+        default: '',
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['create'] } },
+        description: 'Reason for the cancellation',
+        options: [
+            { name: 'Customer Request', value: 'CUSTOMER_REQUEST' },
+            { name: 'Billing Error', value: 'BILLING_ERROR' },
+            { name: 'Goods Returned', value: 'GOODS_RETURNED' },
+            { name: 'Pricing Error', value: 'PRICING_ERROR' },
+            { name: 'Other', value: 'OTHER' },
+        ],
+    },
+    {
+        displayName: 'ReasonDescription',
+        name: 'reasonDescription',
+        type: 'string',
+        default: '',
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['create'] } },
+        description: 'ReasonDescription',
+    },
+    // ── restore ──
+    {
+        displayName: 'Cancellation Invoice ID',
+        name: 'cancellationInvoiceId',
+        type: 'string',
+        required: true,
+        default: '',
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['restore'] } },
+        description: 'The ID of the cancellation invoice',
+    },
+];

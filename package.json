@@ -1,0 +1,58 @@
+{
+  "name": "@cashwerk/n8n-nodes-cashwerk",
+  "version": "0.1.0",
+  "description": "n8n community node for the cashwerk API – CRM, Invoicing, Projects, Time Tracking and more",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "cashwerk",
+    "crm",
+    "invoicing",
+    "time-tracking",
+    "automation"
+  ],
+  "license": "MIT",
+  "main": "dist/nodes/Cashwerk/Cashwerk.node.js",
+  "types": "dist/nodes/Cashwerk/Cashwerk.node.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && npm run copy:assets",
+    "copy:assets": "cp nodes/Cashwerk/cashwerk.png dist/nodes/Cashwerk/cashwerk.png",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build",
+    "link:n8n": "npm run build && npm link"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/CashwerkApi.credentials.js",
+      "dist/credentials/CashwerkOAuth2Api.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Cashwerk/Cashwerk.node.js",
+      "dist/nodes/Cashwerk/CashwerkTrigger.node.js"
+    ]
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cashwerk/Software.git",
+    "directory": "packages/nx-cashwerk-n8n"
+  },
+  "devDependencies": {
+    "n8n-core": "^2.7.2",
+    "n8n-workflow": "^2.8.0",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "n8n-workflow": ">=1.0.0"
+  },
+  "dependencies": {
+    "form-data": "^4.0.5"
+  }
+}
