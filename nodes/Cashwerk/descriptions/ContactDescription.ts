@@ -152,10 +152,12 @@ export const contactFields: INodeProperties[] = [
                 { name: 'Inactive', value: 'INACTIVE' },
                 { name: 'Archived', value: 'ARCHIVED' },
                 { name: 'Blocked', value: 'BLOCKED' },
+                { name: 'Churn', value: 'CHURN' },
             ] },
             { displayName: 'Type', name: 'type', type: 'options', default: '', description: 'Type', options: [
                 { name: 'Lead', value: 'LEAD' },
                 { name: 'Customer', value: 'CUSTOMER' },
+                { name: 'Private Customer', value: 'PRIVATE_CUSTOMER' },
                 { name: 'Contact Person', value: 'CONTACT_PERSON' },
                 { name: 'Other', value: 'OTHER' },
             ] },
@@ -226,6 +228,7 @@ export const contactFields: INodeProperties[] = [
             { displayName: 'Type', name: 'type', type: 'options', default: '', description: 'Type', options: [
                 { name: 'Lead', value: 'LEAD' },
                 { name: 'Customer', value: 'CUSTOMER' },
+                { name: 'Private Customer', value: 'PRIVATE_CUSTOMER' },
                 { name: 'Contact Person', value: 'CONTACT_PERSON' },
                 { name: 'Other', value: 'OTHER' },
             ] },
@@ -239,6 +242,7 @@ export const contactFields: INodeProperties[] = [
                 { name: 'Inactive', value: 'INACTIVE' },
                 { name: 'Archived', value: 'ARCHIVED' },
                 { name: 'Blocked', value: 'BLOCKED' },
+                { name: 'Churn', value: 'CHURN' },
             ] },
             { displayName: 'PrivatePhone', name: 'privatePhone', type: 'json', default: '{}', description: 'PrivatePhone' },
             { displayName: 'SecondaryPhone', name: 'secondaryPhone', type: 'json', default: '{}', description: 'SecondaryPhone' },
