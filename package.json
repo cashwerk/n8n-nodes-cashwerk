@@ -1,6 +1,6 @@
 {
-  "name": "@cashwerk/n8n-nodes-cashwerk",
-  "version": "0.1.0",
+  "name": "n8n-nodes-cashwerk",
+  "version": "1.0.0",
   "description": "n8n community node for the cashwerk API – CRM, Invoicing, Projects, Time Tracking and more",
   "keywords": [
     "n8n-community-node-package",
@@ -9,13 +9,23 @@
     "crm",
     "invoicing",
     "time-tracking",
+    "project-management",
     "automation"
   ],
   "license": "MIT",
+  "author": {
+    "name": "cashwerk",
+    "url": "https://cashwerk.io"
+  },
+  "homepage": "https://docs.cashwerk.io/",
+  "bugs": {
+    "url": "https://github.com/cashwerk/Software/issues"
+  },
   "main": "dist/nodes/Cashwerk/Cashwerk.node.js",
   "types": "dist/nodes/Cashwerk/Cashwerk.node.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "templates"
   ],
   "scripts": {
     "build": "tsc && npm run copy:assets",
@@ -37,7 +47,7 @@
     ]
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "repository": {
     "type": "git",

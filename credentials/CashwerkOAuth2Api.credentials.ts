@@ -11,7 +11,7 @@ const SERVER_URL_EXPR =
     '($self.environment === "staging" ? "https://cloud-staging.cashwerk.io" : ' +
     '"https://production.cashwerk.io")))}}';
 
-// Browser URL (opened in user's browser for authorization -- Docker uses localhost since the browser runs on the host)
+// Browser URL (opened in user's browser for OAuth authorization -- Docker maps to localhost since the browser runs on the host)
 const BROWSER_URL_EXPR =
     '={{$self.environment === "custom" ? $self.customBaseUrl : ' +
     '($self.environment === "local" ? "http://localhost:3000" : ' +
@@ -68,8 +68,8 @@ export class CashwerkOAuth2Api implements ICredentialType {
             displayOptions: {
                 show: { environment: ['custom'] },
             },
-            placeholder: 'https://staging.cashwerk.io',
-            description: 'Full base URL including protocol',
+            placeholder: 'https://my-cashwerk.example.com',
+            description: 'Full base URL including protocol (for self-hosted cashwerk instances)',
         },
         {
             displayName: 'Grant Type',

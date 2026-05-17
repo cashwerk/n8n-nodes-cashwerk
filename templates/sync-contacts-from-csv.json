@@ -26,9 +26,9 @@
         "authentication": "apiKey",
         "resource": "contact",
         "operation": "create",
-        "firstName": "={{ $json.firstName }}",
-        "lastName": "={{ $json.lastName }}",
-        "additionalFields": {
+        "options": {
+          "firstName": "={{ $json.firstName }}",
+          "lastName": "={{ $json.lastName }}",
           "email": "={{ $json.email }}",
           "phone": "={{ $json.phone }}"
         }

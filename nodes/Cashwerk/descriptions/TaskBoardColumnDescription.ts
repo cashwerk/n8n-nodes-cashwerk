@@ -11,6 +11,7 @@ export const taskBoardColumnOperations: INodeProperties[] = [
             { name: 'Delete', value: 'delete', action: 'Delete a Task Board Column', description: 'Delete a task board column' },
             { name: 'Create Task', value: 'createTask', action: 'Create Task in Column', description: 'Create a task in a board column' },
             { name: 'Update Name', value: 'updateName', action: 'Update Column Name', description: 'Update a task board column name' },
+            { name: 'Update Position', value: 'updatePosition', action: 'Update Position a Task Board Column', description: 'Update a task board column position' },
         ],
         default: 'delete',
     },
@@ -94,5 +95,27 @@ export const taskBoardColumnFields: INodeProperties[] = [
         default: '',
         displayOptions: { show: { resource: ['taskBoardColumn'], operation: ['updateName'] } },
         description: 'Name',
+    },
+    // ── updatePosition ──
+    {
+        displayName: 'Id',
+        name: 'id',
+        type: 'number',
+        required: true,
+        default: 0,
+        displayOptions: { show: { resource: ['taskBoardColumn'], operation: ['updatePosition'] } },
+        description: 'Id value',
+    },
+    {
+        displayName: 'Options',
+        name: 'options',
+        type: 'collection',
+        placeholder: 'Add Field',
+        default: {},
+        displayOptions: { show: { resource: ['taskBoardColumn'], operation: ['updatePosition'] } },
+        options: [
+            { displayName: 'Index', name: 'index', type: 'number', default: 0, description: 'Index value' },
+            { displayName: 'PreviousIndex', name: 'previousIndex', type: 'number', default: 0, description: 'PreviousIndex value' },
+        ],
     },
 ];

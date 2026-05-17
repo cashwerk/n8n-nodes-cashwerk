@@ -19,8 +19,7 @@
         "resource": "invoice",
         "operation": "getAll",
         "returnAll": false,
-        "limit": 50,
-        "filters": {}
+        "limit": 50
       },
       "id": "fetch-invoices",
       "name": "cashwerk – Get Invoices",

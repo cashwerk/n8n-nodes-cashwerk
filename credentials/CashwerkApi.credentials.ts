@@ -5,13 +5,6 @@ import {
     INodeProperties,
 } from 'n8n-workflow';
 
-const CASHWERK_URLS: Record<string, string> = {
-    production: 'https://production.cashwerk.io',
-    staging: 'https://cloud-staging.cashwerk.io',
-    local: 'http://localhost:3000',
-    docker: 'http://host.docker.internal:3000',
-};
-
 export class CashwerkApi implements ICredentialType {
     name = 'cashwerkApi';
     displayName = 'cashwerk API';
@@ -69,8 +62,8 @@ export class CashwerkApi implements ICredentialType {
             displayOptions: {
                 show: { environment: ['custom'] },
             },
-            placeholder: 'https://staging.cashwerk.io',
-            description: 'Full base URL including protocol',
+            placeholder: 'https://my-cashwerk.example.com',
+            description: 'Full base URL including protocol (for self-hosted cashwerk instances)',
         },
     ];
 

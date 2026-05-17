@@ -1,159 +1,177 @@
-# @cashwerk/n8n-nodes-cashwerk
+# n8n-nodes-cashwerk
 
-n8n community node for the **cashwerk** API. Provides full CRUD operations for CRM, Invoicing, Project Management, Time Tracking and Sales Pipeline entities, plus a webhook-based trigger node for real-time event automation.
+n8n community node for the **cashwerk** API. Provides full CRUD operations across 38 resources spanning CRM, Invoicing, Project Management, Drive, Calendar, Asset Management, Work & Time Tracking, Task Management and Sales Pipeline -- plus a webhook-based trigger node for real-time event automation.
 
 ## Installation
 
-### From GitHub Package Registry (private)
-
-```bash
-npm install @cashwerk/n8n-nodes-cashwerk --registry=https://npm.pkg.github.com
-```
-
-### Community Node (public, once published)
+### Community Node (recommended)
 
 1. Open **Settings > Community Nodes** in your n8n instance
 2. Click **Install a community node**
-3. Enter `@cashwerk/n8n-nodes-cashwerk`
+3. Enter `n8n-nodes-cashwerk`
 4. Click **Install**
+
+### npm
+
+```bash
+npm install n8n-nodes-cashwerk
+```
 
 ## Credentials
 
+This package supports two authentication methods:
+
+### API Key
+
 1. In n8n, go to **Credentials > New Credential > cashwerk API**
 2. Enter your **API Key** (starts with `cw_live_` or `cw_test_`)
-3. Enter your **Base URL** (default: `https://production.cashwerk.io`)
+3. Select the **Environment** (Production or Staging)
 4. Click **Test** to verify the connection
 
-API keys can be generated in the cashwerk web app under **Settings > API & Integrations**.
+### OAuth2
+
+1. In n8n, go to **Credentials > New Credential > cashwerk OAuth2 API**
+2. Select the **Environment** (Production or Staging)
+3. Follow the OAuth2 authorization flow
+4. Optionally specify **Scopes** (space-separated, e.g. `contacts:read invoices:read`)
+
+API keys and OAuth applications can be managed in the cashwerk web app under **Settings > API & Integrations**.
 
 ## Nodes
 
 ### cashwerk (Action Node)
 
-Perform CRUD operations on cashwerk entities.
+Perform operations on cashwerk entities. Supports 38 resources with 200+ operations.
+
+#### CRM
 
 | Resource | Operations |
 |---|---|
-| **Contact** | Create, Get, Get Many, Update, Delete (archive) |
-| **Company** | Create, Get, Get Many |
-| **Invoice** | Create, Get, Get Many, Send (email) |
-| **Offer** | Create, Get, Get Many |
-| **Project** | Create, Get, Get Many |
-| **Task** | Get, Get Many |
-| **Deal** | Create, Get, Get Many |
-| **Time Entry** | Create, Get Many |
+| **Contact** | Get, Get Many, Create, Update, Archive, Archive Many, Restore, Restore Many, Unlink Company, Link Companies, Upload Avatar, Export CSV, Export PDF, Get Deals, Get Invoices, Get Offers, Get Projects, Get Tasks, Get Cancellation Invoices |
+| **Company** | Get, Get Many, Create, Update, Archive, Archive Many, Restore, Restore Many, Add Contacts, Remove Contact, Upload Logo, Export CSV, Export PDF, Get Deals, Get Invoices, Get Offers, Get Projects, Get Tasks, Get Cancellation Invoices |
+| **Portfolio** | Get, Get Many, Create, Update, Delete |
+| **CRM Metrics** | Get Contact Metrics, Get Company Metrics |
+
+#### Invoicing & Finance
+
+| Resource | Operations |
+|---|---|
+| **Invoice** | Get, Get Many, Create, Update, Archive, Restore, Book, Cancel, Cancellation, Mark as Paid, Revert Committed, Send, Get Dashboard, Create XInvoice, Create ZUGFeRD, Validate XInvoice |
+| **Offer** | Get, Get Many, Create, Update, Archive, Restore, Book, Cancel, Send, Convert to Invoice, Create from Deal |
+| **Cancellation Invoice** | Get, Get Many, Create, Update, Archive, Restore, Create XInvoice, Create ZUGFeRD |
+| **Incoming Payment** | Get by Invoice, Total, Create for Invoice, Delete |
+| **Tax Rate** | Get, Get Many, Create, Update, Delete, Delete Many |
+| **Sales Tax Regulation** | Get, Get Many, Create, Update, Delete, Delete Many |
+
+#### Project Management
+
+| Resource | Operations |
+|---|---|
+| **Project** | Get, Create, Query, Archive, Restore, Customer, Add Assignees, Update Assignees, Get Assignees, Add Contact Persons, Get Dashboard, Get Statuses, Update Address with Portfolio, Update Default Task Board, Upload Image |
+
+#### Task Management
+
+| Resource | Operations |
+|---|---|
+| **Task Board** | Get, Get Many, Create, Activate, Archive, Create Column, Invite User, Remove User, Update Due Date, Update Project, Update Title |
+| **Task Board Column** | Delete, Create Task, Update Name |
+| **Task** | Get, Get Many, Delete, Add Collaborator, Remove Collaborator, Add Companies, Add Contacts, Add Tag, Remove Tag, Create Comment, Create Subtask, Remove Subtask, Mark as Completed, Mark as Incomplete, Update Assignee, Update Description, Update Due Date, Update Title |
+| **Task Comment** | Update, Delete |
+
+#### Sales Pipeline
+
+| Resource | Operations |
+|---|---|
+| **Deal** | Get, Get by Pipeline, Create, Update, Delete, Add Companies, Add Contacts, Add Tag, Stage, Update Lines |
+| **Pipeline** | Get, Get Many, Create, Update, Archive, Restore |
+
+#### Drive (File Management)
+
+| Resource | Operations |
+|---|---|
+| **Drive** | Get, Get Many, Search, Init, Create Folder, Get Contents, Get Folders, Get Trash, Get View, Upload Direct, Clear |
+| **Drive File** | Update, Delete, Get Details, Move, Move to Trash, Restore, Update Tags |
+| **Drive Folder** | Get, Update, Delete, Get Details, Get Size, Get Subfolders, Move, Move to Trash, Restore, Update Tags, Zip |
+| **Drive Sharing** | Get Shared Items, Get Shared File, Get Shared Folder, Get Folder Contents, Share Folder, Share File, Unshare Folder, Unshare File, Update Access, Delete Access, Update Share |
+
+#### Calendar
+
+| Resource | Operations |
+|---|---|
+| **Calendar** | Get, Get Many, Create, Update, Delete |
+| **Calendar Event** | Get, Get Many, Create, Update, Delete, Check Busy, Update Response |
+
+#### Work & Time Tracking
+
+| Resource | Operations |
+|---|---|
+| **Time Tracking** | Get, Update, Get by Date Range, Get Running, Start Tracker, Stop Tracker, Pause Tracker, Resume Tracker, Breaks, Trackings |
+| **Tracking Category** | Get, Get Many, Create, Update |
+| **Absence** | Get, Get Many, Create, Update, Delete, Approve, Reject, Get by Date Range, Get Meta, Get Pending |
+| **Shift Plan** | Get, Get Many, Create, Update, Delete, Duplicate, Get by Date Range |
+| **Work Report** | Get User Summary, Get User Report, Get User Monthly, Get Week Stats, Get Working Days, Query Trackings, Get Org Summary, Get Org Report, Export CSV, Export PDF |
+| **Work Time** | Get, For User |
+
+#### Asset Management
+
+| Resource | Operations |
+|---|---|
+| **Asset Unit** | Get, Get Many, Create, Update, Delete, Search |
+| **Asset Group** | Get, Get Many, Create, Update, Delete |
+| **Material** | Get, Get Many, Create, Update, Delete, Delete Many, Query, Upload Image |
+| **Machine** | Get, Get Many, Create, Update, Delete, Delete Many, Query, Upload Image |
+| **Asset Service** | Get, Get Many, Create, Update, Delete, Delete Many, Query, Upload Image |
+| **Subcontract** | Get, Get Many, Create, Update, Delete, Delete Many, Query, Upload Image |
+
+#### Organization & Users
+
+| Resource | Operations |
+|---|---|
+| **Organization** | Get |
+| **User** | Get, Get Many, Get Active |
+| **Mail Connection** | Get Many |
+
+---
 
 ### cashwerk Trigger
 
-Starts a workflow when a cashwerk event occurs. Events are delivered in real-time via webhooks.
+Starts a workflow when a cashwerk event occurs. Events are delivered in real-time via webhooks with HMAC-SHA256 signature verification.
 
 Webhook subscriptions are automatically registered when the workflow is activated and removed on deactivation.
 
-**Available events:**
+**Available events (89 events + wildcard):**
 
-- `contact.create`, `contact.update`, `contact.delete`, `contact.archive`
-- `company.create`, `company.update`, `company.delete`
-- `invoice.create`, `invoice.update`, `invoice.delete`
-- `offer.create`, `offer.update`
-- `deal.create`, `deal.update`
-- `project.create`, `project.update`
-- `task.create`, `task.update`
-- `time_entry.create`, `time_entry.update`
-- `*` (all events)
+| Category | Events |
+|---|---|
+| **All** | `*` (wildcard) |
+| **Absence** | `absence.create`, `absence.update`, `absence.delete`, `absence.approve`, `absence.reject` |
+| **Asset Manager** | `material.create/update/delete`, `machine.create/update/delete`, `asset_service.create/update/delete`, `subcontract.create/update/delete` |
+| **Calendar** | `calendar.create/update/delete`, `calendar_event.create/update/delete` |
+| **CRM** | `contact.create/update/delete/archive/restore`, `company.create/update/delete/archive/restore`, `portfolio.create/update/delete` |
+| **Deal** | `deal.create`, `deal.update`, `deal.delete`, `deal.stage_changed` |
+| **Drive** | `drive.file.upload/update/delete`, `drive.folder.create/delete` |
+| **Invoice** | `invoice.create/update/delete/book/paid/send/cancel` |
+| **Cancellation Invoice** | `cancellation_invoice.create/update` |
+| **Payment** | `incoming_payment.create/delete` |
+| **Offer** | `offer.create/update/delete/send/book/cancel` |
+| **Organization** | `organization.update` |
+| **Pipeline** | `pipeline.create/update/delete` |
+| **Project** | `project.create/update/delete/archive` |
+| **Shift Plan** | `shift_plan.create/update/delete` |
+| **Task** | `task.create/update/delete/complete`, `task_board.create/delete` |
+| **Time Tracking** | `time_entry.create/update/delete`, `tracker.start/stop` |
+| **User** | `user.create/update/delete/archive/activate` |
 
-## Local Development & Testing
+## Workflow Templates
 
-### 1. Build the package
+The package ships with example workflow templates:
 
-```bash
-cd packages/nx-cashwerk-n8n
-npm install
-npm run build
-```
-
-### 2. Run n8n locally with the custom node
-
-**Option A: npm link (recommended for development)**
-
-```bash
-# In packages/nx-cashwerk-n8n
-npm link
-
-# In your n8n installation directory (~/.n8n or wherever n8n is installed)
-npm link @cashwerk/n8n-nodes-cashwerk
-
-# Start n8n
-npx n8n start
-```
-
-**Option B: Docker with volume mount**
-
-```bash
-# Build the package first
-cd packages/nx-cashwerk-n8n && npm run build
-
-# Run n8n with the custom node mounted
-docker run -it --rm \
-  -p 5678:5678 \
-  -v ~/.n8n:/home/node/.n8n \
-  -v $(pwd):/home/node/.n8n/custom/@cashwerk/n8n-nodes-cashwerk \
-  n8nio/n8n
-```
-
-**Option C: N8N_CUSTOM_EXTENSIONS env var**
-
-```bash
-cd packages/nx-cashwerk-n8n && npm run build
-N8N_CUSTOM_EXTENSIONS="/absolute/path/to/packages/nx-cashwerk-n8n" npx n8n start
-```
-
-### 3. Point to localhost
-
-When creating the cashwerk API credential in n8n, set the **Base URL** to your local server:
-
-```
-http://localhost:3000
-```
-
-This way you can test against your local `nx-server` without touching production data.
-
-### 4. Watch mode for development
-
-In one terminal, run the package in watch mode:
-
-```bash
-cd packages/nx-cashwerk-n8n
-npm run dev
-```
-
-In another terminal, run n8n. Restart n8n after each rebuild to pick up changes.
-
-## Publishing
-
-### GitHub Package Registry
-
-The package is published alongside the other `@cashwerk/*` packages:
-
-```bash
-cd packages/nx-cashwerk-n8n
-npm publish
-```
-
-Requires authentication to `https://npm.pkg.github.com` (same as `@cashwerk/shared-types` etc.).
-
-## API Scopes
-
-The API key must have the required scopes for the operations you want to perform. Scopes are configured when creating the API key in the cashwerk web app. Common scopes:
-
-- `CRM_CONTACTS_READ`, `CRM_CONTACT_CREATE`, `CRM_CONTACT_UPDATE`, `CRM_CONTACT_DELETE`
-- `CRM_COMPANIES_READ`, `CRM_COMPANY_CREATE`
-- `INVOICES_READ`, `INVOICE_CREATE`, `INVOICE_SEND_BY_MAIL`
-- `OFFERS_READ`, `OFFER_CREATE`
-- `PROJECTS_READ`, `PROJECT_CREATE`
-- `TASKS_READ`, `TASK_READ`
-- `DEALS_READ`, `DEAL_CREATE`
-- `TIME_TRACKINGS_ORG_READ`, `TIME_TRACKING_START`
+- **Daily Invoice Summary** -- Scheduled report of daily invoices sent via email
+- **Deal Won to Invoice** -- Automatically create an invoice when a deal is won
+- **Deal to Project Pipeline** -- Auto-create project and tasks from won deals
+- **Sync Contacts from CSV** -- Bulk import contacts from a CSV file
+- **New Contact to Slack** -- Real-time Slack notification when a contact is created
 
 ## License
 
-MIT
+[MIT](LICENSE)

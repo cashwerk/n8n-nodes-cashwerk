@@ -24,6 +24,10 @@ export const invoiceOperations: INodeProperties[] = [
             { name: 'Revert Committed', value: 'revertCommitted', action: 'Revert Committed Invoice', description: 'Revert an invoice to committed state' },
             { name: 'Send', value: 'send', action: 'Send an Invoice', description: 'Send an invoice by email' },
             { name: 'Validate X Invoice', value: 'validateXInvoice', action: 'Validate XInvoice', description: 'Validate XInvoice document for an invoice' },
+            { name: 'Delete', value: 'delete', action: 'Delete a Invoice', description: 'Delete an invoice by ID' },
+            { name: 'Archive Many', value: 'archiveMany', action: 'Archive Many a Invoice', description: 'Archive multiple invoices' },
+            { name: 'Delete Many', value: 'deleteMany', action: 'Delete Many a Invoice', description: 'Delete multiple invoices' },
+            { name: 'Restore Many', value: 'restoreMany', action: 'Restore Many a Invoice', description: 'Restore multiple archived invoices' },
         ],
         default: 'get',
     },
@@ -337,5 +341,51 @@ export const invoiceFields: INodeProperties[] = [
         typeOptions: { loadOptionsMethod: 'getInvoices' },
         displayOptions: { show: { resource: ['invoice'], operation: ['validateXInvoice'] } },
         description: 'The ID of the invoice',
+    },
+    // ── delete ──
+    {
+        displayName: 'Id',
+        name: 'id',
+        type: 'number',
+        required: true,
+        default: 0,
+        displayOptions: { show: { resource: ['invoice'], operation: ['delete'] } },
+        description: 'Id value',
+    },
+    // ── archiveMany ──
+    {
+        displayName: 'Options',
+        name: 'options',
+        type: 'collection',
+        placeholder: 'Add Field',
+        default: {},
+        displayOptions: { show: { resource: ['invoice'], operation: ['archiveMany'] } },
+        options: [
+            { displayName: 'Ids', name: 'Ids', type: 'json', default: "", description: 'Ids value' },
+        ],
+    },
+    // ── deleteMany ──
+    {
+        displayName: 'Options',
+        name: 'options',
+        type: 'collection',
+        placeholder: 'Add Field',
+        default: {},
+        displayOptions: { show: { resource: ['invoice'], operation: ['deleteMany'] } },
+        options: [
+            { displayName: 'Ids', name: 'Ids', type: 'json', default: "", description: 'Ids value' },
+        ],
+    },
+    // ── restoreMany ──
+    {
+        displayName: 'Options',
+        name: 'options',
+        type: 'collection',
+        placeholder: 'Add Field',
+        default: {},
+        displayOptions: { show: { resource: ['invoice'], operation: ['restoreMany'] } },
+        options: [
+            { displayName: 'Ids', name: 'Ids', type: 'json', default: "", description: 'Ids value' },
+        ],
     },
 ];

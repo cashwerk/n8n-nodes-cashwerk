@@ -47,6 +47,11 @@ import { incomingPaymentOperations, incomingPaymentFields } from './descriptions
 import { cancellationInvoiceOperations, cancellationInvoiceFields } from './descriptions/CancellationInvoiceDescription';
 import { dealOperations, dealFields } from './descriptions/DealDescription';
 import { pipelineOperations, pipelineFields } from './descriptions/PipelineDescription';
+import { bookingOperations, bookingFields } from './descriptions/BookingDescription';
+import { bookingPageOperations, bookingPageFields } from './descriptions/BookingPageDescription';
+import { bookingEventTypeOperations, bookingEventTypeFields } from './descriptions/BookingEventTypeDescription';
+import { bookingDateOverrideOperations, bookingDateOverrideFields } from './descriptions/BookingDateOverrideDescription';
+import { chatOperations, chatFields } from './descriptions/ChatDescription';
 import { executeUser, executeWorkTime } from './executors/users';
 import { executeOrganization } from './executors/organization';
 import { executeDrive, executeDriveFolder, executeDriveFile, executeDriveSharing } from './executors/drive';
@@ -59,6 +64,8 @@ import { executeProject } from './executors/projectManager';
 import { executeOffer, executeInvoice, executeTaxRate, executeSalesTaxRegulation, executeIncomingPayment, executeCancellationInvoice } from './executors/invoicing';
 import { executeMailConnection } from './executors/mailing';
 import { executeDeal, executePipeline } from './executors/salesPipeline';
+import { executeBooking, executeBookingPage, executeBookingEventType, executeBookingDateOverride } from './executors/booking';
+import { executeChat } from './executors/chat';
 
 export class Cashwerk implements INodeType {
     description: INodeTypeDescription = {
@@ -103,11 +110,16 @@ export class Cashwerk implements INodeType {
                 options: [
                     { name: 'Absence', value: 'absence' },
                     { name: 'Asset Group', value: 'assetGroup' },
+                    { name: 'Booking', value: 'booking' },
+                    { name: 'Booking Date Override', value: 'bookingDateOverride' },
+                    { name: 'Booking Event Type', value: 'bookingEventType' },
+                    { name: 'Booking Page', value: 'bookingPage' },
                     { name: 'Asset Service', value: 'assetService' },
                     { name: 'Asset Unit', value: 'assetUnit' },
                     { name: 'Calendar', value: 'calendar' },
                     { name: 'Calendar Event', value: 'calendarEvent' },
                     { name: 'Cancellation Invoice', value: 'cancellationInvoice' },
+                    { name: 'Chat', value: 'chat' },
                     { name: 'Company', value: 'company' },
                     { name: 'Contact', value: 'contact' },
                     { name: 'CRM Metrics', value: 'crmMetrics' },
@@ -150,12 +162,22 @@ export class Cashwerk implements INodeType {
             ...assetServiceFields,
             ...assetUnitOperations,
             ...assetUnitFields,
+            ...bookingOperations,
+            ...bookingFields,
+            ...bookingDateOverrideOperations,
+            ...bookingDateOverrideFields,
+            ...bookingEventTypeOperations,
+            ...bookingEventTypeFields,
+            ...bookingPageOperations,
+            ...bookingPageFields,
             ...calendarOperations,
             ...calendarFields,
             ...calendarEventOperations,
             ...calendarEventFields,
             ...cancellationInvoiceOperations,
             ...cancellationInvoiceFields,
+            ...chatOperations,
+            ...chatFields,
             ...companyOperations,
             ...companyFields,
             ...contactOperations,
@@ -395,9 +417,14 @@ export class Cashwerk implements INodeType {
             assetGroup: executeAssetGroup,
             assetService: executeAssetService,
             assetUnit: executeAssetUnit,
+            booking: executeBooking,
+            bookingDateOverride: executeBookingDateOverride,
+            bookingEventType: executeBookingEventType,
+            bookingPage: executeBookingPage,
             calendar: executeCalendar,
             calendarEvent: executeCalendarEvent,
             cancellationInvoice: executeCancellationInvoice,
+            chat: executeChat,
             company: executeCompany,
             contact: executeContact,
             crmMetrics: executeCrmMetrics,

@@ -18,6 +18,9 @@ export const dealOperations: INodeProperties[] = [
             { name: 'Add Tag', value: 'addTag', action: 'Add Tag to Deal', description: 'Add a tag to a deal' },
             { name: 'Stage', value: 'stage', action: 'Move Deal to Stage', description: 'Move a deal to a new stage' },
             { name: 'Update Lines', value: 'updateLines', action: 'Update Deal Lines', description: 'Update deal line items' },
+            { name: 'Bulk Update Positions', value: 'bulkUpdatePositions', action: 'Bulk Update Positions a Deal', description: 'Bulk update deal positions in pipeline stages' },
+            { name: 'Drive Folder', value: 'driveFolder', action: 'Drive Folder a Deal', description: 'Get or create the deal documents folder' },
+            { name: 'Tags', value: 'tags', action: 'Tags a Deal', description: 'Add a tag to a deal' },
         ],
         default: 'get',
     },
@@ -339,5 +342,46 @@ export const dealFields: INodeProperties[] = [
         default: '[]',
         displayOptions: { show: { resource: ['deal'], operation: ['updateLines'] } },
         description: 'JSON array of deal line items',
+    },
+    // ── bulkUpdatePositions ──
+    {
+        displayName: 'Options',
+        name: 'options',
+        type: 'collection',
+        placeholder: 'Add Field',
+        default: {},
+        displayOptions: { show: { resource: ['deal'], operation: ['bulkUpdatePositions'] } },
+        options: [
+            { displayName: 'Updates', name: 'updates', type: 'json', default: "", description: 'Updates value' },
+        ],
+    },
+    // ── driveFolder ──
+    {
+        displayName: 'DealId',
+        name: 'dealId',
+        type: 'number',
+        required: true,
+        default: 0,
+        displayOptions: { show: { resource: ['deal'], operation: ['driveFolder'] } },
+        description: 'Deal ID',
+    },
+    // ── tags ──
+    {
+        displayName: 'DealId',
+        name: 'dealId',
+        type: 'number',
+        required: true,
+        default: 0,
+        displayOptions: { show: { resource: ['deal'], operation: ['tags'] } },
+        description: 'DealId value',
+    },
+    {
+        displayName: 'TagId',
+        name: 'tagId',
+        type: 'number',
+        required: true,
+        default: 0,
+        displayOptions: { show: { resource: ['deal'], operation: ['tags'] } },
+        description: 'TagId value',
     },
 ];

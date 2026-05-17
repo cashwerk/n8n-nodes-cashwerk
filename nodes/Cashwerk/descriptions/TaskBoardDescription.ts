@@ -19,6 +19,9 @@ export const taskBoardOperations: INodeProperties[] = [
             { name: 'Update Due Date', value: 'updateDueDate', action: 'Update Task Board Due Date', description: 'Update task board due date' },
             { name: 'Update Project', value: 'updateProject', action: 'Update Task Board Project', description: 'Update task board default project' },
             { name: 'Update Title', value: 'updateTitle', action: 'Update Task Board Title', description: 'Update task board title' },
+            { name: 'Delete', value: 'delete', action: 'Delete a Task Board', description: 'Delete task board' },
+            { name: 'Get Presets', value: 'getPresets', action: 'Get Presets a Task Board', description: 'Get all task board presets' },
+            { name: 'Save As Preset', value: 'saveAsPreset', action: 'Save As Preset a Task Board', description: 'Save task board as preset' },
         ],
         default: 'get',
     },
@@ -285,5 +288,26 @@ export const taskBoardFields: INodeProperties[] = [
         default: '',
         displayOptions: { show: { resource: ['taskBoard'], operation: ['updateTitle'] } },
         description: 'The new title for the task board',
+    },
+    // ── delete ──
+    {
+        displayName: 'Id',
+        name: 'id',
+        type: 'number',
+        required: true,
+        default: 0,
+        displayOptions: { show: { resource: ['taskBoard'], operation: ['delete'] } },
+        description: 'Id value',
+    },
+    // ── getPresets ──
+    // ── saveAsPreset ──
+    {
+        displayName: 'Id',
+        name: 'id',
+        type: 'number',
+        required: true,
+        default: 0,
+        displayOptions: { show: { resource: ['taskBoard'], operation: ['saveAsPreset'] } },
+        description: 'Id value',
     },
 ];

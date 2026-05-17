@@ -41,7 +41,7 @@
         "authentication": "apiKey",
         "resource": "project",
         "operation": "create",
-        "projectName": "=Project: {{ $json.body.name }}",
+        "name": "=Project: {{ $json.body.name }}",
         "additionalFields": {
           "description": "=Auto-created from won deal \"{{ $json.body.name }}\" (value: {{ $json.body.value }})"
         }
@@ -73,10 +73,8 @@
         "authentication": "apiKey",
         "resource": "invoice",
         "operation": "create",
-        "contactId": "={{ $node['cashwerk Trigger'].json.body.contactId }}",
-        "additionalFields": {
-          "title": "=Invoice for {{ $node['cashwerk Trigger'].json.body.name }}"
-        }
+        "invoice": "={\"title\": \"Invoice for {{ $node['cashwerk Trigger'].json.body.name }}\"}",
+        "customer": "={\"clientType\": \"CONTACT\", \"clientId\": {{ $node['cashwerk Trigger'].json.body.contactId }} }"
       },
       "id": "create-invoice",
       "name": "cashwerk – Create Invoice",

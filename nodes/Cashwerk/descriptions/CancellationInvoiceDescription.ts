@@ -16,6 +16,10 @@ export const cancellationInvoiceOperations: INodeProperties[] = [
             { name: 'Create Zugferd', value: 'createZugferd', action: 'Create Cancellation ZUGFeRD', description: 'Create ZUGFeRD document for a cancellation invoice' },
             { name: 'Create', value: 'create', action: 'Create a Cancellation Invoice', description: 'Create a new cancellation invoice' },
             { name: 'Restore', value: 'restore', action: 'Restore a Cancellation Invoice', description: 'Restore an archived cancellation invoice by ID' },
+            { name: 'Archive Many', value: 'archiveMany', action: 'Archive Many a Cancellation Invoice', description: 'Archive multiple cancellation invoices' },
+            { name: 'Delete Many', value: 'deleteMany', action: 'Delete Many a Cancellation Invoice', description: 'Delete multiple cancellation invoices' },
+            { name: 'Get Preview', value: 'getPreview', action: 'Get Preview a Cancellation Invoice', description: 'Get cancellation invoice PDF preview' },
+            { name: 'Restore Many', value: 'restoreMany', action: 'Restore Many a Cancellation Invoice', description: 'Restore multiple archived cancellation invoices' },
         ],
         default: 'get',
     },
@@ -166,5 +170,51 @@ export const cancellationInvoiceFields: INodeProperties[] = [
         default: '',
         displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['restore'] } },
         description: 'The ID of the cancellation invoice',
+    },
+    // ── archiveMany ──
+    {
+        displayName: 'Options',
+        name: 'options',
+        type: 'collection',
+        placeholder: 'Add Field',
+        default: {},
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['archiveMany'] } },
+        options: [
+            { displayName: 'Ids', name: 'Ids', type: 'json', default: "", description: 'Ids value' },
+        ],
+    },
+    // ── deleteMany ──
+    {
+        displayName: 'Options',
+        name: 'options',
+        type: 'collection',
+        placeholder: 'Add Field',
+        default: {},
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['deleteMany'] } },
+        options: [
+            { displayName: 'Ids', name: 'Ids', type: 'json', default: "", description: 'Ids value' },
+        ],
+    },
+    // ── getPreview ──
+    {
+        displayName: 'Id',
+        name: 'id',
+        type: 'number',
+        required: true,
+        default: 0,
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['getPreview'] } },
+        description: 'Id value',
+    },
+    // ── restoreMany ──
+    {
+        displayName: 'Options',
+        name: 'options',
+        type: 'collection',
+        placeholder: 'Add Field',
+        default: {},
+        displayOptions: { show: { resource: ['cancellationInvoice'], operation: ['restoreMany'] } },
+        options: [
+            { displayName: 'Ids', name: 'Ids', type: 'json', default: "", description: 'Ids value' },
+        ],
     },
 ];

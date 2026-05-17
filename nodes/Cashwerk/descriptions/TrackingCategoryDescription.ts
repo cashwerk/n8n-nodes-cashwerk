@@ -12,6 +12,7 @@ export const trackingCategoryOperations: INodeProperties[] = [
             { name: 'Get', value: 'get', action: 'Get a Tracking Category', description: 'Get a tracking category by ID' },
             { name: 'Get Many', value: 'getAll', action: 'Get Many Tracking Categories', description: 'Get all tracking categories for organization' },
             { name: 'Update', value: 'update', action: 'Update a Tracking Category', description: 'Update a tracking category' },
+            { name: 'Delete', value: 'delete', action: 'Delete a Tracking Category', description: 'Delete a tracking category' },
         ],
         default: 'get',
     },
@@ -82,5 +83,15 @@ export const trackingCategoryFields: INodeProperties[] = [
                 description: 'New name of the tracking category',
             },
         ],
+    },
+    // ── delete ──
+    {
+        displayName: 'Id',
+        name: 'id',
+        type: 'number',
+        required: true,
+        default: 0,
+        displayOptions: { show: { resource: ['trackingCategory'], operation: ['delete'] } },
+        description: 'Id value',
     },
 ];
