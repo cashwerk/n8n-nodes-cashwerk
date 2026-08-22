@@ -54,7 +54,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cashwerk/n8n-nodes-cashwerk.git"
+    "url": "git+https://github.com/cashwerk/n8n-nodes-cashwerk.git"
   },
   "devDependencies": {
     "@n8n/node-cli": "^0.44.5",

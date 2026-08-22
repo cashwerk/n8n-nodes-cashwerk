@@ -121,7 +121,7 @@ n8n:generate-descriptions / check-triggers  → up to date
 ### Schritt 1 – Öffentliches Repo ✅
 Erledigt: https://github.com/cashwerk/n8n-nodes-cashwerk (public, `main`, Workflow `publish.yml` enthalten).
 
-### Schritt 2 – Trusted Publisher auf npm ⏳ (nur du – Login nötig)
+### Schritt 2 – Trusted Publisher auf npm ✅ (2026-08-22 eingerichtet)
 npmjs.com → Package **`n8n-nodes-cashwerk`** → *Settings* → *Publish access* → *Trusted Publishers* → *Add a publisher* → **GitHub Actions**:
 - Repository owner: `cashwerk`
 - Repository name: `n8n-nodes-cashwerk`
@@ -130,7 +130,10 @@ npmjs.com → Package **`n8n-nodes-cashwerk`** → *Settings* → *Publish acces
 
 Kein `NPM_TOKEN` nötig. (Fallback: Granular Access Token mit Publish-Recht als Secret `NPM_TOKEN` im Repo.)
 
-### Schritt 3 – Release (nach Schritt 2)
+### Schritt 3 – Release ✅
+**1.0.1 am 2026-08-22 via `publish.yml` veröffentlicht** – Provenance-Attestation (SLSA v1, sigstore logIndex 2568208655), `author.email` = milos@cashwerk.io, 0 Dependencies. Erster Lauf scheiterte, weil `n8n-node lint` im CI auch `scripts/**` lintet → in `eslint.config.mjs` ignoriert, Tag neu gesetzt.
+
+Für künftige Releases:
 ```bash
 cd packages/nx-cashwerk-n8n
 npm version patch --tag-version-prefix=""    # → 1.0.1, Commit + Tag "1.0.1"
