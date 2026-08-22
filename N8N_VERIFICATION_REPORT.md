@@ -109,7 +109,7 @@ n8n:generate-descriptions / check-triggers  → up to date
 |---|---|---|
 | A | `AbsenceDescription.ts` / `ChatDescription.ts` regenerieren | ✅ erledigt (Generator lief, Lint 0) |
 | B | `executors/booking.ts` Stub | ✅ implementiert – plus alle anderen 121 fehlenden Ops (2.7) |
-| C | `author.email` = `m.zaric@openhandwerk.de` (öffentlich auf npm) | ⚠️ unverändert – bei Bedarf vor dem Tag auf Firmenadresse ändern |
+| C | `author.email` | ✅ `milos@cashwerk.io` (= npm-Account-Mail) |
 | D | `cashwerk.png` | ✅ gelöscht |
 | E | `repository.url` | ✅ `github.com/cashwerk/n8n-nodes-cashwerk` |
 | F | Die 121 generierten Executor-Zweige sind **nicht live gegen die API getestet** (Lint/Typen/Build grün, Routen 1:1 aus der Spec). Vor dem Creator-Portal-Submit einen Smoke-Test in einer lokalen n8n-Instanz (`npm run dev`) über die wichtigsten Resources fahren. | ⚠️ offen |
