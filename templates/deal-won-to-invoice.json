@@ -3,55 +3,94 @@
   "nodes": [
     {
       "parameters": {
-        "events": ["deal.update"]
+        "content": "## Deal Won → Create Invoice\nWhen a deal in the sales pipeline is marked **WON**, this workflow loads the deal's contact and creates a draft invoice in cashwerk, titled after the deal.\n\n## Setup\n1. Add your cashwerk API credential to all cashwerk nodes.\n2. Activate the workflow – the trigger registers its webhook in cashwerk automatically.\n3. Optional: extend the *Create Invoice* node with invoice lines (Additional Fields → Invoice Lines).\n\n_Needs the **cashwerk** community node (`n8n-nodes-cashwerk`) and a cashwerk API key (cashwerk → Settings → API Platform)._",
+        "height": 300,
+        "width": 520,
+        "color": 5
       },
-      "id": "trigger-node",
+      "id": "n1",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "events": [
+          "deal.update"
+        ]
+      },
+      "id": "n2",
       "name": "cashwerk Trigger",
       "type": "n8n-nodes-cashwerk.cashwerkTrigger",
       "typeVersion": 1,
-      "position": [240, 300],
-      "webhookId": "REPLACE_ME",
+      "position": [
+        -40,
+        300
+      ],
+      "webhookId": "",
       "credentials": {
         "cashwerkApi": {
-          "id": "REPLACE_ME",
-          "name": "cashwerk API Key"
+          "id": "",
+          "name": "cashwerk API"
         }
       }
     },
     {
       "parameters": {
         "conditions": {
-          "string": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
             {
-              "value1": "={{ $json.body.stage }}",
-              "operation": "equals",
-              "value2": "won"
+              "id": "n3",
+              "leftValue": "={{ $json.data.completionStatus }}",
+              "rightValue": "WON",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
-          ]
-        }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
-      "id": "filter-node",
-      "name": "Filter Won Deals",
+      "id": "n4",
+      "name": "Deal Won?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [460, 300]
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
         "authentication": "apiKey",
         "resource": "contact",
         "operation": "get",
-        "contactId": "={{ $json.body.contactId }}"
+        "contactId": "={{ $json.data.contactId }}"
       },
-      "id": "get-contact",
-      "name": "cashwerk – Get Contact",
+      "id": "n5",
+      "name": "Get Contact",
       "type": "n8n-nodes-cashwerk.cashwerk",
       "typeVersion": 1,
-      "position": [680, 200],
+      "position": [
+        520,
+        200
+      ],
       "credentials": {
         "cashwerkApi": {
-          "id": "REPLACE_ME",
-          "name": "cashwerk API Key"
+          "id": "",
+          "name": "cashwerk API"
         }
       }
     },
@@ -60,44 +99,95 @@
         "authentication": "apiKey",
         "resource": "invoice",
         "operation": "create",
-        "invoice": "={\"title\": \"Invoice for Deal: {{ $node['cashwerk Trigger'].json.body.name }}\"}",
-        "customer": "={\"clientType\": \"CONTACT\", \"clientId\": {{ $node['cashwerk – Get Contact'].json.id }} }"
+        "invoice": "={{ JSON.stringify({ title: \"Invoice – \" + $('cashwerk Trigger').item.json.data.title }) }}",
+        "customer": "={{ JSON.stringify({ clientType: \"CONTACT\", clientId: $json.id }) }}"
       },
-      "id": "create-invoice",
-      "name": "cashwerk – Create Invoice",
+      "id": "n6",
+      "name": "Create Invoice",
       "type": "n8n-nodes-cashwerk.cashwerk",
       "typeVersion": 1,
-      "position": [900, 200],
+      "position": [
+        800,
+        200
+      ],
       "credentials": {
         "cashwerkApi": {
-          "id": "REPLACE_ME",
-          "name": "cashwerk API Key"
+          "id": "",
+          "name": "cashwerk API"
         }
       }
     },
     {
       "parameters": {},
-      "id": "noop-node",
-      "name": "Skip (Not Won)",
+      "id": "n7",
+      "name": "Not Won – Skip",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [680, 400]
+      "position": [
+        520,
+        420
+      ]
     }
   ],
   "connections": {
-    "cashwerk Trigger": { "main": [[{ "node": "Filter Won Deals", "type": "main", "index": 0 }]] },
-    "Filter Won Deals": {
+    "cashwerk Trigger": {
       "main": [
-        [{ "node": "cashwerk – Get Contact", "type": "main", "index": 0 }],
-        [{ "node": "Skip (Not Won)", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Deal Won?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
-    "cashwerk – Get Contact": { "main": [[{ "node": "cashwerk – Create Invoice", "type": "main", "index": 0 }]] }
+    "Deal Won?": {
+      "main": [
+        [
+          {
+            "node": "Get Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Not Won – Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact": {
+      "main": [
+        [
+          {
+            "node": "Create Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
   "meta": {
-    "templateId": "cashwerk-deal-won-invoice",
-    "instanceId": ""
+    "templateId": "cashwerk-deal-won-to-invoice",
+    "templateCredsSetupCompleted": false
   },
-  "tags": [{ "name": "cashwerk" }, { "name": "Sales" }, { "name": "Invoicing" }]
+  "tags": [
+    {
+      "name": "cashwerk"
+    },
+    {
+      "name": "sales"
+    },
+    {
+      "name": "invoicing"
+    }
+  ]
 }

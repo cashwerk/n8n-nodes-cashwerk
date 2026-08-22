@@ -3,15 +3,38 @@
   "nodes": [
     {
       "parameters": {
+        "content": "## Daily Invoice Summary\nEvery morning at 08:00 this workflow fetches the latest invoices from cashwerk, builds a small HTML report and emails it to your finance inbox.\n\n## Setup\n1. Add your cashwerk API credential to *Get Invoices*.\n2. Set sender/recipient and your SMTP credential in *Send Email*.\n3. Adjust the schedule or the invoice filters if needed.\n\n_Needs the **cashwerk** community node (`n8n-nodes-cashwerk`) and a cashwerk API key (cashwerk → Settings → API Platform)._",
+        "height": 300,
+        "width": 520,
+        "color": 5
+      },
+      "id": "n1",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        0
+      ]
+    },
+    {
+      "parameters": {
         "rule": {
-          "interval": [{ "triggerAtHour": 8 }]
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
         }
       },
-      "id": "schedule-node",
-      "name": "Daily 8 AM",
+      "id": "n2",
+      "name": "Every day 08:00",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [240, 300]
+      "typeVersion": 1.2,
+      "position": [
+        -40,
+        300
+      ]
     },
     {
       "parameters": {
@@ -19,60 +42,107 @@
         "resource": "invoice",
         "operation": "getAll",
         "returnAll": false,
-        "limit": 50
+        "limit": 100
       },
-      "id": "fetch-invoices",
-      "name": "cashwerk – Get Invoices",
+      "id": "n3",
+      "name": "Get Invoices",
       "type": "n8n-nodes-cashwerk.cashwerk",
       "typeVersion": 1,
-      "position": [460, 300],
+      "position": [
+        240,
+        300
+      ],
       "credentials": {
         "cashwerkApi": {
-          "id": "REPLACE_ME",
-          "name": "cashwerk API Key"
+          "id": "",
+          "name": "cashwerk API"
         }
       }
     },
     {
       "parameters": {
-        "functionCode": "const invoices = items.map(i => i.json);\nconst total = invoices.reduce((sum, inv) => sum + (inv.totalGross || 0), 0);\nconst open = invoices.filter(inv => inv.status === 'OPEN').length;\nconst paid = invoices.filter(inv => inv.status === 'PAID').length;\nconst overdue = invoices.filter(inv => inv.status === 'OVERDUE').length;\n\nconst rows = invoices.slice(0, 20).map(inv =>\n  `<tr><td>${inv.invoiceNumber || '-'}</td><td>${inv.contactName || '-'}</td><td>${(inv.totalGross || 0).toFixed(2)}</td><td>${inv.status}</td></tr>`\n).join('');\n\nconst html = `\n<h2>Daily Invoice Summary</h2>\n<p><b>Total Revenue:</b> ${total.toFixed(2)} | <b>Open:</b> ${open} | <b>Paid:</b> ${paid} | <b>Overdue:</b> ${overdue}</p>\n<table border=\"1\" cellpadding=\"6\" cellspacing=\"0\" style=\"border-collapse:collapse;\">\n<tr><th>Invoice #</th><th>Contact</th><th>Amount</th><th>Status</th></tr>\n${rows}\n</table>\n<p style=\"color:#888;\">Generated at ${new Date().toISOString()}</p>`;\n\nreturn [{ json: { html, total, open, paid, overdue } }];"
+        "jsCode": "const invoices = $input.all().map(i => i.json);\nconst sum = (f) => invoices.reduce((s, inv) => s + (Number(inv[f]) || 0), 0);\nconst byStatus = {};\nfor (const inv of invoices) byStatus[inv.status || 'UNKNOWN'] = (byStatus[inv.status || 'UNKNOWN'] || 0) + 1;\nconst rows = invoices.slice(0, 25).map(inv =>\n  `<tr><td>${inv.invoiceNumber ?? inv.number ?? '-'}</td><td>${inv.status ?? '-'}</td><td style=\"text-align:right\">${(Number(inv.totalGross ?? inv.grossAmount) || 0).toFixed(2)} €</td></tr>`).join('');\nconst html = `<h2>cashwerk – Daily Invoice Summary</h2>\n<p><b>${invoices.length}</b> invoices · total <b>${sum('totalGross').toFixed(2)} €</b></p>\n<p>${Object.entries(byStatus).map(([k,v]) => `${k}: ${v}`).join(' · ')}</p>\n<table border=\"1\" cellpadding=\"6\" style=\"border-collapse:collapse\"><tr><th>Number</th><th>Status</th><th>Gross</th></tr>${rows}</table>`;\nreturn [{ json: { html, count: invoices.length } }];"
       },
-      "id": "format-node",
+      "id": "n4",
       "name": "Build Report",
-      "type": "n8n-nodes-base.function",
-      "typeVersion": 1,
-      "position": [680, 300]
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ]
     },
     {
       "parameters": {
-        "fromEmail": "noreply@your-domain.com",
-        "toEmail": "finance@your-domain.com",
-        "subject": "=cashwerk Daily Invoice Summary – {{ $now.format('yyyy-MM-dd') }}",
-        "emailType": "html",
-        "html": "={{ $json.html }}"
+        "fromEmail": "noreply@example.com",
+        "toEmail": "finance@example.com",
+        "subject": "=cashwerk – Daily Invoice Summary {{ $now.format('yyyy-MM-dd') }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {}
       },
-      "id": "email-node",
+      "id": "n5",
       "name": "Send Email",
       "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2,
-      "position": [900, 300],
-      "credentials": {
-        "smtp": {
-          "id": "REPLACE_ME",
-          "name": "SMTP"
-        }
-      }
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        300
+      ]
     }
   ],
   "connections": {
-    "Daily 8 AM": { "main": [[{ "node": "cashwerk – Get Invoices", "type": "main", "index": 0 }]] },
-    "cashwerk – Get Invoices": { "main": [[{ "node": "Build Report", "type": "main", "index": 0 }]] },
-    "Build Report": { "main": [[{ "node": "Send Email", "type": "main", "index": 0 }]] }
+    "Every day 08:00": {
+      "main": [
+        [
+          {
+            "node": "Get Invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Invoices": {
+      "main": [
+        [
+          {
+            "node": "Build Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Report": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
   "meta": {
     "templateId": "cashwerk-daily-invoice-summary",
-    "instanceId": ""
+    "templateCredsSetupCompleted": false
   },
-  "tags": [{ "name": "cashwerk" }, { "name": "Invoicing" }, { "name": "Reporting" }]
+  "tags": [
+    {
+      "name": "cashwerk"
+    },
+    {
+      "name": "invoicing"
+    },
+    {
+      "name": "reporting"
+    }
+  ]
 }

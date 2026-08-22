@@ -1,0 +1,124 @@
+{
+  "name": "cashwerk – New Booking → Slack + Prep Task",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## New Booking → Team Notification + Task\nWhen someone books an appointment through a cashwerk booking page, notify the team in Slack and create a preparation task in cashwerk.\n\n## Setup\n1. Add your cashwerk API credential.\n2. Connect Slack and choose the channel.\n3. Paste the ID of the board column the prep task should land in into *Create Task* → Task Board Column ID (cashwerk → Tasks → column menu).\n\n_Needs the **cashwerk** community node (`n8n-nodes-cashwerk`) and a cashwerk API key (cashwerk → Settings → API Platform)._",
+        "height": 300,
+        "width": 520,
+        "color": 5
+      },
+      "id": "n1",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "events": [
+          "booking.create"
+        ]
+      },
+      "id": "n2",
+      "name": "cashwerk Trigger",
+      "type": "n8n-nodes-cashwerk.cashwerkTrigger",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        300
+      ],
+      "webhookId": "",
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#bookings"
+        },
+        "text": "=:calendar: *New booking*\n{{ $json.data.inviteeName }} ({{ $json.data.inviteeEmail }})\nStart: {{ $json.data.startAt }}",
+        "otherOptions": {}
+      },
+      "id": "n3",
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "taskBoardColumn",
+        "operation": "createTask",
+        "taskBoardColumnId": "",
+        "title": "=Prepare appointment: {{ $json.data.inviteeName }} · {{ $json.data.startAt }}"
+      },
+      "id": "n4",
+      "name": "Create Task",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [
+        240,
+        420
+      ],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "cashwerk Trigger": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateId": "cashwerk-new-booking-notification",
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [
+    {
+      "name": "cashwerk"
+    },
+    {
+      "name": "booking"
+    },
+    {
+      "name": "slack"
+    }
+  ]
+}

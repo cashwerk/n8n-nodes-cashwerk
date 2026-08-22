@@ -1,0 +1,131 @@
+{
+  "name": "cashwerk – Import Contacts from CSV",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Import Contacts from CSV\nUpload a CSV (columns: firstName, lastName, email, phone) and create one cashwerk contact per row.\n\n## Setup\n1. Add your cashwerk API credential to *Create Contact*.\n2. Replace *Read CSV* with your file source (Google Drive, FTP, HTTP …) or run manually and upload a file in the Form trigger.\n3. Map extra columns in *Create Contact* → Options.\n\n_Needs the **cashwerk** community node (`n8n-nodes-cashwerk`) and a cashwerk API key (cashwerk → Settings → API Platform)._",
+        "height": 300,
+        "width": 520,
+        "color": 5
+      },
+      "id": "n1",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "Import contacts into cashwerk",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "CSV file",
+              "fieldType": "file",
+              "acceptFileTypes": ".csv",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n2",
+      "name": "Upload CSV",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -40,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "csv",
+        "binaryPropertyName": "CSV_file",
+        "options": {}
+      },
+      "id": "n3",
+      "name": "Read CSV",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "contact",
+        "operation": "create",
+        "options": {
+          "firstName": "={{ $json.firstName }}",
+          "lastName": "={{ $json.lastName }}",
+          "email": "={{ $json.email }}",
+          "phone": "={{ $json.phone }}",
+          "type": "CUSTOMER"
+        }
+      },
+      "id": "n4",
+      "name": "Create Contact",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Upload CSV": {
+      "main": [
+        [
+          {
+            "node": "Read CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read CSV": {
+      "main": [
+        [
+          {
+            "node": "Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateId": "cashwerk-import-contacts-from-csv",
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [
+    {
+      "name": "cashwerk"
+    },
+    {
+      "name": "crm"
+    },
+    {
+      "name": "import"
+    }
+  ]
+}

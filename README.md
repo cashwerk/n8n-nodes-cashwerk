@@ -200,13 +200,16 @@ Webhook subscriptions are automatically registered when the workflow is activate
 
 ## Workflow Templates
 
-The package ships with example workflow templates:
+The package ships with ready-to-import workflow templates (`templates/`):
 
-- **Daily Invoice Summary** -- Scheduled report of daily invoices sent via email
-- **Deal Won to Invoice** -- Automatically create an invoice when a deal is won
-- **Deal to Project Pipeline** -- Auto-create project and tasks from won deals
-- **Sync Contacts from CSV** -- Bulk import contacts from a CSV file
-- **New Contact to Slack** -- Real-time Slack notification when a contact is created
+- **Deal Won → Create Invoice** -- draft an invoice for the deal's contact as soon as a deal is marked WON
+- **Deal Won → Create Project** -- open a project linked to the contact for every won deal
+- **New Contact → Slack Notification** -- post new CRM contacts to a Slack channel
+- **Daily Invoice Summary** -- scheduled HTML report of recent invoices by email
+- **Import Contacts from CSV** -- upload a CSV via form and create one contact per row
+- **New Booking → Slack + Prep Task** -- notify the team and create a preparation task for every booking
+
+Import: n8n → Workflows → Import from file. Each template carries a sticky note with the setup steps.
 
 ## License
 

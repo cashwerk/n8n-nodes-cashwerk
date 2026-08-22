@@ -1,0 +1,164 @@
+{
+  "name": "cashwerk – Deal Won → Create Project",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Deal Won → Create Project\nTurns every **won** deal into a cashwerk project (linked to the deal's contact) so the team can start planning and time-tracking immediately.\n\n## Setup\n1. Add your cashwerk API credential.\n2. Activate the workflow.\n3. Optional: set a default project status / portfolio in *Create Project* → Additional Fields.\n\n_Needs the **cashwerk** community node (`n8n-nodes-cashwerk`) and a cashwerk API key (cashwerk → Settings → API Platform)._",
+        "height": 300,
+        "width": 520,
+        "color": 5
+      },
+      "id": "n1",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "events": [
+          "deal.update"
+        ]
+      },
+      "id": "n2",
+      "name": "cashwerk Trigger",
+      "type": "n8n-nodes-cashwerk.cashwerkTrigger",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        300
+      ],
+      "webhookId": "",
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "n3",
+              "leftValue": "={{ $json.data.completionStatus }}",
+              "rightValue": "WON",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n4",
+      "name": "Deal Won?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "project",
+        "operation": "create",
+        "name": "={{ $json.data.title }}",
+        "additionalFields": {
+          "clientType": "Person",
+          "clientContactId": "={{ $json.data.contactId }}",
+          "description": "=Created automatically from won deal #{{ $json.entityId }}"
+        }
+      },
+      "id": "n5",
+      "name": "Create Project",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [
+        520,
+        200
+      ],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "n6",
+      "name": "Not Won – Skip",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        520,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "cashwerk Trigger": {
+      "main": [
+        [
+          {
+            "node": "Deal Won?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deal Won?": {
+      "main": [
+        [
+          {
+            "node": "Create Project",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Not Won – Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateId": "cashwerk-deal-won-to-project",
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [
+    {
+      "name": "cashwerk"
+    },
+    {
+      "name": "sales"
+    },
+    {
+      "name": "projects"
+    }
+  ]
+}

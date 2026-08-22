@@ -1,0 +1,96 @@
+{
+  "name": "cashwerk – New Contact → Slack Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## New Contact → Slack\nPosts a message to a Slack channel whenever a contact is created in cashwerk – great for keeping sales in the loop.\n\n## Setup\n1. Add your cashwerk API credential to the trigger.\n2. Connect your Slack credential and pick the channel in *Slack*.\n3. Activate the workflow.\n\n_Needs the **cashwerk** community node (`n8n-nodes-cashwerk`) and a cashwerk API key (cashwerk → Settings → API Platform)._",
+        "height": 300,
+        "width": 520,
+        "color": 5
+      },
+      "id": "n1",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "events": [
+          "contact.create"
+        ]
+      },
+      "id": "n2",
+      "name": "cashwerk Trigger",
+      "type": "n8n-nodes-cashwerk.cashwerkTrigger",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        300
+      ],
+      "webhookId": "",
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#sales"
+        },
+        "text": "=:bust_in_silhouette: *New contact in cashwerk*\n{{ $json.data.firstName }} {{ $json.data.lastName }}{{ $json.data.email ? \" · \" + $json.data.email : \"\" }}\nID {{ $json.entityId }}",
+        "otherOptions": {}
+      },
+      "id": "n3",
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "cashwerk Trigger": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateId": "cashwerk-new-contact-to-slack",
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [
+    {
+      "name": "cashwerk"
+    },
+    {
+      "name": "crm"
+    },
+    {
+      "name": "slack"
+    }
+  ]
+}
