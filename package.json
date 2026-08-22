@@ -15,11 +15,12 @@
   "license": "MIT",
   "author": {
     "name": "cashwerk",
+    "email": "m.zaric@openhandwerk.de",
     "url": "https://cashwerk.io"
   },
   "homepage": "https://docs.cashwerk.io/",
   "bugs": {
-    "url": "https://github.com/cashwerk/Software/issues"
+    "url": "https://github.com/cashwerk/n8n-nodes-cashwerk/issues"
   },
   "main": "dist/nodes/Cashwerk/Cashwerk.node.js",
   "types": "dist/nodes/Cashwerk/Cashwerk.node.d.ts",
@@ -28,12 +29,14 @@
     "templates"
   ],
   "scripts": {
-    "build": "tsc && npm run copy:assets",
-    "copy:assets": "cp nodes/Cashwerk/cashwerk.png dist/nodes/Cashwerk/cashwerk.png",
-    "dev": "tsc --watch",
+    "build": "n8n-node build",
+    "dev": "n8n-node dev",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build",
-    "link:n8n": "npm run build && npm link"
+    "prepublishOnly": "n8n-node prerelease",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "build:watch": "tsc --watch",
+    "release": "n8n-node release"
   },
   "n8n": {
     "n8nNodesApiVersion": 1,
@@ -51,18 +54,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cashwerk/Software.git",
-    "directory": "packages/nx-cashwerk-n8n"
+    "url": "https://github.com/cashwerk/n8n-nodes-cashwerk.git"
   },
   "devDependencies": {
+    "@n8n/node-cli": "^0.44.5",
+    "eslint": "^9.29.0",
     "n8n-core": "^2.7.2",
     "n8n-workflow": "^2.8.0",
+    "prettier": "^3.9.6",
+    "release-it": "^20.2.1",
     "typescript": "^5.3.0"
   },
   "peerDependencies": {
-    "n8n-workflow": ">=1.0.0"
+    "n8n-workflow": "*"
   },
-  "dependencies": {
-    "form-data": "^4.0.5"
+  "engines": {
+    "node": ">=20.15"
   }
 }

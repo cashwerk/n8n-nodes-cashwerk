@@ -968,7 +968,7 @@ export class Cashwerk implements INodeType {
     description: INodeTypeDescription = {
         displayName: 'cashwerk',
         name: 'cashwerk',
-        icon: 'file:cashwerk.png',
+        icon: { light: 'file:cashwerk.svg', dark: 'file:cashwerk.dark.svg' },
         group: ['transform'],
         version: 1,
         subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',

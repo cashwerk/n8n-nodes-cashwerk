@@ -1,19 +1,19 @@
 import {
-    IExecuteFunctions,
-    IHookFunctions,
-    ILoadOptionsFunctions,
-    IWebhookFunctions,
-    IHttpRequestMethods,
-    IHttpRequestOptions,
-    IDataObject,
-    NodeApiError,
-    JsonObject,
+	IExecuteFunctions,
+	IHookFunctions,
+	ILoadOptionsFunctions,
+	IWebhookFunctions,
+	IHttpRequestMethods,
+	IHttpRequestOptions,
+	IDataObject,
+	NodeApiError,
+	JsonObject,
 } from 'n8n-workflow';
-import FormData from 'form-data';
 
 import { CASHWERK_URLS, CASHWERK_API_PREFIX } from './constants';
 
-type CashwerkContext = IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions | IWebhookFunctions;
+type CashwerkContext =
+	IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions | IWebhookFunctions;
 
 /** Union of all value types that IDataObject accepts. */
 type IDataObjectValue = IDataObject[string];
@@ -29,19 +29,20 @@ type IDataObjectValue = IDataObject[string];
  * This helper handles every case the user or an expression might produce.
  */
 export function parseJsonParam(value: unknown, fallback: IDataObjectValue = []): IDataObjectValue {
-    if (value === undefined || value === null || value === '') return fallback;
-    if (Array.isArray(value) || (typeof value === 'object' && value !== null)) return value as IDataObjectValue;
-    if (typeof value === 'number') return value;
-    if (typeof value === 'string') {
-        const trimmed = value.trim();
-        if (trimmed === '') return fallback;
-        try {
-            return JSON.parse(trimmed) as IDataObjectValue;
-        } catch {
-            return fallback;
-        }
-    }
-    return fallback;
+	if (value === undefined || value === null || value === '') return fallback;
+	if (Array.isArray(value) || (typeof value === 'object' && value !== null))
+		return value as IDataObjectValue;
+	if (typeof value === 'number') return value;
+	if (typeof value === 'string') {
+		const trimmed = value.trim();
+		if (trimmed === '') return fallback;
+		try {
+			return JSON.parse(trimmed) as IDataObjectValue;
+		} catch {
+			return fallback;
+		}
+	}
+	return fallback;
 }
 
 /**
@@ -49,7 +50,7 @@ export function parseJsonParam(value: unknown, fallback: IDataObjectValue = []):
  * Trims whitespace and applies encodeURIComponent to prevent malformed URLs.
  */
 export function encodeParam(value: string | number): string {
-    return encodeURIComponent(String(value).trim());
+	return encodeURIComponent(String(value).trim());
 }
 
 /**
@@ -58,18 +59,16 @@ export function encodeParam(value: string | number): string {
  * before constructing the URL. Returns the numeric ID as a string for URL use.
  */
 export function requireId(
-    context: IExecuteFunctions,
-    paramName: string,
-    itemIndex: number,
+	context: IExecuteFunctions,
+	paramName: string,
+	itemIndex: number,
 ): string {
-    const raw = context.getNodeParameter(paramName, itemIndex);
-    const num = Number(raw);
-    if (!Number.isFinite(num) || !Number.isInteger(num) || num <= 0) {
-        throw new Error(
-            `Invalid value for "${paramName}": "${raw}". Expected a positive integer ID.`,
-        );
-    }
-    return String(num);
+	const raw = context.getNodeParameter(paramName, itemIndex);
+	const num = Number(raw);
+	if (!Number.isFinite(num) || !Number.isInteger(num) || num <= 0) {
+		throw new Error(`Invalid value for "${paramName}": "${raw}". Expected a positive integer ID.`);
+	}
+	return String(num);
 }
 
 /**
@@ -78,66 +77,76 @@ export function requireId(
  * Accepts ISO-8601 strings, Date objects, or numeric timestamps.
  */
 export function toTimestamp(value: string | number | Date): string {
-    if (typeof value === 'number') {
-        return String(value);
-    }
-    const str = String(value).trim();
-    if (/^\d+$/.test(str)) {
-        return str;
-    }
-    const ms = new Date(str).getTime();
-    if (isNaN(ms)) {
-        throw new Error(`Invalid date value: "${value}". Expected an ISO-8601 date string or a Unix timestamp in milliseconds.`);
-    }
-    return String(ms);
+	if (typeof value === 'number') {
+		return String(value);
+	}
+	const str = String(value).trim();
+	if (/^\d+$/.test(str)) {
+		return str;
+	}
+	const ms = new Date(str).getTime();
+	if (isNaN(ms)) {
+		throw new Error(
+			`Invalid date value: "${value}". Expected an ISO-8601 date string or a Unix timestamp in milliseconds.`,
+		);
+	}
+	return String(ms);
 }
 
 /**
  * Build a fully-qualified cashwerk API URL from the credential environment toggle.
  */
 function getBaseUrl(credentials: IDataObject): string {
-    const env = (credentials.environment as string) || 'production';
-    let base: string;
+	const env = (credentials.environment as string) || 'production';
+	let base: string;
 
-    if (env === 'custom') {
-        base = (credentials.customBaseUrl as string) || CASHWERK_URLS.production;
-    } else {
-        base = CASHWERK_URLS[env as keyof typeof CASHWERK_URLS] || CASHWERK_URLS.production;
-    }
+	if (env === 'custom') {
+		base = (credentials.customBaseUrl as string) || CASHWERK_URLS.production;
+	} else {
+		base = CASHWERK_URLS[env as keyof typeof CASHWERK_URLS] || CASHWERK_URLS.production;
+	}
 
-    return `${base.replace(/\/+$/, '')}${CASHWERK_API_PREFIX}`;
+	return `${base.replace(/\/+$/, '')}${CASHWERK_API_PREFIX}`;
 }
 
 /**
  * Resolve which credential type is active on the current node and return the credentials + auth header.
  */
-async function resolveAuth(context: CashwerkContext): Promise<{ credentials: IDataObject; headers: Record<string, string> }> {
-    let authMethod = 'apiKey';
-    try {
-        if ('getCurrentNodeParameter' in context) {
-            authMethod = ((context as ILoadOptionsFunctions).getCurrentNodeParameter('authentication') as string) || 'apiKey';
-        } else if ('getNodeParameter' in context) {
-            authMethod = ((context as IExecuteFunctions).getNodeParameter('authentication', 0, 'apiKey') as string);
-        }
-    } catch {
-        authMethod = 'apiKey';
-    }
+async function resolveAuth(
+	context: CashwerkContext,
+): Promise<{ credentials: IDataObject; headers: Record<string, string> }> {
+	let authMethod = 'apiKey';
+	try {
+		if ('getCurrentNodeParameter' in context) {
+			authMethod =
+				((context as ILoadOptionsFunctions).getCurrentNodeParameter('authentication') as string) ||
+				'apiKey';
+		} else if ('getNodeParameter' in context) {
+			authMethod = (context as IExecuteFunctions).getNodeParameter(
+				'authentication',
+				0,
+				'apiKey',
+			) as string;
+		}
+	} catch {
+		authMethod = 'apiKey';
+	}
 
-    if (authMethod === 'oAuth2') {
-        const credentials = await context.getCredentials('cashwerkOAuth2Api');
-        const tokenData = credentials.oauthTokenData as IDataObject | undefined;
-        const accessToken = (tokenData?.access_token as string) || '';
-        return {
-            credentials,
-            headers: { Authorization: `Bearer ${accessToken}` },
-        };
-    }
+	if (authMethod === 'oAuth2') {
+		const credentials = await context.getCredentials('cashwerkOAuth2Api');
+		const tokenData = credentials.oauthTokenData as IDataObject | undefined;
+		const accessToken = (tokenData?.access_token as string) || '';
+		return {
+			credentials,
+			headers: { Authorization: `Bearer ${accessToken}` },
+		};
+	}
 
-    const credentials = await context.getCredentials('cashwerkApi');
-    return {
-        credentials,
-        headers: { 'X-API-Key': credentials.apiKey as string },
-    };
+	const credentials = await context.getCredentials('cashwerkApi');
+	return {
+		credentials,
+		headers: { 'X-API-Key': credentials.apiKey as string },
+	};
 }
 
 /**
@@ -145,107 +154,126 @@ async function resolveAuth(context: CashwerkContext): Promise<{ credentials: IDa
  * Automatically detects API key vs OAuth2 credentials.
  */
 export async function cashwerkApiRequest(
-    this: CashwerkContext,
-    method: IHttpRequestMethods,
-    endpoint: string,
-    body: IDataObject = {},
-    qs: IDataObject = {},
+	this: CashwerkContext,
+	method: IHttpRequestMethods,
+	endpoint: string,
+	body: IDataObject = {},
+	qs: IDataObject = {},
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw API payloads are untyped
 ): Promise<any> {
-    const { credentials, headers } = await resolveAuth(this);
-    const baseUrl = getBaseUrl(credentials);
+	const { credentials, headers } = await resolveAuth(this);
+	const baseUrl = getBaseUrl(credentials);
 
-    const options: IHttpRequestOptions = {
-        method,
-        url: `${baseUrl}${endpoint}`,
-        headers: {
-            'Content-Type': 'application/json',
-            ...headers,
-        },
-        qs,
-        json: true,
-    };
+	const options: IHttpRequestOptions = {
+		method,
+		url: `${baseUrl}${endpoint}`,
+		headers: {
+			'Content-Type': 'application/json',
+			...headers,
+		},
+		qs,
+		json: true,
+	};
 
-    if (Object.keys(body).length > 0) {
-        options.body = body;
-    }
+	if (Object.keys(body).length > 0) {
+		options.body = body;
+	}
 
-    try {
-        const response = await this.helpers.httpRequest(options);
-        // Unwrap the TransformInterceptor envelope: { success, data, message, statusCode }
-        if (response && typeof response === 'object' && response.success !== undefined && 'data' in response) {
-            return response.data;
-        }
-        return response;
-    } catch (error: any) {
-        const statusCode = error?.statusCode
-            || error?.response?.status
-            || error?.response?.statusCode
-            || error?.httpCode
-            || error?.code
-            || '';
+	try {
+		const response = await this.helpers.httpRequest(options);
+		// Unwrap the TransformInterceptor envelope: { success, data, message, statusCode }
+		if (
+			response &&
+			typeof response === 'object' &&
+			response.success !== undefined &&
+			'data' in response
+		) {
+			return response.data;
+		}
+		return response;
+	} catch (caught: unknown) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- error shape varies by transport
+		const error = caught as any;
+		const statusCode =
+			error?.statusCode ||
+			error?.response?.status ||
+			error?.response?.statusCode ||
+			error?.httpCode ||
+			error?.code ||
+			'';
 
-        let detail = '';
+		let detail = '';
 
-        const candidates = [
-            error?.response?.data,
-            error?.response?.body,
-            error?.body,
-            error?.cause?.response?.data,
-            error?.cause?.response?.body,
-            error?.data,
-            error?.error,
-        ];
+		const candidates = [
+			error?.response?.data,
+			error?.response?.body,
+			error?.body,
+			error?.cause?.response?.data,
+			error?.cause?.response?.body,
+			error?.data,
+			error?.error,
+		];
 
-        for (const candidate of candidates) {
-            if (!candidate || detail) break;
-            const parsed = typeof candidate === 'string'
-                ? (() => { try { return JSON.parse(candidate); } catch { return null; } })()
-                : candidate;
-            if (!parsed) continue;
-            const nestedMsg = parsed?.response?.message;
-            if (nestedMsg) {
-                detail = Array.isArray(nestedMsg) ? nestedMsg.join('; ') : String(nestedMsg);
-                break;
-            }
-            if (parsed?.message && parsed.message !== 'Bad Request Exception'
-                && parsed.message !== 'Internal Server Error'
-                && !String(parsed.message).startsWith('Request failed')) {
-                const msg = parsed.message;
-                detail = Array.isArray(msg) ? msg.join('; ') : String(msg);
-                break;
-            }
-        }
+		for (const candidate of candidates) {
+			if (!candidate || detail) break;
+			const parsed =
+				typeof candidate === 'string'
+					? (() => {
+							try {
+								return JSON.parse(candidate);
+							} catch {
+								return null;
+							}
+						})()
+					: candidate;
+			if (!parsed) continue;
+			const nestedMsg = parsed?.response?.message;
+			if (nestedMsg) {
+				detail = Array.isArray(nestedMsg) ? nestedMsg.join('; ') : String(nestedMsg);
+				break;
+			}
+			if (
+				parsed?.message &&
+				parsed.message !== 'Bad Request Exception' &&
+				parsed.message !== 'Internal Server Error' &&
+				!String(parsed.message).startsWith('Request failed')
+			) {
+				const msg = parsed.message;
+				detail = Array.isArray(msg) ? msg.join('; ') : String(msg);
+				break;
+			}
+		}
 
-        if (!detail && error?.response?.message) {
-            const rm = error.response.message;
-            detail = Array.isArray(rm) ? rm.join('; ') : String(rm);
-        }
+		if (!detail && error?.response?.message) {
+			const rm = error.response.message;
+			detail = Array.isArray(rm) ? rm.join('; ') : String(rm);
+		}
 
-        if (!detail) {
-            detail = error?.description || '';
-        }
-        if (!detail && error?.message
-            && !error.message.includes('Request failed with status code')
-            && error.message !== 'Bad Request Exception'
-            && error.message !== 'Internal Server Error') {
-            detail = error.message;
-        }
+		if (!detail) {
+			detail = error?.description || '';
+		}
+		if (
+			!detail &&
+			error?.message &&
+			!error.message.includes('Request failed with status code') &&
+			error.message !== 'Bad Request Exception' &&
+			error.message !== 'Internal Server Error'
+		) {
+			detail = error.message;
+		}
 
-        const hint = statusCode === 403 || statusCode === 401
-            ? ' – Check that your API key has the required scopes.'
-            : '';
-        const summary = `cashwerk API error (${statusCode}) on ${method} ${endpoint}${hint}`;
+		const hint =
+			statusCode === 403 || statusCode === 401
+				? ' – Check that your API key has the required scopes.'
+				: '';
+		const summary = `cashwerk API error (${statusCode}) on ${method} ${endpoint}${hint}`;
 
-        throw new NodeApiError(
-            (this as any).getNode(),
-            error as JsonObject,
-            {
-                message: summary,
-                description: detail || 'An unexpected error occurred. Check the server logs for details.',
-                httpCode: String(statusCode),
-            },
-        );
-    }
+		throw new NodeApiError((this as IExecuteFunctions).getNode(), error as JsonObject, {
+			message: summary,
+			description: detail || 'An unexpected error occurred. Check the server logs for details.',
+			httpCode: String(statusCode),
+		});
+	}
 }
 
 /**
@@ -253,50 +281,44 @@ export async function cashwerkApiRequest(
  * Expects the API to return { data: [...], meta?: { page, limit, total } } or a flat array.
  */
 export async function cashwerkApiRequestAllItems(
-    this: IExecuteFunctions | ILoadOptionsFunctions,
-    method: IHttpRequestMethods,
-    endpoint: string,
-    body: IDataObject = {},
-    qs: IDataObject = {},
-    limit = 0,
+	this: IExecuteFunctions | ILoadOptionsFunctions,
+	method: IHttpRequestMethods,
+	endpoint: string,
+	body: IDataObject = {},
+	qs: IDataObject = {},
+	limit = 0,
 ): Promise<IDataObject[]> {
-    const returnData: IDataObject[] = [];
-    let page = 1;
-    const pageSize = 50;
+	const returnData: IDataObject[] = [];
+	let page = 1;
+	const pageSize = 50;
 
-    do {
-        const requestBody: IDataObject = {
-            ...body,
-            page,
-            limit: pageSize,
-        };
+	let hasMore = true;
+	do {
+		const requestBody: IDataObject = {
+			...body,
+			page,
+			limit: pageSize,
+		};
 
-        // cashwerkApiRequest already unwraps the TransformInterceptor envelope
-        const response = await cashwerkApiRequest.call(this, method, endpoint, requestBody, qs);
+		// cashwerkApiRequest already unwraps the TransformInterceptor envelope
+		const response = await cashwerkApiRequest.call(this, method, endpoint, requestBody, qs);
 
-        const items: IDataObject[] = Array.isArray(response)
-            ? response
-            : (response?.result ?? response?.data ?? response?.items ?? []);
+		const items: IDataObject[] = Array.isArray(response)
+			? response
+			: (response?.result ?? response?.data ?? response?.items ?? []);
 
-        returnData.push(...items);
+		returnData.push(...items);
 
-        if (limit > 0 && returnData.length >= limit) {
-            return returnData.slice(0, limit);
-        }
+		if (limit > 0 && returnData.length >= limit) {
+			return returnData.slice(0, limit);
+		}
 
-        const total = response?.total ?? response?.meta?.total;
-        if (total !== undefined && returnData.length >= total) {
-            break;
-        }
+		const total = response?.total ?? response?.meta?.total;
+		hasMore = !(total !== undefined && returnData.length >= total) && items.length >= pageSize;
+		page++;
+	} while (hasMore);
 
-        if (items.length < pageSize) {
-            break;
-        }
-
-        page++;
-    } while (true);
-
-    return returnData;
+	return returnData;
 }
 
 /**
@@ -310,50 +332,67 @@ export async function cashwerkApiRequestAllItems(
  * @param fileFieldName The multipart field name for the file (default: `file`)
  */
 export async function cashwerkApiUploadFile(
-    this: IExecuteFunctions,
-    endpoint: string,
-    itemIndex: number,
-    binaryPropertyName = 'data',
-    formFields: IDataObject = {},
-    fileFieldName = 'file',
+	this: IExecuteFunctions,
+	endpoint: string,
+	itemIndex: number,
+	binaryPropertyName = 'data',
+	formFields: IDataObject = {},
+	fileFieldName = 'file',
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw API payloads are untyped
 ): Promise<any> {
-    const { credentials, headers } = await resolveAuth(this);
-    const baseUrl = getBaseUrl(credentials);
+	const { credentials, headers } = await resolveAuth(this);
+	const baseUrl = getBaseUrl(credentials);
 
-    const binaryData = this.helpers.assertBinaryData(itemIndex, binaryPropertyName);
-    const dataBuffer = await this.helpers.getBinaryDataBuffer(itemIndex, binaryPropertyName);
+	const binaryData = this.helpers.assertBinaryData(itemIndex, binaryPropertyName);
+	const dataBuffer = await this.helpers.getBinaryDataBuffer(itemIndex, binaryPropertyName);
 
-    const form = new FormData();
+	// Build the multipart/form-data body by hand — verified community nodes
+	// must not ship runtime dependencies, so the `form-data` package is out.
+	const boundary = `----cashwerkFormBoundary${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+	const parts: Buffer[] = [];
 
-    for (const [key, value] of Object.entries(formFields)) {
-        if (value !== undefined && value !== null && value !== '') {
-            form.append(key, String(value));
-        }
-    }
+	for (const [key, value] of Object.entries(formFields)) {
+		if (value !== undefined && value !== null && value !== '') {
+			parts.push(
+				Buffer.from(
+					`--${boundary}\r\nContent-Disposition: form-data; name="${key}"\r\n\r\n${String(value)}\r\n`,
+					'utf8',
+				),
+			);
+		}
+	}
 
-    form.append(fileFieldName, dataBuffer, {
-        filename: binaryData.fileName || 'file',
-        contentType: binaryData.mimeType || 'application/octet-stream',
-    });
+	const fileName = (binaryData.fileName || 'file').replace(/"/g, '%22');
+	const contentType = binaryData.mimeType || 'application/octet-stream';
+	parts.push(
+		Buffer.from(
+			`--${boundary}\r\nContent-Disposition: form-data; name="${fileFieldName}"; filename="${fileName}"\r\nContent-Type: ${contentType}\r\n\r\n`,
+			'utf8',
+		),
+		dataBuffer,
+		Buffer.from(`\r\n--${boundary}--\r\n`, 'utf8'),
+	);
+	const body = Buffer.concat(parts);
 
-    const options: IHttpRequestOptions = {
-        method: 'POST',
-        url: `${baseUrl}${endpoint}`,
-        headers: {
-            ...headers,
-            ...form.getHeaders(),
-        },
-        body: form as any,
-    };
+	const options: IHttpRequestOptions = {
+		method: 'POST',
+		url: `${baseUrl}${endpoint}`,
+		headers: {
+			...headers,
+			'Content-Type': `multipart/form-data; boundary=${boundary}`,
+			'Content-Length': String(body.length),
+		},
+		body,
+	};
 
-    try {
-        const response = await this.helpers.httpRequest(options);
-        return response;
-    } catch (error) {
-        throw new NodeApiError(this.getNode(), error as JsonObject, {
-            message: 'cashwerk file upload failed',
-        });
-    }
+	try {
+		const response = await this.helpers.httpRequest(options);
+		return response;
+	} catch (error) {
+		throw new NodeApiError(this.getNode(), error as JsonObject, {
+			message: 'cashwerk file upload failed',
+		});
+	}
 }
 
 /**
@@ -361,18 +400,41 @@ export async function cashwerkApiUploadFile(
  * Caches the result in workflow static data to avoid repeated calls.
  */
 export async function getOrganizationId(
-    this: IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions | IWebhookFunctions,
+	this: IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions | IWebhookFunctions,
 ): Promise<number> {
-    const staticData = this.getWorkflowStaticData('node');
+	const staticData = this.getWorkflowStaticData('node');
 
-    if (staticData.organizationId) {
-        return staticData.organizationId as number;
-    }
+	if (staticData.organizationId) {
+		return staticData.organizationId as number;
+	}
 
-    const meResponse = await cashwerkApiRequest.call(this, 'GET', '/api-platform/me');
-    const orgId = (meResponse?.organizationId ?? meResponse?.data?.organizationId) as number;
+	const meResponse = await cashwerkApiRequest.call(this, 'GET', '/api-platform/me');
+	const orgId = (meResponse?.organizationId ?? meResponse?.data?.organizationId) as number;
 
-    staticData.organizationId = orgId;
+	staticData.organizationId = orgId;
 
-    return orgId;
+	return orgId;
+}
+
+/**
+ * Drop empty entries from a collection parameter and parse json-typed keys,
+ * so the API receives real objects instead of `''` / `'{}'` placeholders.
+ */
+export function cleanCollection(raw: IDataObject, jsonKeys: string[] = []): IDataObject {
+	const clean: IDataObject = {};
+	for (const [key, val] of Object.entries(raw ?? {})) {
+		if (val === undefined || val === null || val === '') continue;
+		if (typeof val === 'string') {
+			const trimmed = val.trim();
+			if (trimmed === '' || trimmed === '{}' || trimmed === '[]') continue;
+		} else if (
+			typeof val === 'object' &&
+			!Array.isArray(val) &&
+			Object.keys(val as Record<string, unknown>).length === 0
+		) {
+			continue;
+		}
+		clean[key] = jsonKeys.includes(key) ? parseJsonParam(val) : val;
+	}
+	return clean;
 }

@@ -92,12 +92,6 @@
       },
       "AddProjectAssigneesDTO": {
         "properties": {
-          "orgId": {
-            "type": "number"
-          },
-          "projectId": {
-            "type": "number"
-          },
           "remove": {
             "default": false,
             "type": "boolean"
@@ -111,9 +105,7 @@
         },
         "required": [
           "userIds",
-          "remove",
-          "projectId",
-          "orgId"
+          "remove"
         ],
         "type": "object"
       },
@@ -185,6 +177,32 @@
         },
         "required": [
           "tagId"
+        ],
+        "type": "object"
+      },
+      "AdjustWorktimeDto": {
+        "properties": {
+          "amountHours": {
+            "description": "Signed hours to book (+ credits, − debits). Must not be 0.",
+            "example": -2.5,
+            "type": "number"
+          },
+          "effectiveDate": {
+            "description": "Booking date the correction takes effect (e.g. the corrected month) — defaults to now",
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Mandatory reason for the correction (audit trail)",
+            "example": "Übertrag aus Altsystem",
+            "maxLength": 500,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "required": [
+          "amountHours",
+          "reason"
         ],
         "type": "object"
       },
@@ -273,6 +291,49 @@
         ],
         "type": "object"
       },
+      "BulkAssignWorkTimeDTO": {
+        "properties": {
+          "overtime": {
+            "description": "Opening overtime for the new period",
+            "example": 0,
+            "type": "number"
+          },
+          "start": {
+            "description": "Start of the new contract period",
+            "format": "date-time",
+            "type": "string"
+          },
+          "userIds": {
+            "description": "Users to assign the time model to",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array"
+          },
+          "vacationDays": {
+            "description": "Vacation days for the new period",
+            "example": 25,
+            "type": "number"
+          },
+          "workDays": {
+            "description": "Weekly schedule of the time model",
+            "items": {
+              "$ref": "#/components/schemas/WorkDayDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "userIds",
+          "start",
+          "vacationDays",
+          "overtime",
+          "workDays"
+        ],
+        "type": "object"
+      },
       "BulkUpdateDealPositionsDto": {
         "properties": {
           "updates": {
@@ -336,6 +397,17 @@
         ],
         "type": "object"
       },
+      "ConvertTaskToSubtaskDto": {
+        "properties": {
+          "parentTaskId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "parentTaskId"
+        ],
+        "type": "object"
+      },
       "CreateAbsenceRequestDto": {
         "properties": {
           "assignedUserIds": {
@@ -377,6 +449,7 @@
               "EDUCATION",
               "BUSINESS_TRIP",
               "FAIR",
+              "COMPENSATORY",
               "OTHER"
             ],
             "type": "string"
@@ -656,7 +729,11 @@
             "type": "string"
           },
           "pageType": {
-            "type": "object"
+            "enum": [
+              "personal",
+              "team"
+            ],
+            "type": "string"
           },
           "slug": {
             "maxLength": 80,
@@ -826,8 +903,10 @@
           "companyNumber": {
             "type": "string"
           },
+          "companySize": {
+            "type": "string"
+          },
           "email": {
-            "format": "email",
             "type": "string"
           },
           "externalReferences": {
@@ -848,6 +927,12 @@
           "phone": {
             "type": "object"
           },
+          "registerDepartment": {
+            "type": "string"
+          },
+          "registerNumber": {
+            "type": "string"
+          },
           "secondaryPhone": {
             "type": "object"
           },
@@ -866,6 +951,7 @@
               "INACTIVE",
               "ARCHIVED",
               "BLOCKED",
+              "CANCELLED",
               "CHURN"
             ],
             "type": "string"
@@ -876,6 +962,15 @@
             },
             "type": "array"
           },
+          "tags": {
+            "type": "string"
+          },
+          "taxNumber": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
           "type": {
             "enum": [
               "LEAD",
@@ -885,6 +980,9 @@
               "PARTNER",
               "SUB_CONTRACTOR"
             ],
+            "type": "string"
+          },
+          "vatId": {
             "type": "string"
           },
           "website": {
@@ -921,7 +1019,6 @@
             "type": "number"
           },
           "email": {
-            "format": "email",
             "type": "string"
           },
           "externalReferences": {
@@ -988,6 +1085,7 @@
               "INACTIVE",
               "ARCHIVED",
               "BLOCKED",
+              "CANCELLED",
               "CHURN"
             ],
             "type": "string"
@@ -997,6 +1095,9 @@
               "type": "number"
             },
             "type": "array"
+          },
+          "tags": {
+            "type": "string"
           },
           "taxNumber": {
             "type": "string"
@@ -1021,10 +1122,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "firstName",
-          "lastName"
-        ],
         "type": "object"
       },
       "CreateContractHistoryDTO": {
@@ -1386,6 +1483,7 @@
       "CreateIncomingPaymentDTO": {
         "properties": {
           "amount": {
+            "minimum": 0.01,
             "type": "number"
           },
           "bankReference": {
@@ -1760,8 +1858,7 @@
           }
         },
         "required": [
-          "name",
-          "clientType"
+          "name"
         ],
         "type": "object"
       },
@@ -1838,7 +1935,12 @@
             "type": "number"
           },
           "endType": {
-            "type": "object"
+            "enum": [
+              "COUNT",
+              "UNTIL",
+              "NEVER"
+            ],
+            "type": "string"
           },
           "excludeDates": {
             "items": {
@@ -2029,6 +2131,22 @@
         ],
         "type": "object"
       },
+      "CreateTagDto": {
+        "properties": {
+          "color": {
+            "pattern": "^#?([0-9A-F]{3}|[0-9A-F]{4}|[0-9A-F]{6}|[0-9A-F]{8})$",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "color"
+        ],
+        "type": "object"
+      },
       "CreateTaskBoardColumnDto": {
         "properties": {
           "name": {
@@ -2066,6 +2184,9 @@
       },
       "CreateTaskDto": {
         "properties": {
+          "assigneeId": {
+            "type": "number"
+          },
           "boardName": {
             "type": "string"
           },
@@ -2073,6 +2194,25 @@
             "type": "number"
           },
           "columnName": {
+            "type": "string"
+          },
+          "companyIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "contactIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dueDate": {
+            "format": "date-time",
             "type": "string"
           },
           "isFirstPosition": {
@@ -2111,7 +2251,14 @@
         "type": "object"
       },
       "CreateTrackingCategoryDto": {
-        "properties": {},
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
         "type": "object"
       },
       "CreateTrackingRequestDto": {
@@ -2144,6 +2291,9 @@
           "project": {
             "type": "string"
           },
+          "projectId": {
+            "type": "number"
+          },
           "start": {
             "format": "date-time",
             "type": "string"
@@ -2162,6 +2312,9 @@
               "type": "number"
             },
             "type": "array"
+          },
+          "taskId": {
+            "type": "number"
           },
           "type": {
             "enum": [
@@ -2217,16 +2370,13 @@
             "minLength": 3,
             "type": "string"
           },
-          "licenseId": {
-            "type": "number"
-          },
           "organizationId": {
             "type": "number"
           },
           "password": {
             "maxLength": 32,
             "minLength": 8,
-            "pattern": "/((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$/",
+            "pattern": "((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$",
             "type": "string"
           },
           "passwordRepeat": {
@@ -2242,7 +2392,6 @@
           "emailRepeat",
           "firstName",
           "lastName",
-          "licenseId",
           "password",
           "passwordRepeat",
           "address"
@@ -2256,14 +2405,158 @@
             "type": "string"
           },
           "events": {
-            "description": "Event types to subscribe to",
+            "description": "Event types to subscribe to. Must be values from the canonical webhook catalog (`${entity}.${action}`) or the `*` wildcard.",
             "example": [
-              "contact.created",
-              "deal.updated"
+              "contact.create",
+              "deal.update"
             ],
             "items": {
+              "enum": [
+                "*",
+                "absence.create",
+                "absence.update",
+                "absence.delete",
+                "asset_group.create",
+                "asset_group.update",
+                "asset_group.delete",
+                "asset_machine.create",
+                "asset_machine.update",
+                "asset_machine.delete",
+                "asset_material.create",
+                "asset_material.update",
+                "asset_material.delete",
+                "asset_service.create",
+                "asset_service.update",
+                "asset_service.delete",
+                "asset_subcontract.create",
+                "asset_subcontract.update",
+                "asset_subcontract.delete",
+                "asset_unit.create",
+                "asset_unit.update",
+                "asset_unit.delete",
+                "booking.create",
+                "booking.update",
+                "booking_event_type.create",
+                "booking_event_type.update",
+                "booking_event_type.delete",
+                "booking_page.create",
+                "booking_page.update",
+                "booking_page.delete",
+                "break_tracking.create",
+                "break_tracking.delete",
+                "calendar.create",
+                "calendar.update",
+                "calendar.delete",
+                "calendar_event.create",
+                "calendar_event.update",
+                "calendar_event.delete",
+                "cancellation_invoice.create",
+                "cancellation_invoice.update",
+                "cancellation_invoice.archive",
+                "cancellation_invoice.restore",
+                "comment.create",
+                "comment.update",
+                "comment.delete",
+                "company.create",
+                "company.update",
+                "company.delete",
+                "company.archive",
+                "company.restore",
+                "contact.create",
+                "contact.update",
+                "contact.delete",
+                "contact.archive",
+                "contact.restore",
+                "data_preset.create",
+                "deal.create",
+                "deal.update",
+                "deal.delete",
+                "deal_line.update",
+                "drive_share.create",
+                "drive_share.update",
+                "drive_share.delete",
+                "file.create",
+                "file.update",
+                "file.delete",
+                "folder.create",
+                "folder.update",
+                "folder.delete",
+                "incoming_payment.create",
+                "invoice.create",
+                "invoice.update",
+                "invoice.delete",
+                "invoice.archive",
+                "invoice.restore",
+                "license.create",
+                "license.update",
+                "notification.create",
+                "notification.update",
+                "notification.archive",
+                "offer.create",
+                "offer.update",
+                "offer.delete",
+                "offer.archive",
+                "offer.restore",
+                "organization.create",
+                "organization.update",
+                "organization_branch.create",
+                "organization_branch.update",
+                "organization_branch.delete",
+                "organization_sector.create",
+                "organization_sector.update",
+                "organization_sector.delete",
+                "pipeline.create",
+                "pipeline.update",
+                "pipeline.delete",
+                "pipeline.restore",
+                "pipeline_stage.create",
+                "pipeline_stage.update",
+                "pipeline_stage.delete",
+                "portfolio.create",
+                "portfolio.update",
+                "portfolio.delete",
+                "project.create",
+                "project.update",
+                "project.delete",
+                "project.archive",
+                "project.restore",
+                "role.create",
+                "role.update",
+                "role.delete",
+                "sales_tax_regulation.create",
+                "sales_tax_regulation.update",
+                "sales_tax_regulation.delete",
+                "shift_plan.create",
+                "shift_plan.update",
+                "shift_plan.delete",
+                "task.create",
+                "task.update",
+                "task.delete",
+                "task_board.create",
+                "task_board.update",
+                "task_board.delete",
+                "task_board.archive",
+                "task_board.restore",
+                "task_board_column.create",
+                "task_board_column.update",
+                "task_board_column.delete",
+                "tax_rate.create",
+                "tax_rate.update",
+                "tax_rate.delete",
+                "time_entry.create",
+                "time_entry.update",
+                "time_entry.delete",
+                "user.create",
+                "user.update",
+                "user.delete",
+                "user.archive",
+                "work_time.create",
+                "work_time.update",
+                "work_time.delete"
+              ],
               "type": "string"
             },
+            "minItems": 1,
             "type": "array"
           },
           "url": {
@@ -2539,11 +2832,26 @@
       },
       "ExportCompaniesDto": {
         "properties": {
+          "amountMax": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountMin": {
+            "nullable": true,
+            "type": "number"
+          },
           "assignedUserIds": {
             "items": {
               "type": "number"
             },
             "type": "array"
+          },
+          "assignedUserMode": {
+            "enum": [
+              "include",
+              "exclude"
+            ],
+            "type": "string"
           },
           "city": {
             "type": "string"
@@ -2555,6 +2863,9 @@
             "type": "array"
           },
           "companyNumber": {
+            "type": "string"
+          },
+          "companySize": {
             "type": "string"
           },
           "country": {
@@ -2578,8 +2889,28 @@
             "nullable": true,
             "type": "string"
           },
+          "deliveryDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "driveId": {
             "type": "number"
+          },
+          "dueDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "email": {
             "type": "string"
@@ -2592,6 +2923,9 @@
           },
           "includeArchived": {
             "type": "boolean"
+          },
+          "leitwegId": {
+            "type": "string"
           },
           "maxContactCount": {
             "type": "number"
@@ -2622,10 +2956,16 @@
             "nullable": true,
             "type": "string"
           },
+          "registerDepartment": {
+            "type": "string"
+          },
           "registerNumber": {
             "type": "string"
           },
           "searchQuery": {
+            "type": "string"
+          },
+          "secondaryPhone": {
             "type": "string"
           },
           "sector": {
@@ -2639,6 +2979,7 @@
           },
           "skip": {
             "default": 0,
+            "minimum": 0,
             "type": "number"
           },
           "sortBy": {
@@ -2655,6 +2996,13 @@
             "nullable": true,
             "type": "string"
           },
+          "statusMode": {
+            "enum": [
+              "include",
+              "exclude"
+            ],
+            "type": "string"
+          },
           "statuses": {
             "items": {
               "enum": [
@@ -2662,6 +3010,7 @@
                 "INACTIVE",
                 "ARCHIVED",
                 "BLOCKED",
+                "CANCELLED",
                 "CHURN"
               ],
               "type": "string"
@@ -2678,11 +3027,26 @@
             },
             "type": "array"
           },
+          "tagMode": {
+            "enum": [
+              "include",
+              "exclude"
+            ],
+            "type": "string"
+          },
           "take": {
             "default": 10,
+            "minimum": 1,
             "type": "number"
           },
           "taxNumber": {
+            "type": "string"
+          },
+          "typeMode": {
+            "enum": [
+              "include",
+              "exclude"
+            ],
             "type": "string"
           },
           "types": {
@@ -2724,11 +3088,26 @@
       },
       "ExportContactsDto": {
         "properties": {
+          "amountMax": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountMin": {
+            "nullable": true,
+            "type": "number"
+          },
           "assignedUserIds": {
             "items": {
               "type": "number"
             },
             "type": "array"
+          },
+          "assignedUserMode": {
+            "enum": [
+              "include",
+              "exclude"
+            ],
+            "type": "string"
           },
           "city": {
             "type": "string"
@@ -2763,8 +3142,28 @@
             "nullable": true,
             "type": "string"
           },
+          "deliveryDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "driveId": {
             "type": "number"
+          },
+          "dueDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
           },
           "email": {
             "type": "string"
@@ -2801,6 +3200,9 @@
           "phone": {
             "type": "string"
           },
+          "privatePhone": {
+            "type": "string"
+          },
           "projectIds": {
             "items": {
               "type": "number"
@@ -2814,6 +3216,17 @@
           "recipientFilter": {
             "nullable": true,
             "type": "string"
+          },
+          "salutations": {
+            "items": {
+              "enum": [
+                "MR",
+                "MS",
+                "NONE"
+              ],
+              "type": "string"
+            },
+            "type": "array"
           },
           "searchQuery": {
             "type": "string"
@@ -2829,6 +3242,7 @@
           },
           "skip": {
             "default": 0,
+            "minimum": 0,
             "type": "number"
           },
           "sortBy": {
@@ -2845,6 +3259,13 @@
             "nullable": true,
             "type": "string"
           },
+          "statusMode": {
+            "enum": [
+              "include",
+              "exclude"
+            ],
+            "type": "string"
+          },
           "statuses": {
             "items": {
               "enum": [
@@ -2852,6 +3273,7 @@
                 "INACTIVE",
                 "ARCHIVED",
                 "BLOCKED",
+                "CANCELLED",
                 "CHURN"
               ],
               "type": "string"
@@ -2868,11 +3290,26 @@
             },
             "type": "array"
           },
+          "tagMode": {
+            "enum": [
+              "include",
+              "exclude"
+            ],
+            "type": "string"
+          },
           "take": {
             "default": 10,
+            "minimum": 1,
             "type": "number"
           },
           "title": {
+            "type": "string"
+          },
+          "typeMode": {
+            "enum": [
+              "include",
+              "exclude"
+            ],
             "type": "string"
           },
           "types": {
@@ -2909,7 +3346,24 @@
         "type": "object"
       },
       "ExportReportDto": {
-        "properties": {},
+        "properties": {
+          "driveId": {
+            "type": "number"
+          },
+          "endDate": {
+            "type": "number"
+          },
+          "folderId": {
+            "type": "number"
+          },
+          "startDate": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate"
+        ],
         "type": "object"
       },
       "FindContactsByEmailsDto": {
@@ -2925,6 +3379,21 @@
         },
         "required": [
           "emails"
+        ],
+        "type": "object"
+      },
+      "FindOrCreateTagsDto": {
+        "properties": {
+          "names": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "names"
         ],
         "type": "object"
       },
@@ -3056,9 +3525,14 @@
             "type": "array"
           },
           "sortDirection": {
-            "type": "object"
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string"
           },
           "sortField": {
+            "pattern": "^[a-zA-Z_]+$",
             "type": "string"
           },
           "tagIds": {
@@ -3153,9 +3627,6 @@
             "minLength": 3,
             "type": "string"
           },
-          "licenseId": {
-            "type": "number"
-          },
           "roleId": {
             "type": "number"
           }
@@ -3165,7 +3636,6 @@
           "emailRepeat",
           "firstName",
           "lastName",
-          "licenseId",
           "roleId",
           "address"
         ],
@@ -3217,6 +3687,7 @@
             "type": "string"
           },
           "title": {
+            "maxLength": 255,
             "type": "string"
           },
           "type": {
@@ -3303,6 +3774,12 @@
       },
       "LinkingOptionsDTO": {
         "properties": {
+          "assigneeIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
           "contactUserId": {
             "type": "number"
           },
@@ -3332,6 +3809,20 @@
         ],
         "type": "object"
       },
+      "MoveTaskToBoardDto": {
+        "properties": {
+          "boardId": {
+            "type": "number"
+          },
+          "columnId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "boardId"
+        ],
+        "type": "object"
+      },
       "NxAssetGroup": {
         "properties": {},
         "type": "object"
@@ -3357,10 +3848,6 @@
         "type": "object"
       },
       "NxStorageFileEntity": {
-        "properties": {},
-        "type": "object"
-      },
-      "Object": {
         "properties": {},
         "type": "object"
       },
@@ -3403,6 +3890,7 @@
             "type": "string"
           },
           "title": {
+            "maxLength": 255,
             "type": "string"
           },
           "type": {
@@ -3463,6 +3951,116 @@
         },
         "type": "object"
       },
+      "PatchInvoiceDetailsDTO": {
+        "properties": {
+          "assigneeIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "deliveryDetails": {
+            "$ref": "#/components/schemas/DeliveryDetailsDTO"
+          },
+          "footer": {
+            "type": "string"
+          },
+          "header": {
+            "type": "string"
+          },
+          "invoiceNumber": {
+            "type": "string"
+          },
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "netGross": {
+            "enum": [
+              "net",
+              "gross"
+            ],
+            "type": "string"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "INVOICE",
+              "PARTIAL_INVOICE",
+              "CREDIT_NOTE",
+              "CANCELLATION_INVOICE",
+              "FINAL_INVOICE",
+              "DELIVERY_NOTE",
+              "OFFER"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PatchOfferDetailsDTO": {
+        "properties": {
+          "assigneeIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "deliveryDetails": {
+            "$ref": "#/components/schemas/DeliveryDetailsDTO"
+          },
+          "footer": {
+            "type": "string"
+          },
+          "header": {
+            "type": "string"
+          },
+          "netGross": {
+            "enum": [
+              "net",
+              "gross"
+            ],
+            "type": "string"
+          },
+          "offerDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "offerDueDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "offerNumber": {
+            "type": "string"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "INVOICE",
+              "PARTIAL_INVOICE",
+              "CREDIT_NOTE",
+              "CANCELLATION_INVOICE",
+              "FINAL_INVOICE",
+              "DELIVERY_NOTE",
+              "OFFER"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PaymentOptionsDTO": {
         "properties": {
           "bankAccount": {
@@ -3509,6 +4107,32 @@
         "required": [
           "dueDate",
           "skonto"
+        ],
+        "type": "object"
+      },
+      "PayoutWorktimeDto": {
+        "properties": {
+          "hours": {
+            "description": "Hours to pay out (positive). The account is debited 1:1; the paid value is hours × (1 + premium/100).",
+            "example": 10,
+            "minimum": 1,
+            "type": "number"
+          },
+          "note": {
+            "description": "Optional note shown in the ledger",
+            "example": "Auszahlung Juni",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "payoutRef": {
+            "description": "Payroll reference (e.g. payroll run / document number)",
+            "example": "LOHN-2026-06",
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "required": [
+          "hours"
         ],
         "type": "object"
       },
@@ -3579,6 +4203,12 @@
           "end": {
             "type": "string"
           },
+          "expandRecurring": {
+            "type": "boolean"
+          },
+          "onlyMine": {
+            "type": "boolean"
+          },
           "organizationId": {
             "type": "number"
           },
@@ -3613,6 +4243,14 @@
       },
       "QueryCompaniesDto": {
         "properties": {
+          "amountMax": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountMin": {
+            "nullable": true,
+            "type": "number"
+          },
           "assignedUserIds": {
             "items": {
               "type": "number"
@@ -3623,6 +4261,9 @@
             "type": "string"
           },
           "companyNumber": {
+            "type": "string"
+          },
+          "companySize": {
             "type": "string"
           },
           "country": {
@@ -3646,6 +4287,26 @@
             "nullable": true,
             "type": "string"
           },
+          "deliveryDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "email": {
             "type": "string"
           },
@@ -3654,6 +4315,9 @@
           },
           "includeArchived": {
             "type": "boolean"
+          },
+          "leitwegId": {
+            "type": "string"
           },
           "maxContactCount": {
             "type": "number"
@@ -3684,10 +4348,16 @@
             "nullable": true,
             "type": "string"
           },
+          "registerDepartment": {
+            "type": "string"
+          },
           "registerNumber": {
             "type": "string"
           },
           "searchQuery": {
+            "type": "string"
+          },
+          "secondaryPhone": {
             "type": "string"
           },
           "sector": {
@@ -3695,6 +4365,7 @@
           },
           "skip": {
             "default": 0,
+            "minimum": 0,
             "type": "number"
           },
           "sortBy": {
@@ -3718,6 +4389,7 @@
                 "INACTIVE",
                 "ARCHIVED",
                 "BLOCKED",
+                "CANCELLED",
                 "CHURN"
               ],
               "type": "string"
@@ -3736,6 +4408,7 @@
           },
           "take": {
             "default": 10,
+            "minimum": 1,
             "type": "number"
           },
           "taxNumber": {
@@ -3780,6 +4453,14 @@
       },
       "QueryContactsDto": {
         "properties": {
+          "amountMax": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountMin": {
+            "nullable": true,
+            "type": "number"
+          },
           "assignedUserIds": {
             "items": {
               "type": "number"
@@ -3809,6 +4490,26 @@
             "type": "string"
           },
           "dateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueDateTo": {
             "format": "date-time",
             "nullable": true,
             "type": "string"
@@ -3845,6 +4546,9 @@
           "phone": {
             "type": "string"
           },
+          "privatePhone": {
+            "type": "string"
+          },
           "projectIds": {
             "items": {
               "type": "number"
@@ -3859,6 +4563,17 @@
             "nullable": true,
             "type": "string"
           },
+          "salutations": {
+            "items": {
+              "enum": [
+                "MR",
+                "MS",
+                "NONE"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
           "searchQuery": {
             "type": "string"
           },
@@ -3867,6 +4582,7 @@
           },
           "skip": {
             "default": 0,
+            "minimum": 0,
             "type": "number"
           },
           "sortBy": {
@@ -3890,6 +4606,7 @@
                 "INACTIVE",
                 "ARCHIVED",
                 "BLOCKED",
+                "CANCELLED",
                 "CHURN"
               ],
               "type": "string"
@@ -3908,6 +4625,7 @@
           },
           "take": {
             "default": 10,
+            "minimum": 1,
             "type": "number"
           },
           "title": {
@@ -3992,6 +4710,16 @@
         },
         "type": "object"
       },
+      "RecomputeWorktimeAccountDto": {
+        "properties": {
+          "fromMonth": {
+            "description": "Rebuild accruals from this month onward (default: 12 months back)",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "RemoveUserFromBoardDto": {
         "properties": {
           "userId": {
@@ -4050,9 +4778,6 @@
       },
       "SaveFormFieldsDto": {
         "properties": {
-          "eventTypeId": {
-            "type": "number"
-          },
           "fields": {
             "items": {
               "$ref": "#/components/schemas/FormFieldItemDto"
@@ -4061,8 +4786,51 @@
           }
         },
         "required": [
-          "eventTypeId",
           "fields"
+        ],
+        "type": "object"
+      },
+      "SaveFormsDocumentDto": {
+        "properties": {
+          "contentBase64": {
+            "description": "Base64-encoded file content",
+            "type": "string"
+          },
+          "filename": {
+            "description": "Output filename (with extension), e.g. \"Abnahmeprotokoll.pdf\"",
+            "type": "string"
+          },
+          "folder": {
+            "description": "Target subfolder name under the project Drive folder (P4 G4.3) — defaults to \"Formulare\"",
+            "type": "string"
+          },
+          "kind": {
+            "description": "template = registered template doc, submission = filled/signed output",
+            "enum": [
+              "template",
+              "submission"
+            ],
+            "type": "string"
+          },
+          "mimeType": {
+            "description": "MIME type of the file content",
+            "type": "string"
+          },
+          "projectId": {
+            "description": "The Cashwerk project this document belongs to",
+            "type": "number"
+          },
+          "templateId": {
+            "description": "The form-builder template id this document was generated from",
+            "type": "string"
+          }
+        },
+        "required": [
+          "templateId",
+          "filename",
+          "mimeType",
+          "contentBase64",
+          "kind"
         ],
         "type": "object"
       },
@@ -4108,6 +4876,58 @@
         ],
         "type": "object"
       },
+      "SendMessageDto": {
+        "properties": {
+          "attachmentIds": {
+            "description": "IDs of previously uploaded attachments to link to this message",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "content": {
+            "description": "Message content (text body)",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "description": "Client-generated idempotency key to prevent duplicate messages on retry",
+            "type": "string"
+          },
+          "mentionedUserIds": {
+            "description": "User IDs mentioned in the message",
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "replyToId": {
+            "description": "ID of the message being replied to",
+            "format": "uuid",
+            "type": "string"
+          },
+          "type": {
+            "default": "TEXT",
+            "description": "Message type",
+            "enum": [
+              "TEXT",
+              "VOICE",
+              "IMAGE",
+              "GIF",
+              "VIDEO",
+              "DOCUMENT",
+              "DRIVE_FILE",
+              "DRIVE_FOLDER",
+              "SYSTEM"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "type": "object"
+      },
       "SendOfferByMailDto": {
         "properties": {
           "connectionId": {
@@ -4131,6 +4951,26 @@
           "recipientEmail",
           "connectionId",
           "mailProvider"
+        ],
+        "type": "object"
+      },
+      "SetSectorMembersDto": {
+        "properties": {
+          "userIds": {
+            "description": "Full set of user IDs that should belong to this sector. Users currently in the sector but absent from this list are unassigned.",
+            "example": [
+              12,
+              34,
+              56
+            ],
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "userIds"
         ],
         "type": "object"
       },
@@ -4189,12 +5029,40 @@
       },
       "TablePaginatorDto": {
         "properties": {
+          "amountMax": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountMin": {
+            "nullable": true,
+            "type": "number"
+          },
           "dateFrom": {
             "format": "date-time",
             "nullable": true,
             "type": "string"
           },
           "dateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueDateTo": {
             "format": "date-time",
             "nullable": true,
             "type": "string"
@@ -4224,6 +5092,7 @@
           },
           "skip": {
             "default": 0,
+            "minimum": 0,
             "type": "number"
           },
           "sortBy": {
@@ -4246,6 +5115,7 @@
           },
           "take": {
             "default": 10,
+            "minimum": 1,
             "type": "number"
           },
           "userIds": {
@@ -4255,6 +5125,51 @@
             "type": "array"
           }
         },
+        "type": "object"
+      },
+      "TaskBoardIdsDto": {
+        "properties": {
+          "boardIds": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "boardIds"
+        ],
+        "type": "object"
+      },
+      "TimeOffWorktimeDto": {
+        "properties": {
+          "end": {
+            "description": "Last day of the Freizeitausgleich (inclusive)",
+            "format": "date-time",
+            "type": "string"
+          },
+          "isHalfDay": {
+            "default": false,
+            "description": "Book only half of each working day",
+            "type": "boolean"
+          },
+          "note": {
+            "description": "Optional note shown in the ledger and absence",
+            "example": "Freizeitausgleich Brückentag",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "start": {
+            "description": "First day of the Freizeitausgleich",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
         "type": "object"
       },
       "UpdateAbsenceRequestDto": {
@@ -4295,6 +5210,7 @@
               "EDUCATION",
               "BUSINESS_TRIP",
               "FAIR",
+              "COMPENSATORY",
               "OTHER"
             ],
             "type": "string"
@@ -4612,7 +5528,11 @@
             "type": "boolean"
           },
           "pageType": {
-            "type": "object"
+            "enum": [
+              "personal",
+              "team"
+            ],
+            "type": "string"
           },
           "slug": {
             "maxLength": 80,
@@ -4638,7 +5558,12 @@
             "type": "string"
           },
           "buttonStyle": {
-            "type": "object"
+            "enum": [
+              "rounded",
+              "pill",
+              "square"
+            ],
+            "type": "string"
           },
           "coverFileId": {
             "nullable": true,
@@ -4727,8 +5652,10 @@
           "companyNumber": {
             "type": "string"
           },
+          "companySize": {
+            "type": "string"
+          },
           "email": {
-            "format": "email",
             "type": "string"
           },
           "externalReferences": {
@@ -4773,6 +5700,7 @@
               "INACTIVE",
               "ARCHIVED",
               "BLOCKED",
+              "CANCELLED",
               "CHURN"
             ],
             "type": "string"
@@ -4784,6 +5712,9 @@
             "type": "array"
           },
           "taxNumber": {
+            "type": "string"
+          },
+          "title": {
             "type": "string"
           },
           "type": {
@@ -4828,7 +5759,6 @@
             "type": "string"
           },
           "email": {
-            "format": "email",
             "type": "string"
           },
           "externalReferences": {
@@ -4895,6 +5825,7 @@
               "INACTIVE",
               "ARCHIVED",
               "BLOCKED",
+              "CANCELLED",
               "CHURN"
             ],
             "type": "string"
@@ -4926,6 +5857,39 @@
           },
           "website": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateContractHistoryDTO": {
+        "properties": {
+          "end": {
+            "description": "End of the contract period (null = current/open period)",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "overtime": {
+            "description": "Opening overtime of the period",
+            "example": 0,
+            "type": "number"
+          },
+          "start": {
+            "description": "Start of the contract period",
+            "format": "date-time",
+            "type": "string"
+          },
+          "vacationDays": {
+            "description": "Vacation days for the period",
+            "example": 25,
+            "type": "number"
+          },
+          "workDays": {
+            "description": "Weekly schedule of the time model",
+            "items": {
+              "$ref": "#/components/schemas/WorkDayDto"
+            },
+            "type": "array"
           }
         },
         "type": "object"
@@ -4967,10 +5931,18 @@
           "dealReason": {
             "type": "string"
           },
+          "dealSource": {
+            "nullable": true,
+            "type": "string"
+          },
           "dealValue": {
             "type": "number"
           },
           "description": {
+            "type": "string"
+          },
+          "dueDate": {
+            "nullable": true,
             "type": "string"
           },
           "expectedCloseDate": {
@@ -5252,6 +6224,41 @@
         ],
         "type": "object"
       },
+      "UpdateInvoiceDTO": {
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/InvoicingCustomerDTO"
+          },
+          "invoice": {
+            "$ref": "#/components/schemas/PatchInvoiceDetailsDTO"
+          },
+          "invoiceLines": {
+            "items": {
+              "$ref": "#/components/schemas/CreateInvoiceLineDTO"
+            },
+            "type": "array"
+          },
+          "linkingOptions": {
+            "$ref": "#/components/schemas/LinkingOptionsDTO"
+          },
+          "paymentOptions": {
+            "$ref": "#/components/schemas/PaymentOptionsDTO"
+          },
+          "paymentTerms": {
+            "$ref": "#/components/schemas/PaymentTermsDTO"
+          },
+          "pdfOptions": {
+            "$ref": "#/components/schemas/PDFOptionsDTO"
+          },
+          "totalDiscounts": {
+            "items": {
+              "$ref": "#/components/schemas/NxDiscountValue"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "UpdateMachineDto": {
         "properties": {
           "buyingPrice": {
@@ -5339,6 +6346,41 @@
           },
           "unitId": {
             "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateOfferDTO": {
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/InvoicingCustomerDTO"
+          },
+          "invoiceLines": {
+            "items": {
+              "$ref": "#/components/schemas/CreateInvoiceLineDTO"
+            },
+            "type": "array"
+          },
+          "linkingOptions": {
+            "$ref": "#/components/schemas/LinkingOptionsDTO"
+          },
+          "offer": {
+            "$ref": "#/components/schemas/PatchOfferDetailsDTO"
+          },
+          "paymentOptions": {
+            "$ref": "#/components/schemas/PaymentOptionsDTO"
+          },
+          "paymentTerms": {
+            "$ref": "#/components/schemas/PaymentTermsDTO"
+          },
+          "pdfOptions": {
+            "$ref": "#/components/schemas/PDFOptionsDTO"
+          },
+          "totalDiscounts": {
+            "items": {
+              "$ref": "#/components/schemas/NxDiscountValue"
+            },
+            "type": "array"
           }
         },
         "type": "object"
@@ -5511,6 +6553,14 @@
             ],
             "type": "string"
           },
+          "trackingCorrectionEnabled": {
+            "type": "boolean"
+          },
+          "trackingCorrectionThresholdHours": {
+            "maximum": 23,
+            "minimum": 1,
+            "type": "number"
+          },
           "vatId": {
             "type": "string"
           },
@@ -5538,6 +6588,8 @@
           "socialMedia",
           "currency",
           "minBreakTime",
+          "trackingCorrectionEnabled",
+          "trackingCorrectionThresholdHours",
           "bankAccounts",
           "accountChartType",
           "taxationMethod",
@@ -5742,6 +6794,9 @@
             },
             "type": "array"
           },
+          "budget": {
+            "type": "number"
+          },
           "clientCompanyId": {
             "type": "number"
           },
@@ -5763,7 +6818,7 @@
             "type": "array"
           },
           "customAddress": {
-            "type": "object"
+            "$ref": "#/components/schemas/CreateAddressDto"
           },
           "description": {
             "type": "string"
@@ -5780,6 +6835,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "plannedHours": {
+            "type": "number"
           },
           "portfolioId": {
             "type": "number"
@@ -5929,6 +6987,22 @@
         ],
         "type": "object"
       },
+      "UpdateTagDto": {
+        "properties": {
+          "color": {
+            "pattern": "^#?([0-9A-F]{3}|[0-9A-F]{4}|[0-9A-F]{6}|[0-9A-F]{8})$",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "color"
+        ],
+        "type": "object"
+      },
       "UpdateTagsDto": {
         "properties": {
           "tagIds": {
@@ -6039,7 +7113,11 @@
         "type": "object"
       },
       "UpdateTrackingCategoryDto": {
-        "properties": {},
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UpdateTrackingRequestDto": {
@@ -6166,6 +7244,33 @@
         "required": [
           "workDays"
         ],
+        "type": "object"
+      },
+      "UpdateWorktimeAccountSettingsDto": {
+        "properties": {
+          "capHours": {
+            "description": "Kappung: balance cap in hours (null = no cap)",
+            "example": 80,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "expiryMonths": {
+            "description": "Verfall: hours expire after N months (null = never)",
+            "example": 12,
+            "maximum": 60,
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          },
+          "payoutPremiumPercent": {
+            "description": "Zuschlag for payouts in percent (e.g. 25 = +25%)",
+            "example": 25,
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
         "type": "object"
       },
       "WorkDayDto": {
@@ -6687,6 +7792,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "type": "number"
             }
           },
@@ -6696,6 +7802,7 @@
             "required": false,
             "schema": {
               "default": 10,
+              "minimum": 1,
               "type": "number"
             }
           },
@@ -6815,6 +7922,64 @@
           },
           {
             "in": "query",
+            "name": "amountMin",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMax",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "organizationId",
             "required": false,
             "schema": {
@@ -6842,7 +8007,11 @@
             "name": "priceType",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Object"
+              "enum": [
+                "buying",
+                "selling"
+              ],
+              "type": "string"
             }
           },
           {
@@ -7209,6 +8378,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "type": "number"
             }
           },
@@ -7218,6 +8388,7 @@
             "required": false,
             "schema": {
               "default": 10,
+              "minimum": 1,
               "type": "number"
             }
           },
@@ -7331,6 +8502,64 @@
             "name": "subjectFilter",
             "required": false,
             "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMin",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMax",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
               "nullable": true,
               "type": "string"
             }
@@ -7384,6 +8613,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "type": "number"
             }
           },
@@ -7393,6 +8623,7 @@
             "required": false,
             "schema": {
               "default": 10,
+              "minimum": 1,
               "type": "number"
             }
           },
@@ -7512,6 +8743,64 @@
           },
           {
             "in": "query",
+            "name": "amountMin",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMax",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "organizationId",
             "required": false,
             "schema": {
@@ -7539,7 +8828,11 @@
             "name": "priceType",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Object"
+              "enum": [
+                "buying",
+                "selling"
+              ],
+              "type": "string"
             }
           },
           {
@@ -7941,6 +9234,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "type": "number"
             }
           },
@@ -7950,6 +9244,7 @@
             "required": false,
             "schema": {
               "default": 10,
+              "minimum": 1,
               "type": "number"
             }
           },
@@ -8069,6 +9364,64 @@
           },
           {
             "in": "query",
+            "name": "amountMin",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMax",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "organizationId",
             "required": false,
             "schema": {
@@ -8096,7 +9449,11 @@
             "name": "priceType",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Object"
+              "enum": [
+                "buying",
+                "selling"
+              ],
+              "type": "string"
             }
           },
           {
@@ -8498,6 +9855,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "type": "number"
             }
           },
@@ -8507,6 +9865,7 @@
             "required": false,
             "schema": {
               "default": 10,
+              "minimum": 1,
               "type": "number"
             }
           },
@@ -8626,6 +9985,64 @@
           },
           {
             "in": "query",
+            "name": "amountMin",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMax",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "organizationId",
             "required": false,
             "schema": {
@@ -8653,7 +10070,11 @@
             "name": "priceType",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Object"
+              "enum": [
+                "buying",
+                "selling"
+              ],
+              "type": "string"
             }
           },
           {
@@ -9162,6 +10583,14 @@
           {
             "in": "query",
             "name": "pageId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "eventTypeId",
             "required": true,
             "schema": {
               "type": "string"
@@ -10244,16 +11673,7 @@
     "/api/v1/calendar-events/organization/{orgId}": {
       "get": {
         "operationId": "NxCalendarEventsController_getEventsByOrganization",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "orgId",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "401": {
             "description": "Unauthorized - Invalid or missing API key/token"
@@ -10279,16 +11699,7 @@
     "/api/v1/calendar-events/organization/{orgId}/search": {
       "post": {
         "operationId": "NxCalendarEventsController_searchAllEvents",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "orgId",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
@@ -10957,16 +12368,7 @@
     "/api/v1/calendars/organization/{orgId}": {
       "get": {
         "operationId": "NxCalendarsController_getAllCalendarsForOrganization",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "orgId",
-            "required": true,
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "401": {
             "description": "Unauthorized - Invalid or missing API key/token"
@@ -11595,6 +12997,49 @@
         "tags": [
           "Chat"
         ]
+      },
+      "post": {
+        "operationId": "NxChatController_sendMessage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Send a message to a conversation",
+        "tags": [
+          "Chat"
+        ]
       }
     },
     "/api/v1/chat/conversations/{id}/participants": {
@@ -12093,6 +13538,14 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "in": "query",
+            "name": "includeArchived",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -12462,6 +13915,51 @@
           }
         ],
         "summary": "Update an existing company",
+        "tags": [
+          "Companies"
+        ]
+      }
+    },
+    "/api/v1/crm/companies/{id}/appointments": {
+      "post": {
+        "operationId": "NxCompaniesController_getCompanyAppointments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryCompaniesDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get appointments for a company",
         "tags": [
           "Companies"
         ]
@@ -12999,6 +14497,14 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "in": "query",
+            "name": "includeArchived",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -13421,6 +14927,51 @@
           }
         ],
         "summary": "Update an existing contact",
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/crm/contacts/{id}/appointments": {
+      "post": {
+        "operationId": "NxContactsController_getContactAppointments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryContactsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get appointments for a contact",
         "tags": [
           "Contacts"
         ]
@@ -15922,6 +17473,43 @@
         ]
       }
     },
+    "/api/v1/forms/documents": {
+      "post": {
+        "operationId": "FormsDocumentsController_saveDocument",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveFormsDocumentDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Receive a generated Forms document and store it in the project Drive folder",
+        "tags": [
+          "Forms Documents",
+          "Forms"
+        ]
+      }
+    },
     "/api/v1/invoicing/cancellation-invoices": {
       "post": {
         "operationId": "NxCancellationInvoiceController_createCancellationInvoice",
@@ -16664,7 +18252,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateInvoiceDTO"
+                "$ref": "#/components/schemas/UpdateInvoiceDTO"
               }
             }
           },
@@ -17445,7 +19033,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateOfferDTO"
+                "$ref": "#/components/schemas/UpdateOfferDTO"
               }
             }
           },
@@ -17993,6 +19581,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "type": "number"
             }
           },
@@ -18002,6 +19591,7 @@
             "required": false,
             "schema": {
               "default": 10,
+              "minimum": 1,
               "type": "number"
             }
           },
@@ -18115,6 +19705,64 @@
             "name": "subjectFilter",
             "required": false,
             "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMin",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMax",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
               "nullable": true,
               "type": "string"
             }
@@ -18995,6 +20643,59 @@
         ]
       }
     },
+    "/api/v1/organization/{orgId}/sector/{id}/members": {
+      "post": {
+        "operationId": "NxOrganizationSectorsController_setSectorMembers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetSectorMembersDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Set the full member list of an organization sector",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
     "/api/v1/organization/{orgId}/sector/{id}/update": {
       "patch": {
         "operationId": "NxOrganizationSectorsController_updateSector",
@@ -19310,6 +21011,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "type": "number"
             }
           },
@@ -19319,6 +21021,7 @@
             "required": false,
             "schema": {
               "default": 10,
+              "minimum": 1,
               "type": "number"
             }
           },
@@ -19432,6 +21135,64 @@
             "name": "subjectFilter",
             "required": false,
             "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMin",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMax",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
               "nullable": true,
               "type": "string"
             }
@@ -19477,6 +21238,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "type": "number"
             }
           },
@@ -19486,6 +21248,7 @@
             "required": false,
             "schema": {
               "default": 10,
+              "minimum": 1,
               "type": "number"
             }
           },
@@ -19599,6 +21362,64 @@
             "name": "subjectFilter",
             "required": false,
             "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMin",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "amountMax",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deliveryDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateFrom",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateTo",
+            "required": false,
+            "schema": {
+              "format": "date-time",
               "nullable": true,
               "type": "string"
             }
@@ -20279,6 +22100,41 @@
           }
         ],
         "summary": "Duplicate a project",
+        "tags": [
+          "Projects"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/financial-summary": {
+      "get": {
+        "operationId": "ProjectManagerController_getProjectFinancialSummary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get all-time controlling figures (labor cost & hours, invoiced/offered totals) for a project",
         "tags": [
           "Projects"
         ]
@@ -21740,6 +23596,261 @@
         ]
       }
     },
+    "/api/v1/tags/create": {
+      "post": {
+        "operationId": "NxTagsController_createTag",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTagDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a new tag (name + optional hex color)",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/tags/find-or-create": {
+      "post": {
+        "operationId": "NxTagsController_findOrCreateTags",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FindOrCreateTagsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Find tags by name or create missing ones; returns the resolved tags (with ids)",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/tags/list": {
+      "get": {
+        "operationId": "NxTagsController_getTagsByOrg",
+        "parameters": [],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List all tags for the organization",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/tags/search": {
+      "get": {
+        "operationId": "NxTagsController_searchTagsInOrg",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Search tags by name within the organization",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/tags/{id}/update": {
+      "patch": {
+        "operationId": "NxTagsController_updateTag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTagDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Update a tag (name and/or color)",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/task-manager/boards/activate-many": {
+      "post": {
+        "operationId": "NxTaskBoardsController_activateMany",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskBoardIdsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Activate multiple task boards",
+        "tags": [
+          "Task Boards"
+        ]
+      }
+    },
+    "/api/v1/task-manager/boards/archive-many": {
+      "post": {
+        "operationId": "NxTaskBoardsController_archiveMany",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskBoardIdsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Archive multiple task boards",
+        "tags": [
+          "Task Boards"
+        ]
+      }
+    },
     "/api/v1/task-manager/boards/create": {
       "post": {
         "operationId": "NxTaskBoardsController_createTaskBoard",
@@ -21850,6 +23961,19 @@
           },
           {
             "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "active",
+                "archived",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "includeArchived",
             "required": false,
             "schema": {
@@ -21858,10 +23982,67 @@
           },
           {
             "in": "query",
+            "name": "ownerIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "invitedUserIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "projectIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateStart",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateEnd",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "sortField",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Object"
+              "enum": [
+                "createdAt",
+                "status",
+                "title",
+                "dueDate"
+              ],
+              "type": "string"
             }
           },
           {
@@ -22007,7 +24188,15 @@
             "name": "sortField",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Object"
+              "enum": [
+                "createdAt",
+                "title",
+                "dueDate",
+                "taskNumber",
+                "comments",
+                "subtasks"
+              ],
+              "type": "string"
             }
           },
           {
@@ -22020,6 +24209,16 @@
                 "DESC"
               ],
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tasksPerColumn",
+            "required": false,
+            "schema": {
+              "maximum": 200,
+              "minimum": 1,
+              "type": "number"
             }
           },
           {
@@ -22047,6 +24246,28 @@
           {
             "in": "query",
             "name": "tagIds",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "companyIds",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contactIds",
             "required": true,
             "schema": {
               "items": {
@@ -22143,6 +24364,192 @@
           }
         ],
         "summary": "Archive task board",
+        "tags": [
+          "Task Boards"
+        ]
+      }
+    },
+    "/api/v1/task-manager/boards/{id}/columns/{columnId}/tasks": {
+      "get": {
+        "operationId": "NxTaskBoardsController_getColumnTasks",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "path",
+            "name": "columnId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "completed",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateStart",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dueDateEnd",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortField",
+            "required": false,
+            "schema": {
+              "enum": [
+                "createdAt",
+                "title",
+                "dueDate",
+                "taskNumber",
+                "comments",
+                "subtasks"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortDirection",
+            "required": false,
+            "schema": {
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tasksPerColumn",
+            "required": false,
+            "schema": {
+              "maximum": 200,
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "take",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "assigneeIds",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "createdByIds",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tagIds",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "companyIds",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "contactIds",
+            "required": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Page tasks within a board column",
         "tags": [
           "Task Boards"
         ]
@@ -22827,7 +25234,15 @@
             "name": "sortField",
             "required": false,
             "schema": {
-              "$ref": "#/components/schemas/Object"
+              "enum": [
+                "createdAt",
+                "title",
+                "dueDate",
+                "taskNumber",
+                "comments",
+                "subtasks"
+              ],
+              "type": "string"
             }
           },
           {
@@ -23343,6 +25758,51 @@
         ]
       }
     },
+    "/api/v1/task-manager/tasks/{id}/convert-to-subtask": {
+      "post": {
+        "operationId": "NxTasksController_convertToSubtask",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertTaskToSubtaskDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Convert a top-level task into a subtask of another task",
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
     "/api/v1/task-manager/tasks/{id}/create-comment": {
       "post": {
         "operationId": "NxTasksController_createComment",
@@ -23433,6 +25893,45 @@
         ]
       }
     },
+    "/api/v1/task-manager/tasks/{id}/drive-folder": {
+      "post": {
+        "operationId": "NxTasksController_getOrCreateTaskFolder",
+        "parameters": [
+          {
+            "description": "Task ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The task drive folder (created if not exists)"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get or create the drive folder for a task — upload task documents into this folder (not the drive root)",
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
     "/api/v1/task-manager/tasks/{id}/mark-as-completed": {
       "post": {
         "operationId": "NxTasksController_markAsCompleted",
@@ -23498,6 +25997,51 @@
           }
         ],
         "summary": "Mark task as incomplete",
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/api/v1/task-manager/tasks/{id}/move-to-board": {
+      "post": {
+        "operationId": "NxTasksController_moveToBoard",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveTaskToBoardDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Move a task to another board",
         "tags": [
           "Tasks"
         ]
@@ -27207,7 +29751,7 @@
         ]
       }
     },
-    "/api/v1/work-manager/time-tracking/{userId}/trackings/date/{date}": {
+    "/api/v1/work-manager/time-tracking/{userId}/trackings/date/{start}/{end}": {
       "get": {
         "operationId": "NxTimeTrackingController_getTrackingsByDate",
         "parameters": [
@@ -27220,8 +29764,18 @@
             }
           },
           {
+            "description": "Start of the day as a Unix timestamp (ms), computed in the user timezone",
             "in": "path",
-            "name": "date",
+            "name": "start",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "End of the day as a Unix timestamp (ms), computed in the user timezone",
+            "in": "path",
+            "name": "end",
             "required": true,
             "schema": {
               "type": "number"
@@ -27244,7 +29798,7 @@
             "api-key": []
           }
         ],
-        "summary": "Get time entries for a user on a specific date",
+        "summary": "Get time entries for a user on a specific day",
         "tags": [
           "Time Tracking"
         ]
@@ -27298,6 +29852,374 @@
         "summary": "Get time entries for a user in a date range",
         "tags": [
           "Time Tracking"
+        ]
+      }
+    },
+    "/api/v1/work-manager/worktime-account/{userId}": {
+      "get": {
+        "operationId": "NxWorktimeAccountController_getAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get a user worktime account (balance, live period, history)",
+        "tags": [
+          "Work Manager",
+          "Worktime Account",
+          "Work Manager",
+          "Worktime Account"
+        ]
+      }
+    },
+    "/api/v1/work-manager/worktime-account/{userId}/adjust": {
+      "post": {
+        "operationId": "NxWorktimeAccountController_adjust",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustWorktimeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Book a manual correction (reason mandatory)",
+        "tags": [
+          "Work Manager",
+          "Worktime Account",
+          "Work Manager",
+          "Worktime Account"
+        ]
+      }
+    },
+    "/api/v1/work-manager/worktime-account/{userId}/ledger": {
+      "get": {
+        "operationId": "NxWorktimeAccountController_getLedger",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get the paginated worktime account ledger",
+        "tags": [
+          "Work Manager",
+          "Worktime Account",
+          "Work Manager",
+          "Worktime Account"
+        ]
+      }
+    },
+    "/api/v1/work-manager/worktime-account/{userId}/payout": {
+      "post": {
+        "operationId": "NxWorktimeAccountController_payout",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayoutWorktimeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Settle overtime as payout (Auszahlung)",
+        "tags": [
+          "Work Manager",
+          "Worktime Account",
+          "Work Manager",
+          "Worktime Account"
+        ]
+      }
+    },
+    "/api/v1/work-manager/worktime-account/{userId}/recompute": {
+      "post": {
+        "operationId": "NxWorktimeAccountController_recompute",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecomputeWorktimeAccountDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Rebuild closed-month accruals and reconcile the balance",
+        "tags": [
+          "Work Manager",
+          "Worktime Account",
+          "Work Manager",
+          "Worktime Account"
+        ]
+      }
+    },
+    "/api/v1/work-manager/worktime-account/{userId}/settings": {
+      "patch": {
+        "operationId": "NxWorktimeAccountController_updateSettings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWorktimeAccountSettingsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Update account policy (cap, expiry, payout premium)",
+        "tags": [
+          "Work Manager",
+          "Worktime Account",
+          "Work Manager",
+          "Worktime Account"
+        ]
+      }
+    },
+    "/api/v1/work-manager/worktime-account/{userId}/time-off": {
+      "post": {
+        "operationId": "NxWorktimeAccountController_timeOff",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeOffWorktimeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Settle overtime as compensatory time off (Freizeitausgleich)",
+        "tags": [
+          "Work Manager",
+          "Worktime Account",
+          "Work Manager",
+          "Worktime Account"
+        ]
+      }
+    },
+    "/api/v1/work-time/bulk-assign": {
+      "post": {
+        "operationId": "NxWorkTimeController_bulkAssignWorktime",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignWorkTimeDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Assign one time model to multiple users",
+        "tags": [
+          "Work Time"
         ]
       }
     },
@@ -27547,6 +30469,57 @@
         "tags": [
           "Work Time"
         ]
+      },
+      "patch": {
+        "operationId": "NxWorkTimeController_updateWorktimeHistory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "path",
+            "name": "workTimeId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContractHistoryDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Edit an existing work time period (contract history entry)",
+        "tags": [
+          "Work Time"
+        ]
       }
     }
   },
@@ -27666,6 +30639,14 @@
       "name": "Drive Sharing"
     },
     {
+      "description": "",
+      "name": "Forms"
+    },
+    {
+      "description": "",
+      "name": "Forms Documents"
+    },
+    {
       "description": "Create, manage, book, and send invoices",
       "name": "Invoices"
     },
@@ -27710,6 +30691,10 @@
       "name": "Shift Planner"
     },
     {
+      "description": "",
+      "name": "Tags"
+    },
+    {
       "description": "Manage task board columns and create tasks within columns",
       "name": "Task Board Columns"
     },
@@ -27746,12 +30731,20 @@
       "name": "Webhooks"
     },
     {
+      "description": "",
+      "name": "Work Manager"
+    },
+    {
       "description": "Generate work reports, export tracking data",
       "name": "Work Reports"
     },
     {
       "description": "Manage user work time contracts and schedules",
       "name": "Work Time"
+    },
+    {
+      "description": "",
+      "name": "Worktime Account"
     }
   ],
   "x-tagGroups": [

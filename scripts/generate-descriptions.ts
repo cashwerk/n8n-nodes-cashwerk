@@ -56,18 +56,18 @@ import { HTTP_METHODS } from '../../../scripts/shared/openapi.interfaces';
 // ─── Configuration ──────────────────────────────────────────────────
 
 const SCRIPT_DIR = resolve(__dirname);
-const SPEC_PATH = resolve(SCRIPT_DIR, 'openapi-external.json');
+export const SPEC_PATH = resolve(SCRIPT_DIR, 'openapi-external.json');
 const DESCRIPTIONS_DIR = resolve(SCRIPT_DIR, '..', 'nodes', 'Cashwerk', 'descriptions');
 const EXECUTORS_DIR = resolve(SCRIPT_DIR, '..', 'nodes', 'Cashwerk', 'executors');
 const MANUAL_MARKER = '// @manual';
-const API_PREFIX = '/api/v1';
+export const API_PREFIX = '/api/v1';
 
 const SKIP_FIELDS = new Set(['operation', 'resource', 'sortType']);
 const SKIP_BODY_FIELDS = new Set(['organizationId', 'orgId']);
 
 // ─── Tag Configuration ──────────────────────────────────────────────
 
-const TAG_CONFIG: Record<string, DescriptionTagConfig> = {
+export const TAG_CONFIG: Record<string, DescriptionTagConfig> = {
     'Contacts':               { resource: 'contact',             displayName: 'Contact',              descFile: 'ContactDescription',             domain: 'crm',              needsOrgId: true },
     'Companies':              { resource: 'company',             displayName: 'Company',              descFile: 'CompanyDescription',             domain: 'crm',              needsOrgId: true },
     'Portfolios':             { resource: 'portfolio',           displayName: 'Portfolio',            descFile: 'PortfolioDescription',           domain: 'crm' },
@@ -114,7 +114,35 @@ const TAG_CONFIG: Record<string, DescriptionTagConfig> = {
     'Mailing':                { resource: 'mailConnection',      displayName: 'Mail Connection',      descFile: 'MailConnectionDescription',      domain: 'mailing' },
 };
 
-const SKIP_TAGS = new Set(['API Platform', 'Webhooks']);
+export const SKIP_TAGS = new Set(['API Platform', 'Webhooks']);
+
+/**
+ * Spec-derived operations that must NOT be (re-)added to a description:
+ * they duplicate a hand-written operation under a worse label.
+ */
+const OP_EXCLUSIONS: Record<string, Set<string>> = {
+    company: new Set(['deals', 'invoices', 'offers', 'projects', 'tasks', 'delete', 'addCompanies']),
+    contact: new Set(['deals', 'invoices', 'offers', 'projects', 'tasks', 'addCompanies', 'addContacts']),
+    project: new Set(['getAll', 'addContacts']),
+    workReport: new Set(['get', 'getAll', 'getByDateRange']),
+    crmMetrics: new Set(['getAll']),
+    incomingPayment: new Set(['get']),
+};
+
+/** Spec-derived operation value → the value the description actually uses. */
+const OP_ALIASES: Record<string, Record<string, string>> = {
+    company: { appointments: 'getAppointments' },
+    contact: { appointments: 'getAppointments', byEmails: 'findByEmails' },
+    project: { contact: 'addContact' },
+    organization: { create: 'createSector', update: 'updateSector', delete: 'deleteBranch', branch: 'createBranch', members: 'setSectorMembers' },
+    timeTracking: { getAll: 'getTaskTrackings', create: 'createBreak', delete: 'deleteBreak', deleteBulk: 'deleteBreaks' },
+    chat: { messages: 'sendMessage' },
+    drive: { create: 'createFolder' },
+    calendarEvent: { attachments: 'uploadAttachment', link: 'linkAttachment', folder: 'ensureFolder', convert: 'convertGuest', occurrences: 'updateOccurrence', split: 'splitSeries', clear: 'clearAll' },
+    deal: { tags: 'addTag' },
+    pipeline: { assignedUsers: 'updateAssignedUsers', reorder: 'reorderStages' },
+    bookingEventType: { get: 'getByPage' },
+};
 
 // ─── CLI ────────────────────────────────────────────────────────────
 
@@ -129,20 +157,20 @@ function parseArgs(): DescriptionGeneratorCliArgs {
 
 // ─── String Helpers ─────────────────────────────────────────────────
 
-function titleCase(str: string): string {
+export function titleCase(str: string): string {
     return str.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function camelCase(str: string): string {
+export function camelCase(str: string): string {
     return str.replace(/[-_](\w)/g, (_, c: string) => c.toUpperCase());
 }
 
-function pascalCase(str: string): string {
+export function pascalCase(str: string): string {
     const cc = camelCase(str);
     return cc.charAt(0).toUpperCase() + cc.slice(1);
 }
 
-function stripPrefix(p: string): string {
+export function stripPrefix(p: string): string {
     return p.startsWith(API_PREFIX) ? p.slice(API_PREFIX.length) : p;
 }
 
@@ -159,7 +187,7 @@ function escapeQuotes(str: string): string {
 
 // ─── Spec Parsing ───────────────────────────────────────────────────
 
-interface SpecEndpoint {
+export interface SpecEndpoint {
     method: string;
     path: string;
     summary: string;
@@ -168,7 +196,7 @@ interface SpecEndpoint {
     requestBody?: OpenApiRequestBody;
 }
 
-function groupEndpointsByTag(spec: OpenApiDocument): Map<string, SpecEndpoint[]> {
+export function groupEndpointsByTag(spec: OpenApiDocument): Map<string, SpecEndpoint[]> {
     const groups = new Map<string, SpecEndpoint[]>();
 
     for (const [rawPath, pathItem] of Object.entries(spec.paths)) {
@@ -234,7 +262,7 @@ function getDefaultValue(n8nType: string): string | number | boolean {
 
 // ─── Operation Classification ───────────────────────────────────────
 
-interface ClassifiedOp {
+export interface ClassifiedOp {
     value: string;
     label: string;
     action: string;
@@ -395,7 +423,7 @@ function classifyEndpoint(ep: SpecEndpoint): ClassifiedOp | null {
 
 // ─── Field Extraction from Spec ─────────────────────────────────────
 
-interface ExtractedField {
+export interface ExtractedField {
     displayName: string;
     name: string;
     n8nType: string;
@@ -405,7 +433,7 @@ interface ExtractedField {
     enumValues?: string[];
 }
 
-function extractPathParams(ep: SpecEndpoint): ExtractedField[] {
+export function extractPathParams(ep: SpecEndpoint): ExtractedField[] {
     return (ep.parameters ?? [])
         .filter(p => p.in === 'path' && p.name !== 'orgId')
         .map(p => ({
@@ -418,7 +446,7 @@ function extractPathParams(ep: SpecEndpoint): ExtractedField[] {
         }));
 }
 
-function extractQueryParams(ep: SpecEndpoint): ExtractedField[] {
+export function extractQueryParams(ep: SpecEndpoint): ExtractedField[] {
     return (ep.parameters ?? [])
         .filter(p => p.in === 'query')
         .map(p => {
@@ -435,7 +463,7 @@ function extractQueryParams(ep: SpecEndpoint): ExtractedField[] {
         });
 }
 
-function extractBodyFields(spec: OpenApiDocument, ep: SpecEndpoint): ExtractedField[] {
+export function extractBodyFields(spec: OpenApiDocument, ep: SpecEndpoint): ExtractedField[] {
     const schema = getSchemaFromBody(spec, ep.requestBody);
     if (!schema?.properties) return [];
 
@@ -1001,7 +1029,13 @@ function processResource(
         totalSkippedManual = skippedManual;
     }
 
-    const newOps = classifiedOps.filter(o => !existing.operationValues.has(o.classified.value));
+    const excluded = OP_EXCLUSIONS[config.resource] ?? new Set<string>();
+    const aliases = OP_ALIASES[config.resource] ?? {};
+    const newOps = classifiedOps.filter(o => {
+        const v = o.classified.value;
+        if (excluded.has(v)) return false;
+        return !existing.operationValues.has(aliases[v] ?? v);
+    });
 
     if (newOps.length > 0) {
         const insertionPoint = findOperationsInsertionPoint(lines);
@@ -1054,7 +1088,7 @@ function processResource(
     };
 }
 
-function classifyOperations(endpoints: SpecEndpoint[]): Array<{ classified: ClassifiedOp; endpoint: SpecEndpoint }> {
+export function classifyOperations(endpoints: SpecEndpoint[]): Array<{ classified: ClassifiedOp; endpoint: SpecEndpoint }> {
     const result: Array<{ classified: ClassifiedOp; endpoint: SpecEndpoint }> = [];
     const seenOps = new Set<string>();
 
@@ -1382,4 +1416,6 @@ function main(): void {
     }
 }
 
-main();
+if (require.main === module) {
+    main();
+}

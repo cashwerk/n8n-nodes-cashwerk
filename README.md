@@ -1,6 +1,6 @@
 # n8n-nodes-cashwerk
 
-n8n community node for the **cashwerk** API. Provides full CRUD operations across 38 resources spanning CRM, Invoicing, Project Management, Drive, Calendar, Asset Management, Work & Time Tracking, Task Management and Sales Pipeline -- plus a webhook-based trigger node for real-time event automation.
+n8n community node for the **cashwerk** API. Provides full CRUD operations across 43 resources spanning CRM, Invoicing, Project Management, Drive, Calendar, Asset Management, Work & Time Tracking, Task Management and Sales Pipeline -- plus a webhook-based trigger node for real-time event automation.
 
 ## Installation
 
@@ -41,94 +41,109 @@ API keys and OAuth applications can be managed in the cashwerk web app under **S
 
 ### cashwerk (Action Node)
 
-Perform operations on cashwerk entities. Supports 38 resources with 200+ operations.
+Perform operations on cashwerk entities. Supports 43 resources with 430+ operations.
 
 #### CRM
 
 | Resource | Operations |
 |---|---|
-| **Contact** | Get, Get Many, Create, Update, Archive, Archive Many, Restore, Restore Many, Unlink Company, Link Companies, Upload Avatar, Export CSV, Export PDF, Get Deals, Get Invoices, Get Offers, Get Projects, Get Tasks, Get Cancellation Invoices |
-| **Company** | Get, Get Many, Create, Update, Archive, Archive Many, Restore, Restore Many, Add Contacts, Remove Contact, Upload Logo, Export CSV, Export PDF, Get Deals, Get Invoices, Get Offers, Get Projects, Get Tasks, Get Cancellation Invoices |
-| **Portfolio** | Get, Get Many, Create, Update, Delete |
-| **CRM Metrics** | Get Contact Metrics, Get Company Metrics |
+| **Contact** | Archive, Archive Many, Create, Export Csv, Export Pdf, Find By Emails, Get, Get Appointments, Get Cancellation Invoices, Get Deals, Get Invoices, Get Many, Get Offers, Get Projects, Get Tasks, Link Companies, Restore, Restore Many, Unlink Company, Update, Upload Avatar |
+| **Company** | Archive, Archive Many, Create, Export Csv, Export Pdf, Get, Get Appointments, Get Cancellation Invoices, Get Deals, Get Invoices, Get Many, Get Offers, Get Projects, Get Tasks, Link Contacts, Remove Contact, Restore, Restore Many, Update, Upload Logo |
+| **Portfolio** | Create, Delete, Get, Get Many, Portfolios, Update |
+| **CRM Metrics** | Get Company Metrics, Get Contact Metrics |
 
 #### Invoicing & Finance
 
 | Resource | Operations |
 |---|---|
-| **Invoice** | Get, Get Many, Create, Update, Archive, Restore, Book, Cancel, Cancellation, Mark as Paid, Revert Committed, Send, Get Dashboard, Create XInvoice, Create ZUGFeRD, Validate XInvoice |
-| **Offer** | Get, Get Many, Create, Update, Archive, Restore, Book, Cancel, Send, Convert to Invoice, Create from Deal |
-| **Cancellation Invoice** | Get, Get Many, Create, Update, Archive, Restore, Create XInvoice, Create ZUGFeRD |
-| **Incoming Payment** | Get by Invoice, Total, Create for Invoice, Delete |
-| **Tax Rate** | Get, Get Many, Create, Update, Delete, Delete Many |
-| **Sales Tax Regulation** | Get, Get Many, Create, Update, Delete, Delete Many |
+| **Invoice** | Archive, Archive Many, Book, Cancel, Cancellation, Create, Create X Invoice, Create Zugferd, Delete, Delete Many, Get, Get Dashboard, Get Many, Mark As Paid, Restore, Restore Many, Revert Committed, Send, Update, Validate X Invoice |
+| **Offer** | Accept, Archive, Archive Many, Book, Cancel, Convert To Invoice, Create, Create From Deal, Delete, Delete Many, Get, Get Dashboard, Get Many, Get Preview, Preview From Data, Reject, Restore, Restore Many, Send, Update |
+| **Cancellation Invoice** | Archive, Archive Many, Create, Create X Invoice, Create Zugferd, Delete Many, Get, Get Many, Get Preview, Restore, Restore Many, Update |
+| **Incoming Payment** | Create For Invoice, Delete, Get By Invoice, Get Total |
+| **Tax Rate** | Create, Delete, Delete Many, Get, Get Many, Update |
+| **Sales Tax Regulation** | Create, Delete, Delete Many, Get, Get Many, Update |
 
 #### Project Management
 
 | Resource | Operations |
 |---|---|
-| **Project** | Get, Create, Query, Archive, Restore, Customer, Add Assignees, Update Assignees, Get Assignees, Add Contact Persons, Get Dashboard, Get Statuses, Update Address with Portfolio, Update Default Task Board, Upload Image |
+| **Project** | Add Assignees, Add Contact, Add Contact Persons, Archive, Archive Many, Create, Customer, Delete, Delete Many, Duplicate, Get, Get Assignees, Get Dashboard, Get Statuses, Query, Restore, Restore Many, Update, Update Address With Portfolio, Update Assignees, Update Default Task Board, Upload Image |
 
 #### Task Management
 
 | Resource | Operations |
 |---|---|
-| **Task Board** | Get, Get Many, Create, Activate, Archive, Create Column, Invite User, Remove User, Update Due Date, Update Project, Update Title |
-| **Task Board Column** | Delete, Create Task, Update Name |
-| **Task** | Get, Get Many, Delete, Add Collaborator, Remove Collaborator, Add Companies, Add Contacts, Add Tag, Remove Tag, Create Comment, Create Subtask, Remove Subtask, Mark as Completed, Mark as Incomplete, Update Assignee, Update Description, Update Due Date, Update Title |
-| **Task Comment** | Update, Delete |
+| **Task Board** | Activate, Activate Many, Archive, Archive Many, Create, Create Column, Delete, Get, Get Many, Get Presets, Invite User, Remove User, Save As Preset, Update Due Date, Update Project, Update Title |
+| **Task Board Column** | Create Task, Delete, Update Name, Update Position |
+| **Task** | Add Collaborator, Add Companies, Add Contacts, Add Tag, Assign To Column, Clone, Clone Subtask, Convert To Subtask, Create Comment, Create Subtask, Delete, Get, Get Drive Folder, Get Many, Mark As Completed, Mark As Incomplete, Move To Board, Remove Collaborator, Remove Subtask, Remove Tag, Update Assignee, Update Description, Update Due Date, Update Position, Update Subtask Position, Update Title |
+| **Task Comment** | Delete, Update |
 
 #### Sales Pipeline
 
 | Resource | Operations |
 |---|---|
-| **Deal** | Get, Get by Pipeline, Create, Update, Delete, Add Companies, Add Contacts, Add Tag, Stage, Update Lines |
-| **Pipeline** | Get, Get Many, Create, Update, Archive, Restore |
+| **Deal** | Add Companies, Add Contacts, Add Tag, Bulk Update Positions, Create, Delete, Get, Get Drive Folder, Get Many, Stage, Update, Update Lines |
+| **Pipeline** | Add Stage, Archive, Create, Delete, Get, Get Many, Reorder Stages, Restore, Update, Update Assigned Users |
 
 #### Drive (File Management)
 
 | Resource | Operations |
 |---|---|
-| **Drive** | Get, Get Many, Search, Init, Create Folder, Get Contents, Get Folders, Get Trash, Get View, Upload Direct, Clear |
-| **Drive File** | Update, Delete, Get Details, Move, Move to Trash, Restore, Update Tags |
-| **Drive Folder** | Get, Update, Delete, Get Details, Get Size, Get Subfolders, Move, Move to Trash, Restore, Update Tags, Zip |
-| **Drive Sharing** | Get Shared Items, Get Shared File, Get Shared Folder, Get Folder Contents, Share Folder, Share File, Unshare Folder, Unshare File, Update Access, Delete Access, Update Share |
+| **Drive** | Clear Trash, Create Folder, Get, Get Contents, Get Folders, Get Many, Get Trash, Get View, Init Chunked Upload, Search, Upload Batch, Upload File |
+| **Drive File** | Delete, Get Details, Move, Move to Trash, Restore, Update, Update Tags |
+| **Drive Folder** | Delete, Get, Get Details, Get Size, Get Subfolders, Move, Move to Trash, Restore, Update, Update Tags, Zip |
+| **Drive Sharing** | Delete, Delete Access, Get, Get Folder Contents, Get Shared File, Get Shared Folder, Get Shared Items, Share, Share File, Share Folder, Unshare, Unshare File, Unshare Folder, Update, Update Access, Update Share |
 
 #### Calendar
 
 | Resource | Operations |
 |---|---|
-| **Calendar** | Get, Get Many, Create, Update, Delete |
-| **Calendar Event** | Get, Get Many, Create, Update, Delete, Check Busy, Update Response |
+| **Calendar** | Create, Delete, Get, Get Many, Update |
+| **Calendar Event** | Check Busy, Clear All Events, Convert Guest To Contact, Create, Delete, Ensure Drive Folder, Get, Get Many, Link Attachment, Split Series, Update, Update Occurrence, Update Response, Upload Attachment |
+
+#### Booking
+
+| Resource | Operations |
+|---|---|
+| **Booking** | Cancel, Create, Get, Get Many |
+| **Booking Page** | Create, Delete, Get, Get Many, Share Links, Theme, Update |
+| **Booking Event Type** | Availability, Create, Delete, Form Fields, Get By Page, Update |
+| **Booking Date Override** | Create, Delete, Get Many, Upload Batch |
+
+#### Chat
+
+| Resource | Operations |
+|---|---|
+| **Chat** | Archive, Create, Delete, Get Many, Participants, Read, Send Message, Update |
 
 #### Work & Time Tracking
 
 | Resource | Operations |
 |---|---|
-| **Time Tracking** | Get, Update, Get by Date Range, Get Running, Start Tracker, Stop Tracker, Pause Tracker, Resume Tracker, Breaks, Trackings |
-| **Tracking Category** | Get, Get Many, Create, Update |
-| **Absence** | Get, Get Many, Create, Update, Delete, Approve, Reject, Get by Date Range, Get Meta, Get Pending |
-| **Shift Plan** | Get, Get Many, Create, Update, Delete, Duplicate, Get by Date Range |
-| **Work Report** | Get User Summary, Get User Report, Get User Monthly, Get Week Stats, Get Working Days, Query Trackings, Get Org Summary, Get Org Report, Export CSV, Export PDF |
-| **Work Time** | Get, For User |
+| **Time Tracking** | Breaks, Create Break, Delete Break, Delete Breaks, Get, Get By Date Range, Get Running, Get Task Trackings, Pause Tracker, Resume Tracker, Start Tracker, Stop Tracker, Trackings, Update, Update GPS |
+| **Tracking Category** | Create, Delete, Get, Get Many, Update |
+| **Absence** | Approve, Create, Delete, Get, Get By Date Range, Get Many, Get Meta, Get Pending, Reject, Update |
+| **Shift Plan** | Create, Delete, Duplicate, Get, Get By Date Range, Get Many, Update |
+| **Work Report** | Export CSV, Export PDF, Get Organization Report, Get Organization Summary, Get User Monthly Summary, Get User Report, Get User Summary, Get User Weekly Stats, Get Working Days, Query User Trackings, Start |
+| **Work Time** | Bulk Assign, Delete, For User, Get, Update, Update Vacation Days, Update Work Days |
 
 #### Asset Management
 
 | Resource | Operations |
 |---|---|
-| **Asset Unit** | Get, Get Many, Create, Update, Delete, Search |
-| **Asset Group** | Get, Get Many, Create, Update, Delete |
-| **Material** | Get, Get Many, Create, Update, Delete, Delete Many, Query, Upload Image |
-| **Machine** | Get, Get Many, Create, Update, Delete, Delete Many, Query, Upload Image |
-| **Asset Service** | Get, Get Many, Create, Update, Delete, Delete Many, Query, Upload Image |
-| **Subcontract** | Get, Get Many, Create, Update, Delete, Delete Many, Query, Upload Image |
+| **Asset Unit** | Create, Delete, Get, Get Many, Search, Update |
+| **Asset Group** | Create, Delete, Get, Get Many, Update |
+| **Material** | Create, Delete, Delete Many, Get, Get Many, Query, Update, Upload Image |
+| **Machine** | Create, Delete, Delete Many, Get, Get Many, Query, Update, Upload Image |
+| **Asset Service** | Create, Delete, Delete Many, Get, Get Many, Query, Update, Upload Image |
+| **Subcontract** | Create, Delete, Delete Many, Get, Get Many, Query, Update, Upload Image |
 
 #### Organization & Users
 
 | Resource | Operations |
 |---|---|
-| **Organization** | Get |
-| **User** | Get, Get Many, Get Active |
+| **Organization** | Create Branch, Create Sector, Delete Branch, Get My Organization, Invite User, Set Sector Members, Update Headquarters, Update Sector, Upload Logo |
+| **User** | Activate, Archive, Create, Delete, Get, Get Active, Get Many, Update Address, Update Birth Place, Update Birthdate, Update Branch, Update Nationality, Update Position, Update Profile Data, Update Public Phone, Update Sector, Update Social Media, Update Timezone, Upload Avatar, Upload Header |
 | **Mail Connection** | Get Many |
 
 ---
@@ -139,28 +154,49 @@ Starts a workflow when a cashwerk event occurs. Events are delivered in real-tim
 
 Webhook subscriptions are automatically registered when the workflow is activated and removed on deactivation.
 
-**Available events (89 events + wildcard):**
+**Available events (125 events + wildcard):**
 
 | Category | Events |
 |---|---|
 | **All** | `*` (wildcard) |
-| **Absence** | `absence.create`, `absence.update`, `absence.delete`, `absence.approve`, `absence.reject` |
-| **Asset Manager** | `material.create/update/delete`, `machine.create/update/delete`, `asset_service.create/update/delete`, `subcontract.create/update/delete` |
-| **Calendar** | `calendar.create/update/delete`, `calendar_event.create/update/delete` |
-| **CRM** | `contact.create/update/delete/archive/restore`, `company.create/update/delete/archive/restore`, `portfolio.create/update/delete` |
-| **Deal** | `deal.create`, `deal.update`, `deal.delete`, `deal.stage_changed` |
-| **Drive** | `drive.file.upload/update/delete`, `drive.folder.create/delete` |
-| **Invoice** | `invoice.create/update/delete/book/paid/send/cancel` |
-| **Cancellation Invoice** | `cancellation_invoice.create/update` |
-| **Payment** | `incoming_payment.create/delete` |
-| **Offer** | `offer.create/update/delete/send/book/cancel` |
-| **Organization** | `organization.update` |
-| **Pipeline** | `pipeline.create/update/delete` |
-| **Project** | `project.create/update/delete/archive` |
-| **Shift Plan** | `shift_plan.create/update/delete` |
-| **Task** | `task.create/update/delete/complete`, `task_board.create/delete` |
-| **Time Tracking** | `time_entry.create/update/delete`, `tracker.start/stop` |
-| **User** | `user.create/update/delete/archive/activate` |
+| **Absence** | `absence.create/delete/update` |
+| **Asset Group** | `asset_group.create/delete/update` |
+| **Asset Machine** | `asset_machine.create/delete/update` |
+| **Asset Material** | `asset_material.create/delete/update` |
+| **Asset Service** | `asset_service.create/delete/update` |
+| **Asset Subcontract** | `asset_subcontract.create/delete/update` |
+| **Asset Unit** | `asset_unit.create/delete/update` |
+| **Booking** | `booking.create/update` |
+| **Booking Event Type** | `booking_event_type.create/delete/update` |
+| **Booking Page** | `booking_page.create/delete/update` |
+| **Calendar** | `calendar.create/delete/update` |
+| **Calendar Event** | `calendar_event.create/delete/update` |
+| **Cancellation Invoice** | `cancellation_invoice.archive/create/restore/update` |
+| **Comment** | `comment.create/delete/update` |
+| **Company** | `company.archive/create/delete/restore/update` |
+| **Contact** | `contact.archive/create/delete/restore/update` |
+| **Deal** | `deal.create/delete/update` |
+| **Drive Share** | `drive_share.create/delete/update` |
+| **File** | `file.create/delete/update` |
+| **Folder** | `folder.create/delete/update` |
+| **Incoming Payment** | `incoming_payment.create` |
+| **Invoice** | `invoice.archive/create/delete/restore/update` |
+| **Offer** | `offer.archive/create/delete/restore/update` |
+| **Organization** | `organization.create/update` |
+| **Organization Branch** | `organization_branch.create/delete/update` |
+| **Organization Sector** | `organization_sector.create/delete/update` |
+| **Pipeline** | `pipeline.create/delete/restore/update` |
+| **Portfolio** | `portfolio.create/delete/update` |
+| **Project** | `project.archive/create/delete/restore/update` |
+| **Sales Tax Regulation** | `sales_tax_regulation.create/delete/update` |
+| **Shift Plan** | `shift_plan.create/delete/update` |
+| **Task** | `task.create/delete/update` |
+| **Task Board** | `task_board.archive/create/delete/restore/update` |
+| **Task Board Column** | `task_board_column.create/delete/update` |
+| **Tax Rate** | `tax_rate.create/delete/update` |
+| **Time Entry** | `time_entry.create/delete/update` |
+| **User** | `user.archive/create/delete/update` |
+| **Work Time** | `work_time.create/delete/update` |
 
 ## Workflow Templates
 
