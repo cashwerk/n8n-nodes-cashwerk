@@ -180,6 +180,50 @@
         ],
         "type": "object"
       },
+      "AddressWindowMmDTO": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "form": {
+            "enum": [
+              "A",
+              "B",
+              "CUSTOM"
+            ],
+            "type": "string"
+          },
+          "height": {
+            "maximum": 200,
+            "minimum": 10,
+            "type": "number"
+          },
+          "left": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          },
+          "top": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          },
+          "width": {
+            "maximum": 200,
+            "minimum": 10,
+            "type": "number"
+          }
+        },
+        "required": [
+          "enabled",
+          "form",
+          "top",
+          "left",
+          "width",
+          "height"
+        ],
+        "type": "object"
+      },
       "AdjustWorktimeDto": {
         "properties": {
           "amountHours": {
@@ -256,6 +300,39 @@
         "required": [
           "columnId",
           "index"
+        ],
+        "type": "object"
+      },
+      "AttachTimeEntriesDTO": {
+        "properties": {
+          "grouping": {
+            "description": "How entries are folded into lines",
+            "enum": [
+              "PER_ENTRY",
+              "PER_DAY",
+              "PER_USER",
+              "PER_USER_DAY",
+              "PER_CATEGORY",
+              "PER_TASK",
+              "SINGLE_LINE"
+            ],
+            "type": "string"
+          },
+          "rateOverrides": {
+            "description": "Rate overrides keyed by tracking id",
+            "type": "object"
+          },
+          "trackingIds": {
+            "description": "The time entries to bill",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "trackingIds"
         ],
         "type": "object"
       },
@@ -375,6 +452,25 @@
       },
       "CompanySector": {
         "properties": {},
+        "type": "object"
+      },
+      "ContentBoundsMmDTO": {
+        "properties": {
+          "contentBottom": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          },
+          "contentTop": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "contentTop",
+          "contentBottom"
+        ],
         "type": "object"
       },
       "ConvertGuestToContactDto": {
@@ -515,8 +611,32 @@
           "buyingPrice": {
             "type": "number"
           },
+          "calculation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NxLineCalculation"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
           "companyId": {
             "type": "number"
+          },
+          "costCategoryId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costCategoryOverride": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
+            "type": "string"
           },
           "customServiceNumber": {
             "type": "string"
@@ -559,10 +679,34 @@
           "buyingPrice": {
             "type": "number"
           },
+          "calculation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NxLineCalculation"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
           "companyId": {
             "type": "number"
           },
           "contractNumber": {
+            "type": "string"
+          },
+          "costCategoryId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costCategoryOverride": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
             "type": "string"
           },
           "customContractNumber": {
@@ -596,6 +740,76 @@
         "required": [
           "name",
           "unitId"
+        ],
+        "type": "object"
+      },
+      "CreateBillingChainMemberDTO": {
+        "properties": {
+          "amountNet": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "deliveryDetails": {
+            "$ref": "#/components/schemas/DeliveryDetailsDTO"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "footer": {
+            "type": "string"
+          },
+          "fromOffer": {
+            "type": "boolean"
+          },
+          "fromOfferLineIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "header": {
+            "type": "string"
+          },
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CreateInvoiceLineDTO"
+            },
+            "type": "array"
+          },
+          "progressPct": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "retentionPct": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "role": {
+            "enum": [
+              "AR",
+              "TR",
+              "KR",
+              "SR"
+            ],
+            "type": "string"
+          },
+          "taxRate": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "invoicingDate"
         ],
         "type": "object"
       },
@@ -872,6 +1086,40 @@
         ],
         "type": "object"
       },
+      "CreateChainAmendmentDTO": {
+        "properties": {
+          "effectiveDate": {
+            "description": "When the change took effect for the contract. Defaults to now.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Why the sum moves",
+            "enum": [
+              "SUPPLEMENT",
+              "REDUCTION",
+              "CORRECTION"
+            ],
+            "type": "string"
+          },
+          "netDelta": {
+            "description": "Net amount. Signed for a CORRECTION; a REDUCTION always subtracts.",
+            "type": "number"
+          },
+          "reason": {
+            "description": "Why the contract sum moves. Printed in the ledger and audited.",
+            "maxLength": 500,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "netDelta",
+          "reason"
+        ],
+        "type": "object"
+      },
       "CreateCommentDto": {
         "properties": {
           "content": {
@@ -888,6 +1136,9 @@
       },
       "CreateCompanyDto": {
         "properties": {
+          "acquisitionSource": {
+            "type": "string"
+          },
           "address": {
             "type": "object"
           },
@@ -996,6 +1247,9 @@
       },
       "CreateContactDto": {
         "properties": {
+          "acquisitionSource": {
+            "type": "string"
+          },
           "address": {
             "type": "object"
           },
@@ -1160,6 +1414,87 @@
         ],
         "type": "object"
       },
+      "CreateCostCategoryDTO": {
+        "properties": {
+          "color": {
+            "nullable": true,
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "type": "string"
+          },
+          "icon": {
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-]+$",
+            "type": "string"
+          },
+          "isDefaultForKind": {
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "kind"
+        ],
+        "type": "object"
+      },
+      "CreateCreditNoteDTO": {
+        "properties": {
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CreditNoteLineDTO"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "originalInvoiceId": {
+            "type": "number"
+          },
+          "reason": {
+            "enum": [
+              "CUSTOMER_REQUEST",
+              "BILLING_ERROR",
+              "GOODS_RETURNED",
+              "PRICING_ERROR",
+              "GOODWILL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "reasonDescription": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "required": [
+          "originalInvoiceId",
+          "reason",
+          "lines"
+        ],
+        "type": "object"
+      },
       "CreateDateOverrideDto": {
         "properties": {
           "date": {
@@ -1310,6 +1645,55 @@
         ],
         "type": "object"
       },
+      "CreateDeliveryNoteDTO": {
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/InvoicingCustomerDTO"
+          },
+          "deliveryDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deliveryDetails": {
+            "$ref": "#/components/schemas/DeliveryDetailsDTO"
+          },
+          "footer": {
+            "type": "string"
+          },
+          "from": {
+            "$ref": "#/components/schemas/DeliveryNoteSourceDTO"
+          },
+          "header": {
+            "type": "string"
+          },
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CreateInvoiceLineDTO"
+            },
+            "type": "array"
+          },
+          "linkingOptions": {
+            "$ref": "#/components/schemas/LinkingOptionsDTO"
+          },
+          "orderNumber": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "recipientName": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CreateDirectConversationDto": {
         "properties": {
           "targetUserId": {
@@ -1318,6 +1702,78 @@
         },
         "required": [
           "targetUserId"
+        ],
+        "type": "object"
+      },
+      "CreateDocumentLayoutDTO": {
+        "properties": {
+          "geometry": {
+            "$ref": "#/components/schemas/DocumentLayoutGeometryDTO"
+          },
+          "language": {
+            "enum": [
+              "de",
+              "en"
+            ],
+            "type": "string"
+          },
+          "letterheadFollowPagesMode": {
+            "enum": [
+              "SAME",
+              "BLANK",
+              "FILE"
+            ],
+            "type": "string"
+          },
+          "letterheadMode": {
+            "enum": [
+              "NONE",
+              "BEHIND"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "presetKey": {
+            "enum": [
+              "CLASSIC",
+              "MODERN",
+              "COMPACT",
+              "CONSTRUCTION",
+              "MINIMAL",
+              "ELEGANT",
+              "BOLD",
+              "TECHNICAL",
+              "CRAFT",
+              "NORDIC",
+              "CONTRACT"
+            ],
+            "type": "string"
+          },
+          "setAsDefault": {
+            "type": "boolean"
+          },
+          "sourceLayoutId": {
+            "type": "number"
+          },
+          "style": {
+            "$ref": "#/components/schemas/DocumentLayoutStyleDTO"
+          },
+          "suppressBuiltInFooter": {
+            "type": "boolean"
+          },
+          "suppressBuiltInHeader": {
+            "type": "boolean"
+          },
+          "textDefaults": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "name"
         ],
         "type": "object"
       },
@@ -1580,16 +2036,152 @@
         ],
         "type": "object"
       },
+      "CreateInvoiceFromDeliveryNotesDTO": {
+        "properties": {
+          "deliveryNoteIds": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pricing": {
+            "enum": [
+              "FROM_ASSET",
+              "FROM_SOURCE_OFFER",
+              "MANUAL"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "deliveryNoteIds",
+          "pricing"
+        ],
+        "type": "object"
+      },
+      "CreateInvoiceFromMeasurementSheetsDTO": {
+        "properties": {
+          "dueDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "measurementSheetIds": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "pricing": {
+            "enum": [
+              "FROM_ASSET",
+              "FROM_SOURCE_OFFER",
+              "MANUAL"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "measurementSheetIds",
+          "pricing"
+        ],
+        "type": "object"
+      },
+      "CreateInvoiceFromPerformanceRecordsDTO": {
+        "properties": {
+          "dueDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "performanceRecordIds": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "performanceRecordIds"
+        ],
+        "type": "object"
+      },
+      "CreateInvoiceFromProformaDTO": {
+        "properties": {
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "proformaInvoiceId": {
+            "type": "number"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "required": [
+          "proformaInvoiceId"
+        ],
+        "type": "object"
+      },
       "CreateInvoiceLineDTO": {
         "properties": {
           "assetId": {
             "type": "number"
+          },
+          "assetType": {
+            "enum": [
+              "SERVICE",
+              "SUBCONTRACT",
+              "MACHINE",
+              "MATERIAL"
+            ],
+            "type": "string"
+          },
+          "buyingPrice": {
+            "type": "number"
+          },
+          "calculation": {
+            "$ref": "#/components/schemas/NxLineCalculation"
           },
           "children": {
             "items": {
               "$ref": "#/components/schemas/CreateInvoiceLineDTO"
             },
             "type": "array"
+          },
+          "costCategory": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "costCategoryId": {
+            "nullable": true,
+            "type": "number"
           },
           "discount": {
             "$ref": "#/components/schemas/NxDiscountValue"
@@ -1599,6 +2191,17 @@
           },
           "longText": {
             "type": "string"
+          },
+          "measurementFormula": {
+            "maxLength": 500,
+            "nullable": true,
+            "type": "string"
+          },
+          "measurementLineIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
           },
           "position": {
             "type": "string"
@@ -1631,6 +2234,12 @@
           "total": {
             "type": "number"
           },
+          "trackingIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
           "unit": {
             "type": "string"
           }
@@ -1650,6 +2259,30 @@
         "properties": {
           "buyingPrice": {
             "type": "number"
+          },
+          "calculation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NxLineCalculation"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
+          "costCategoryId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costCategoryOverride": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
+            "type": "string"
           },
           "customMachineNumber": {
             "type": "string"
@@ -1702,6 +2335,30 @@
           "buyingPrice": {
             "type": "number"
           },
+          "calculation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NxLineCalculation"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
+          "costCategoryId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costCategoryOverride": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
           "customArticleNumber": {
             "type": "string"
           },
@@ -1742,6 +2399,107 @@
         ],
         "type": "object"
       },
+      "CreateMeasurementLineDTO": {
+        "properties": {
+          "assetId": {
+            "type": "number"
+          },
+          "assetType": {
+            "type": "string"
+          },
+          "formula": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "longText": {
+            "type": "string"
+          },
+          "position": {
+            "maxLength": 50,
+            "type": "string"
+          },
+          "positionType": {
+            "enum": [
+              "HEADER",
+              "NORMAL",
+              "ALTERNATIVE",
+              "REQUIREMENT",
+              "SUBTOTAL"
+            ],
+            "type": "string"
+          },
+          "quantity": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "shortText": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 50,
+            "type": "string"
+          }
+        },
+        "required": [
+          "shortText"
+        ],
+        "type": "object"
+      },
+      "CreateMeasurementSheetDTO": {
+        "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/InvoicingCustomerDTO"
+          },
+          "footer": {
+            "type": "string"
+          },
+          "header": {
+            "type": "string"
+          },
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CreateMeasurementLineDTO"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array"
+          },
+          "linkingOptions": {
+            "$ref": "#/components/schemas/LinkingOptionsDTO"
+          },
+          "measuredOn": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "measurementSketch": {
+            "type": "object"
+          },
+          "orderNumber": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "recipientName": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "type": "object"
+      },
       "CreateOfferDTO": {
         "properties": {
           "customer": {
@@ -1773,6 +2531,82 @@
               "$ref": "#/components/schemas/NxDiscountValue"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CreateOrderConfirmationDTO": {
+        "properties": {
+          "deliveryDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "offerId": {
+            "type": "number"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "required": [
+          "offerId"
+        ],
+        "type": "object"
+      },
+      "CreatePerformanceRecordDTO": {
+        "properties": {
+          "billingMode": {
+            "enum": [
+              "REGIE",
+              "FLAT"
+            ],
+            "type": "string"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/InvoicingCustomerDTO"
+          },
+          "footer": {
+            "type": "string"
+          },
+          "header": {
+            "type": "string"
+          },
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "linkingOptions": {
+            "$ref": "#/components/schemas/LinkingOptionsDTO"
+          },
+          "materialLines": {
+            "items": {
+              "$ref": "#/components/schemas/CreateInvoiceLineDTO"
+            },
+            "maxItems": 200,
+            "type": "array"
+          },
+          "orderNumber": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "performanceDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recipientName": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "showPrices": {
+            "type": "boolean"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "work": {
+            "$ref": "#/components/schemas/PerformanceWorkSelectionDTO"
           }
         },
         "type": "object"
@@ -1859,6 +2693,25 @@
         },
         "required": [
           "name"
+        ],
+        "type": "object"
+      },
+      "CreateProformaInvoiceDTO": {
+        "properties": {
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "offerId": {
+            "type": "number"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "required": [
+          "offerId"
         ],
         "type": "object"
       },
@@ -1982,6 +2835,120 @@
         ],
         "type": "object"
       },
+      "CreateRecurringScheduleDTO": {
+        "properties": {
+          "automation": {
+            "description": "DRAFT_ONLY (default), AUTO_BOOK or AUTO_BOOK_AND_SEND",
+            "enum": [
+              "DRAFT_ONLY",
+              "AUTO_BOOK",
+              "AUTO_BOOK_AND_SEND"
+            ],
+            "type": "string"
+          },
+          "billingMode": {
+            "description": "ADVANCE bills the period starting at the issue date, ARREARS the one ending at it",
+            "enum": [
+              "ADVANCE",
+              "ARREARS"
+            ],
+            "type": "string"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/InvoicingCustomerDTO"
+          },
+          "dueDays": {
+            "description": "Payment term of each generated invoice, in days",
+            "maximum": 365,
+            "minimum": 0,
+            "type": "number"
+          },
+          "footer": {
+            "type": "string"
+          },
+          "fromInvoiceId": {
+            "description": "Turn this existing invoice into the template of a new series",
+            "type": "number"
+          },
+          "header": {
+            "type": "string"
+          },
+          "includeUninvoicedTime": {
+            "description": "Append the period's uninvoiced tracked time of the template's project to each instance (ARREARS only)",
+            "type": "boolean"
+          },
+          "indexationMonth": {
+            "description": "Month the uplift is applied in, 1-12",
+            "maximum": 12,
+            "minimum": 1,
+            "type": "number"
+          },
+          "indexationPct": {
+            "description": "Annual uplift in percent applied to the template prices",
+            "maximum": 50,
+            "minimum": -50,
+            "type": "number"
+          },
+          "lines": {
+            "description": "Lines of the template; every generated invoice repeats them",
+            "items": {
+              "$ref": "#/components/schemas/CreateInvoiceLineDTO"
+            },
+            "type": "array"
+          },
+          "mail": {
+            "$ref": "#/components/schemas/RecurringMailSettingsDTO"
+          },
+          "maxCatchUp": {
+            "description": "How many missed occurrences one catch-up may still bill",
+            "maximum": 24,
+            "minimum": 0,
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "recurrence": {
+            "$ref": "#/components/schemas/RecurrenceRuleDTO"
+          },
+          "startPaused": {
+            "type": "boolean"
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timezone": {
+            "example": "Europe/Berlin",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "title": {
+            "description": "Name of the series, e.g. \"Wartungsvertrag Heizung\"",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "usageTimeGrouping": {
+            "description": "How appended hours fold into lines",
+            "enum": [
+              "PER_ENTRY",
+              "PER_DAY",
+              "PER_USER",
+              "PER_USER_DAY",
+              "PER_CATEGORY",
+              "PER_TASK",
+              "SINGLE_LINE"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "recurrence",
+          "startsAt"
+        ],
+        "type": "object"
+      },
       "CreateSalesTaxRegulationDTO": {
         "properties": {
           "name": {
@@ -1989,6 +2956,16 @@
           },
           "rate": {
             "type": "number"
+          },
+          "regime": {
+            "enum": [
+              "STANDARD",
+              "REVERSE_CHARGE_13B",
+              "INTRA_COMMUNITY",
+              "SMALL_BUSINESS_19",
+              "EXEMPT"
+            ],
+            "type": "string"
           },
           "regulationText": {
             "type": "string"
@@ -2131,6 +3108,47 @@
         ],
         "type": "object"
       },
+      "CreateSupplementOfferDTO": {
+        "properties": {
+          "footer": {
+            "type": "string"
+          },
+          "fromOfferLineIds": {
+            "description": "Contract positions to start from, by line id.",
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "header": {
+            "description": "What the supplement is about; printed under the header.",
+            "type": "string"
+          },
+          "lines": {
+            "description": "New positions.",
+            "items": {
+              "$ref": "#/components/schemas/CreateInvoiceLineDTO"
+            },
+            "type": "array"
+          },
+          "offerDate": {
+            "description": "Document date. Defaults to today.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "offerDueDate": {
+            "description": "How long the supplement stands.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "title": {
+            "description": "Title. Defaults to \"Nachtrag <n> zu <contract>\".",
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "CreateTagDto": {
         "properties": {
           "color": {
@@ -2254,6 +3272,11 @@
         "properties": {
           "name": {
             "type": "string"
+          },
+          "serviceAssetId": {
+            "description": "The service article this category bills as",
+            "nullable": true,
+            "type": "number"
           }
         },
         "required": [
@@ -2274,6 +3297,10 @@
           },
           "billable": {
             "type": "boolean"
+          },
+          "billingRateOverride": {
+            "nullable": true,
+            "type": "number"
           },
           "categoryId": {
             "type": "number"
@@ -2572,6 +3599,51 @@
         ],
         "type": "object"
       },
+      "CreditNoteLineDTO": {
+        "properties": {
+          "assetId": {
+            "type": "number"
+          },
+          "assetType": {
+            "enum": [
+              "SERVICE",
+              "SUBCONTRACT",
+              "MACHINE",
+              "MATERIAL"
+            ],
+            "type": "string"
+          },
+          "fromLineId": {
+            "type": "number"
+          },
+          "longText": {
+            "type": "string"
+          },
+          "priceBase": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "quantity": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "shortText": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "taxRate": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "quantity"
+        ],
+        "type": "object"
+      },
       "DateOverrideItemDto": {
         "properties": {
           "date": {
@@ -2790,6 +3862,208 @@
         ],
         "type": "object"
       },
+      "DeliveryNoteSourceDTO": {
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "type": {
+            "enum": [
+              "INVOICE",
+              "PARTIAL_INVOICE",
+              "CREDIT_NOTE",
+              "CANCELLATION_INVOICE",
+              "FINAL_INVOICE",
+              "DELIVERY_NOTE",
+              "OFFER",
+              "ORDER_CONFIRMATION",
+              "PROGRESS_INVOICE",
+              "CUMULATIVE_INVOICE",
+              "RECURRING_TEMPLATE",
+              "PROFORMA_INVOICE",
+              "PERFORMANCE_RECORD",
+              "MEASUREMENT_SHEET"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "DocumentLayoutAreasDTO": {
+        "properties": {
+          "infoBlock": {
+            "type": "boolean"
+          },
+          "logo": {
+            "type": "boolean"
+          },
+          "pageNumbers": {
+            "type": "boolean"
+          },
+          "senderLine": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "logo",
+          "senderLine",
+          "infoBlock",
+          "pageNumbers"
+        ],
+        "type": "object"
+      },
+      "DocumentLayoutGeometryDTO": {
+        "properties": {
+          "addressWindow": {
+            "$ref": "#/components/schemas/AddressWindowMmDTO"
+          },
+          "firstPage": {
+            "$ref": "#/components/schemas/ContentBoundsMmDTO"
+          },
+          "foldMarks": {
+            "type": "boolean"
+          },
+          "followPages": {
+            "$ref": "#/components/schemas/ContentBoundsMmDTO"
+          },
+          "infoBlock": {
+            "$ref": "#/components/schemas/InfoBlockMmDTO"
+          },
+          "logoBox": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LogoBoxMmDTO"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
+          "margins": {
+            "$ref": "#/components/schemas/MarginsMmDTO"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageGeometryDTO"
+          },
+          "punchMark": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "page",
+          "margins",
+          "firstPage",
+          "followPages",
+          "addressWindow",
+          "infoBlock",
+          "foldMarks",
+          "punchMark"
+        ],
+        "type": "object"
+      },
+      "DocumentLayoutStyleDTO": {
+        "properties": {
+          "accentColor": {
+            "nullable": true,
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "type": "string"
+          },
+          "areas": {
+            "$ref": "#/components/schemas/DocumentLayoutAreasDTO"
+          },
+          "baseFontSizePt": {
+            "maximum": 14,
+            "minimum": 5,
+            "type": "number"
+          },
+          "fontFamily": {
+            "enum": [
+              "INTER",
+              "ROBOTO",
+              "SOURCE_SANS",
+              "HELVETICA",
+              "OPEN_SANS",
+              "LATO",
+              "MONTSERRAT",
+              "NUNITO_SANS",
+              "WORK_SANS",
+              "IBM_PLEX_SANS",
+              "FIRA_SANS",
+              "POPPINS",
+              "PT_SANS",
+              "MERRIWEATHER",
+              "ROBOTO_SLAB",
+              "LORA"
+            ],
+            "type": "string"
+          },
+          "footerBlocks": {
+            "items": {
+              "enum": [
+                "SENDER",
+                "CONTACT",
+                "MANAGEMENT",
+                "REGISTER",
+                "BANK",
+                "WEB",
+                "CUSTOM"
+              ],
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "footerColumns": {
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "number"
+          },
+          "footerCustomText": {
+            "maxLength": 1000,
+            "nullable": true,
+            "type": "string"
+          },
+          "logoHeightMm": {
+            "maximum": 60,
+            "minimum": 5,
+            "type": "number"
+          },
+          "logoPlacement": {
+            "enum": [
+              "LEFT",
+              "RIGHT",
+              "CENTER",
+              "NONE"
+            ],
+            "type": "string"
+          },
+          "tableStyle": {
+            "enum": [
+              "LINES",
+              "ZEBRA",
+              "PLAIN"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "fontFamily",
+          "baseFontSizePt",
+          "accentColor",
+          "logoPlacement",
+          "logoHeightMm",
+          "tableStyle",
+          "footerColumns"
+        ],
+        "type": "object"
+      },
       "EditMessageDto": {
         "properties": {
           "content": {
@@ -2799,6 +4073,19 @@
         },
         "required": [
           "content"
+        ],
+        "type": "object"
+      },
+      "EnsureProjectConversationDto": {
+        "properties": {
+          "projectId": {
+            "description": "The project whose chat should be opened, created on first use",
+            "minimum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "projectId"
         ],
         "type": "object"
       },
@@ -2936,6 +4223,10 @@
           "name": {
             "type": "string"
           },
+          "offerTypeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
           "organizationId": {
             "type": "number"
           },
@@ -3042,6 +4333,10 @@
           "taxNumber": {
             "type": "string"
           },
+          "typeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
           "typeMode": {
             "enum": [
               "include",
@@ -3082,6 +4377,9 @@
           },
           "website": {
             "type": "string"
+          },
+          "withoutProject": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -3192,6 +4490,10 @@
             "type": "boolean"
           },
           "lastName": {
+            "type": "string"
+          },
+          "offerTypeFilter": {
+            "nullable": true,
             "type": "string"
           },
           "organizationId": {
@@ -3305,6 +4607,10 @@
           "title": {
             "type": "string"
           },
+          "typeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
           "typeMode": {
             "enum": [
               "include",
@@ -3341,6 +4647,9 @@
           },
           "website": {
             "type": "string"
+          },
+          "withoutProject": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -3547,6 +4856,26 @@
         },
         "type": "object"
       },
+      "HolidaySurchargeDto": {
+        "properties": {
+          "pct": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          },
+          "specialDays": {
+            "description": "Days that pay more than an ordinary holiday",
+            "items": {
+              "$ref": "#/components/schemas/SpecialDaySurchargeDto"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "pct"
+        ],
+        "type": "object"
+      },
       "HostConfigDto": {
         "properties": {
           "isRequired": {
@@ -3563,6 +4892,31 @@
         },
         "required": [
           "userId"
+        ],
+        "type": "object"
+      },
+      "InfoBlockMmDTO": {
+        "properties": {
+          "right": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          },
+          "top": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          },
+          "width": {
+            "maximum": 200,
+            "minimum": 20,
+            "type": "number"
+          }
+        },
+        "required": [
+          "top",
+          "right",
+          "width"
         ],
         "type": "object"
       },
@@ -3698,7 +5052,14 @@
               "CANCELLATION_INVOICE",
               "FINAL_INVOICE",
               "DELIVERY_NOTE",
-              "OFFER"
+              "OFFER",
+              "ORDER_CONFIRMATION",
+              "PROGRESS_INVOICE",
+              "CUMULATIVE_INVOICE",
+              "RECURRING_TEMPLATE",
+              "PROFORMA_INVOICE",
+              "PERFORMANCE_RECORD",
+              "MEASUREMENT_SHEET"
             ],
             "type": "string"
           }
@@ -3719,6 +5080,31 @@
         },
         "required": [
           "paymentDate"
+        ],
+        "type": "object"
+      },
+      "InvoicePaymentSummaryDto": {
+        "properties": {
+          "credited": {
+            "description": "Gross of the booked credit notes of the invoice, as a positive number",
+            "example": 1975.4,
+            "type": "number"
+          },
+          "open": {
+            "description": "Invoice gross minus paid minus credited, never below 0",
+            "example": 333.2,
+            "type": "number"
+          },
+          "total": {
+            "description": "Gross amount received on the invoice",
+            "example": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "total",
+          "credited",
+          "open"
         ],
         "type": "object"
       },
@@ -3755,9 +5141,63 @@
           }
         },
         "required": [
-          "clientType",
-          "billingAddress"
+          "clientType"
         ],
+        "type": "object"
+      },
+      "LaborSurchargePolicyDto": {
+        "properties": {
+          "holiday": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HolidaySurchargeDto"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
+          "night": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NightSurchargeDto"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
+          "overtime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OvertimeSurchargeDto"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
+          "saturday": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SaturdaySurchargeDto"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
+          "stack": {
+            "description": "Overlapping premiums add up instead of the highest winning (D-L8)",
+            "example": false,
+            "type": "boolean"
+          },
+          "sunday": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PctSurchargeDto"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          }
+        },
         "type": "object"
       },
       "LinkEventAttachmentDto": {
@@ -3792,6 +5232,99 @@
         },
         "type": "object"
       },
+      "LogoBoxMmDTO": {
+        "properties": {
+          "height": {
+            "maximum": 100,
+            "minimum": 5,
+            "type": "number"
+          },
+          "left": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          },
+          "top": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          },
+          "width": {
+            "maximum": 200,
+            "minimum": 5,
+            "type": "number"
+          }
+        },
+        "required": [
+          "top",
+          "left",
+          "width",
+          "height"
+        ],
+        "type": "object"
+      },
+      "MarginsMmDTO": {
+        "properties": {
+          "bottom": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "left": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "right": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "top": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "top",
+          "right",
+          "bottom",
+          "left"
+        ],
+        "type": "object"
+      },
+      "MarkDeliveredDTO": {
+        "properties": {
+          "deliveredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "recipientName": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "signatureDataUrl": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MeasurementLineRequestDTO": {
+        "properties": {
+          "measurementLineId": {
+            "type": "number"
+          },
+          "quantity": {
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "measurementLineId"
+        ],
+        "type": "object"
+      },
       "MoveDealStageRequestDTO": {
         "properties": {
           "lostReason": {
@@ -3823,6 +5356,32 @@
         ],
         "type": "object"
       },
+      "NightSurchargeDto": {
+        "properties": {
+          "fromHour": {
+            "description": "Local hour the night window opens (0-23)",
+            "example": 20,
+            "maximum": 23,
+            "minimum": 0,
+            "type": "number"
+          },
+          "pct": {
+            "description": "Premium in percent",
+            "example": 25,
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          },
+          "toHour": {
+            "description": "Local hour it closes; smaller than fromHour wraps midnight",
+            "example": 6,
+            "maximum": 23,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "NxAssetGroup": {
         "properties": {},
         "type": "object"
@@ -3836,6 +5395,10 @@
         "type": "object"
       },
       "NxDiscountValue": {
+        "properties": {},
+        "type": "object"
+      },
+      "NxLineCalculation": {
         "properties": {},
         "type": "object"
       },
@@ -3886,6 +5449,14 @@
           "offerNumber": {
             "type": "string"
           },
+          "offerType": {
+            "enum": [
+              "OFFER",
+              "COST_ESTIMATE",
+              "SUPPLEMENT"
+            ],
+            "type": "string"
+          },
           "orderNumber": {
             "type": "string"
           },
@@ -3901,7 +5472,14 @@
               "CANCELLATION_INVOICE",
               "FINAL_INVOICE",
               "DELIVERY_NOTE",
-              "OFFER"
+              "OFFER",
+              "ORDER_CONFIRMATION",
+              "PROGRESS_INVOICE",
+              "CUMULATIVE_INVOICE",
+              "RECURRING_TEMPLATE",
+              "PROFORMA_INVOICE",
+              "PERFORMANCE_RECORD",
+              "MEASUREMENT_SHEET"
             ],
             "type": "string"
           }
@@ -3914,8 +5492,93 @@
         ],
         "type": "object"
       },
+      "OpenBillingChainDTO": {
+        "properties": {
+          "constructionFlag": {
+            "type": "boolean"
+          },
+          "consumerConstructionContract": {
+            "type": "boolean"
+          },
+          "contractNumber": {
+            "type": "string"
+          },
+          "contractSumNet": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "mode": {
+            "enum": [
+              "SEQUENTIAL",
+              "CUMULATIVE"
+            ],
+            "type": "string"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "retentionBase": {
+            "enum": [
+              "CONTRACT_GROSS",
+              "BILLED_GROSS"
+            ],
+            "type": "string"
+          },
+          "retentionDueDate": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "retentionExchangeAllowed": {
+            "type": "boolean"
+          },
+          "retentionPct": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "sourceOfferId": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "type": "object"
+      },
+      "OvertimeSurchargeDto": {
+        "properties": {
+          "afterDailyHours": {
+            "description": "Hours per day after which the premium applies; absent falls back to the contract Soll",
+            "maximum": 24,
+            "minimum": 0,
+            "type": "number"
+          },
+          "afterWeeklyHours": {
+            "description": "Hours per week after which the premium applies",
+            "maximum": 168,
+            "minimum": 0,
+            "type": "number"
+          },
+          "pct": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "pct"
+        ],
+        "type": "object"
+      },
       "PDFOptionsDTO": {
         "properties": {
+          "groupByCategory": {
+            "type": "boolean"
+          },
           "hideDiscount": {
             "type": "boolean"
           },
@@ -3928,8 +5591,24 @@
           "hideLongText": {
             "type": "boolean"
           },
+          "language": {
+            "enum": [
+              "de",
+              "en",
+              null
+            ],
+            "nullable": true,
+            "type": "string"
+          },
           "layout": {
             "$ref": "#/components/schemas/NxPDFLayout"
+          },
+          "layoutId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "showLaborShare": {
+            "type": "boolean"
           },
           "showQRCode": {
             "type": "boolean"
@@ -3938,6 +5617,31 @@
             "type": "boolean"
           }
         },
+        "type": "object"
+      },
+      "PageGeometryDTO": {
+        "properties": {
+          "format": {
+            "enum": [
+              "A4",
+              "A3",
+              "A5",
+              "LETTER"
+            ],
+            "type": "string"
+          },
+          "orientation": {
+            "enum": [
+              "portrait",
+              "landscape"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "format",
+          "orientation"
+        ],
         "type": "object"
       },
       "PatchCancellationInvoiceDTO": {
@@ -3975,6 +5679,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "measurementSketch": {
+            "nullable": true,
+            "type": "object"
+          },
           "netGross": {
             "enum": [
               "net",
@@ -3997,7 +5705,14 @@
               "CANCELLATION_INVOICE",
               "FINAL_INVOICE",
               "DELIVERY_NOTE",
-              "OFFER"
+              "OFFER",
+              "ORDER_CONFIRMATION",
+              "PROGRESS_INVOICE",
+              "CUMULATIVE_INVOICE",
+              "RECURRING_TEMPLATE",
+              "PROFORMA_INVOICE",
+              "PERFORMANCE_RECORD",
+              "MEASUREMENT_SHEET"
             ],
             "type": "string"
           }
@@ -4039,6 +5754,14 @@
           "offerNumber": {
             "type": "string"
           },
+          "offerType": {
+            "enum": [
+              "OFFER",
+              "COST_ESTIMATE",
+              "SUPPLEMENT"
+            ],
+            "type": "string"
+          },
           "orderNumber": {
             "type": "string"
           },
@@ -4054,7 +5777,14 @@
               "CANCELLATION_INVOICE",
               "FINAL_INVOICE",
               "DELIVERY_NOTE",
-              "OFFER"
+              "OFFER",
+              "ORDER_CONFIRMATION",
+              "PROGRESS_INVOICE",
+              "CUMULATIVE_INVOICE",
+              "RECURRING_TEMPLATE",
+              "PROFORMA_INVOICE",
+              "PERFORMANCE_RECORD",
+              "MEASUREMENT_SHEET"
             ],
             "type": "string"
           }
@@ -4136,6 +5866,67 @@
         ],
         "type": "object"
       },
+      "PctSurchargeDto": {
+        "properties": {
+          "pct": {
+            "description": "Premium in percent",
+            "example": 50,
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceWorkSelectionDTO": {
+        "properties": {
+          "from": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "grouping": {
+            "enum": [
+              "PER_ENTRY",
+              "PER_DAY",
+              "PER_USER",
+              "PER_USER_DAY",
+              "PER_CATEGORY",
+              "PER_TASK",
+              "SINGLE_LINE"
+            ],
+            "type": "string"
+          },
+          "includeAlreadyRecorded": {
+            "type": "boolean"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "taskId": {
+            "type": "number"
+          },
+          "to": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "trackingIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "userIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "from"
+        ],
+        "type": "object"
+      },
       "PipelineSettingsDto": {
         "properties": {
           "defaultStageId": {
@@ -4189,6 +5980,132 @@
           "statusId",
           "progress",
           "order"
+        ],
+        "type": "object"
+      },
+      "PreviewMeasurementLinesDTO": {
+        "properties": {
+          "pricing": {
+            "enum": [
+              "FROM_ASSET",
+              "FROM_SOURCE_OFFER",
+              "MANUAL"
+            ],
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/MeasurementLineRequestDTO"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows",
+          "pricing"
+        ],
+        "type": "object"
+      },
+      "PreviewMeasurementQuantitiesDTO": {
+        "properties": {
+          "measurementSheetIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "projectId": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PreviewPerformanceWorkDTO": {
+        "properties": {
+          "excludeRecordId": {
+            "type": "number"
+          },
+          "from": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "grouping": {
+            "enum": [
+              "PER_ENTRY",
+              "PER_DAY",
+              "PER_USER",
+              "PER_USER_DAY",
+              "PER_CATEGORY",
+              "PER_TASK",
+              "SINGLE_LINE"
+            ],
+            "type": "string"
+          },
+          "includeAlreadyRecorded": {
+            "type": "boolean"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "taskId": {
+            "type": "number"
+          },
+          "to": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "userIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "from"
+        ],
+        "type": "object"
+      },
+      "PreviewRecurringDraftDTO": {
+        "properties": {
+          "billingMode": {
+            "enum": [
+              "ADVANCE",
+              "ARREARS"
+            ],
+            "type": "string"
+          },
+          "count": {
+            "maximum": 60,
+            "minimum": 1,
+            "type": "number"
+          },
+          "dueDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "number"
+          },
+          "fromInvoiceId": {
+            "type": "number"
+          },
+          "recurrence": {
+            "$ref": "#/components/schemas/RecurrenceRuleDTO"
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timezone": {
+            "example": "Europe/Berlin",
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": [
+          "recurrence",
+          "startsAt"
         ],
         "type": "object"
       },
@@ -4328,6 +6245,10 @@
           "name": {
             "type": "string"
           },
+          "offerTypeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
           "organizationId": {
             "type": "number"
           },
@@ -4414,6 +6335,10 @@
           "taxNumber": {
             "type": "string"
           },
+          "typeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
           "types": {
             "items": {
               "enum": [
@@ -4447,6 +6372,9 @@
           },
           "website": {
             "type": "string"
+          },
+          "withoutProject": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -4540,6 +6468,10 @@
           "lastName": {
             "type": "string"
           },
+          "offerTypeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
           "organizationId": {
             "type": "number"
           },
@@ -4631,6 +6563,10 @@
           "title": {
             "type": "string"
           },
+          "typeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
           "types": {
             "items": {
               "enum": [
@@ -4660,6 +6596,9 @@
           },
           "website": {
             "type": "string"
+          },
+          "withoutProject": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -4720,6 +6659,104 @@
         },
         "type": "object"
       },
+      "RecurrenceRuleDTO": {
+        "properties": {
+          "count": {
+            "description": "Number of invoices to issue, when endType is COUNT",
+            "maximum": 999,
+            "minimum": 1,
+            "type": "number"
+          },
+          "endType": {
+            "enum": [
+              "NEVER",
+              "UNTIL",
+              "COUNT"
+            ],
+            "type": "string"
+          },
+          "frequency": {
+            "description": "DAILY, WEEKLY, MONTHLY or YEARLY",
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ],
+            "type": "string"
+          },
+          "interval": {
+            "description": "Repeat every n periods (1 = every period, 3 = quarterly for MONTHLY)",
+            "maximum": 99,
+            "minimum": 1,
+            "type": "number"
+          },
+          "until": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "weekdays": {
+            "description": "Weekly only: weekdays, 0 = Sunday",
+            "items": {
+              "maximum": 6,
+              "minimum": 0,
+              "type": "number"
+            },
+            "maxItems": 7,
+            "type": "array"
+          }
+        },
+        "required": [
+          "frequency"
+        ],
+        "type": "object"
+      },
+      "RecurringMailSettingsDTO": {
+        "properties": {
+          "bcc": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "cc": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "connectionId": {
+            "description": "Id of the mail connection the invoice is sent through",
+            "type": "number"
+          },
+          "message": {
+            "description": "Standing cover note prepended to every generated mail",
+            "maxLength": 4000,
+            "type": "string"
+          },
+          "provider": {
+            "maxLength": 40,
+            "type": "string"
+          },
+          "recipientEmail": {
+            "format": "email",
+            "type": "string"
+          },
+          "recipientName": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "senderUserId": {
+            "description": "User the mail is sent as; defaults to the creator",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
       "RemoveUserFromBoardDto": {
         "properties": {
           "userId": {
@@ -4742,6 +6779,25 @@
         },
         "required": [
           "stageOrders"
+        ],
+        "type": "object"
+      },
+      "SaturdaySurchargeDto": {
+        "properties": {
+          "fromHour": {
+            "description": "Only from this local hour on; absent means the whole day",
+            "maximum": 23,
+            "minimum": 0,
+            "type": "number"
+          },
+          "pct": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "pct"
         ],
         "type": "object"
       },
@@ -4974,6 +7030,25 @@
         ],
         "type": "object"
       },
+      "SpecialDaySurchargeDto": {
+        "properties": {
+          "date": {
+            "description": "MM-DD for a yearly date, YYYY-MM-DD for a one-off",
+            "example": "12-24",
+            "pattern": "^(\\d{4}-)?\\d{2}-\\d{2}$",
+            "type": "string"
+          },
+          "pct": {
+            "maximum": 500,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "pct"
+        ],
+        "type": "object"
+      },
       "SplitEventSeriesDto": {
         "properties": {
           "splitAt": {
@@ -5070,6 +7145,10 @@
           "includeArchived": {
             "type": "boolean"
           },
+          "offerTypeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
           "organizationId": {
             "type": "number"
           },
@@ -5118,11 +7197,18 @@
             "minimum": 1,
             "type": "number"
           },
+          "typeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
           "userIds": {
             "items": {
               "type": "number"
             },
             "type": "array"
+          },
+          "withoutProject": {
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -5276,8 +7362,32 @@
           "buyingPrice": {
             "type": "number"
           },
+          "calculation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NxLineCalculation"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
           "companyId": {
             "type": "number"
+          },
+          "costCategoryId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costCategoryOverride": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
+            "type": "string"
           },
           "customServiceNumber": {
             "type": "string"
@@ -5317,10 +7427,34 @@
           "buyingPrice": {
             "type": "number"
           },
+          "calculation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NxLineCalculation"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
           "companyId": {
             "type": "number"
           },
           "contractNumber": {
+            "type": "string"
+          },
+          "costCategoryId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costCategoryOverride": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
             "type": "string"
           },
           "customContractNumber": {
@@ -5655,6 +7789,11 @@
           "companySize": {
             "type": "string"
           },
+          "defaultBillingRate": {
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
           "email": {
             "type": "string"
           },
@@ -5894,6 +8033,40 @@
         },
         "type": "object"
       },
+      "UpdateCostCategoryDTO": {
+        "properties": {
+          "color": {
+            "nullable": true,
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "type": "string"
+          },
+          "icon": {
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-]+$",
+            "type": "string"
+          },
+          "isDefaultForKind": {
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "UpdateDealLinesBodyDto": {
         "properties": {
           "lines": {
@@ -5978,6 +8151,53 @@
           },
           "title": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateDocumentLayoutDTO": {
+        "properties": {
+          "geometry": {
+            "$ref": "#/components/schemas/DocumentLayoutGeometryDTO"
+          },
+          "language": {
+            "enum": [
+              "de",
+              "en"
+            ],
+            "type": "string"
+          },
+          "letterheadFollowPagesMode": {
+            "enum": [
+              "SAME",
+              "BLANK",
+              "FILE"
+            ],
+            "type": "string"
+          },
+          "letterheadMode": {
+            "enum": [
+              "NONE",
+              "BEHIND"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "style": {
+            "$ref": "#/components/schemas/DocumentLayoutStyleDTO"
+          },
+          "suppressBuiltInFooter": {
+            "type": "boolean"
+          },
+          "suppressBuiltInHeader": {
+            "type": "boolean"
+          },
+          "textDefaults": {
+            "type": "object"
           }
         },
         "type": "object"
@@ -6264,6 +8484,30 @@
           "buyingPrice": {
             "type": "number"
           },
+          "calculation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NxLineCalculation"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
+          "costCategoryId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costCategoryOverride": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
+            "type": "string"
+          },
           "customMachineNumber": {
             "type": "string"
           },
@@ -6313,6 +8557,30 @@
           },
           "buyingPrice": {
             "type": "number"
+          },
+          "calculation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NxLineCalculation"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
+          },
+          "costCategoryId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "costCategoryOverride": {
+            "enum": [
+              "MATERIAL",
+              "LABOR",
+              "MACHINE",
+              "SUBCONTRACT",
+              "TRAVEL",
+              "OTHER"
+            ],
+            "type": "string"
           },
           "customArticleNumber": {
             "type": "string"
@@ -6497,11 +8765,22 @@
           "cooName": {
             "type": "string"
           },
+          "costEstimateTolerancePct": {
+            "maximum": 100,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
           "currency": {
             "items": {
               "type": "string"
             },
             "type": "array"
+          },
+          "defaultBillingRate": {
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
           },
           "defaultNetGross": {
             "enum": [
@@ -6517,6 +8796,20 @@
             "type": "array"
           },
           "headQuarters": {
+            "type": "object"
+          },
+          "laborRateMarkupFactor": {
+            "minimum": 1.01,
+            "nullable": true,
+            "type": "number"
+          },
+          "laborSurchargePolicy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LaborSurchargePolicyDto"
+              }
+            ],
+            "nullable": true,
             "type": "object"
           },
           "leitwegId": {
@@ -6559,6 +8852,12 @@
           "trackingCorrectionThresholdHours": {
             "maximum": 23,
             "minimum": 1,
+            "type": "number"
+          },
+          "uninvoicedReminderDays": {
+            "maximum": 365,
+            "minimum": 1,
+            "nullable": true,
             "type": "number"
           },
           "vatId": {
@@ -6794,6 +9093,10 @@
             },
             "type": "array"
           },
+          "billingRates": {
+            "nullable": true,
+            "type": "object"
+          },
           "budget": {
             "type": "number"
           },
@@ -6819,6 +9122,11 @@
           },
           "customAddress": {
             "$ref": "#/components/schemas/CreateAddressDto"
+          },
+          "defaultBillingRate": {
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
           },
           "description": {
             "type": "string"
@@ -6886,6 +9194,93 @@
         "required": [
           "phone"
         ],
+        "type": "object"
+      },
+      "UpdateRecurringScheduleDTO": {
+        "properties": {
+          "automation": {
+            "enum": [
+              "DRAFT_ONLY",
+              "AUTO_BOOK",
+              "AUTO_BOOK_AND_SEND"
+            ],
+            "type": "string"
+          },
+          "billingMode": {
+            "enum": [
+              "ADVANCE",
+              "ARREARS"
+            ],
+            "type": "string"
+          },
+          "dueDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "number"
+          },
+          "includeUninvoicedTime": {
+            "description": "Append the period's uninvoiced tracked time (ARREARS only)",
+            "type": "boolean"
+          },
+          "indexationMonth": {
+            "maximum": 12,
+            "minimum": 1,
+            "type": "number"
+          },
+          "indexationPct": {
+            "maximum": 50,
+            "minimum": -50,
+            "type": "number"
+          },
+          "lines": {
+            "description": "Replaces the template lines; affects future invoices only",
+            "items": {
+              "$ref": "#/components/schemas/CreateInvoiceLineDTO"
+            },
+            "type": "array"
+          },
+          "mail": {
+            "$ref": "#/components/schemas/RecurringMailSettingsDTO"
+          },
+          "maxCatchUp": {
+            "maximum": 24,
+            "minimum": 0,
+            "type": "number"
+          },
+          "recurrence": {
+            "$ref": "#/components/schemas/RecurrenceRuleDTO"
+          },
+          "startsAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "templateTitle": {
+            "description": "Title of the generated invoices",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "usageTimeGrouping": {
+            "enum": [
+              "PER_ENTRY",
+              "PER_DAY",
+              "PER_USER",
+              "PER_USER_DAY",
+              "PER_CATEGORY",
+              "PER_TASK",
+              "SINGLE_LINE"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UpdateShareAccessDto": {
@@ -7116,6 +9511,11 @@
         "properties": {
           "name": {
             "type": "string"
+          },
+          "serviceAssetId": {
+            "description": "The service article this category bills as; null unlinks it",
+            "nullable": true,
+            "type": "number"
           }
         },
         "type": "object"
@@ -7133,6 +9533,10 @@
           },
           "billable": {
             "type": "boolean"
+          },
+          "billingRateOverride": {
+            "nullable": true,
+            "type": "number"
           },
           "categoryId": {
             "type": "number"
@@ -7875,6 +10279,32 @@
           },
           {
             "in": "query",
+            "name": "typeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offerTypeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withoutProject",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "providerFilter",
             "required": false,
             "schema": {
@@ -8461,6 +10891,32 @@
           },
           {
             "in": "query",
+            "name": "typeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offerTypeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withoutProject",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "providerFilter",
             "required": false,
             "schema": {
@@ -8692,6 +11148,32 @@
             "schema": {
               "nullable": true,
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "typeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offerTypeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withoutProject",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           },
           {
@@ -9317,6 +11799,32 @@
           },
           {
             "in": "query",
+            "name": "typeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offerTypeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withoutProject",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "providerFilter",
             "required": false,
             "schema": {
@@ -9934,6 +12442,32 @@
             "schema": {
               "nullable": true,
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "typeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offerTypeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withoutProject",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           },
           {
@@ -12636,6 +15170,42 @@
           }
         ],
         "summary": "Create a group conversation",
+        "tags": [
+          "Chat"
+        ]
+      }
+    },
+    "/api/v1/chat/conversations/project": {
+      "post": {
+        "operationId": "NxChatController_ensureProjectConversation",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnsureProjectConversationDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Open (and create on first use) a project conversation",
         "tags": [
           "Chat"
         ]
@@ -17510,6 +20080,404 @@
         ]
       }
     },
+    "/api/v1/invoicing/billing-chains": {
+      "post": {
+        "operationId": "NxBillingChainController_open",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenBillingChainDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The opened billing chain"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Open staged billing (Abschlag / Teil / Schluss) for an accepted offer or a project",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/by-offer/{offerId}": {
+      "get": {
+        "operationId": "NxBillingChainController_byOffer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "offerId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The live billing chain of the offer, or null"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get the billing chain of an offer",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/by-project/{projectId}": {
+      "get": {
+        "operationId": "NxBillingChainController_byProject",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The live billing chain of the project, or null"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get the billing chain of a project",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}": {
+      "get": {
+        "operationId": "NxBillingChainController_byId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The billing chain with its members"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get a billing chain by ID",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}/amendments": {
+      "get": {
+        "operationId": "NxBillingChainController_amendments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "ISO date — read the contract as it stood then, e.g. to reconstruct the §650m cap that applied when an Abschlag was booked",
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The base contract sum, what moved it, and every movement"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get the contract-sum ledger of a billing chain, optionally as it stood on a past date",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      },
+      "post": {
+        "operationId": "NxBillingChainController_addAmendment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChainAmendmentDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The ledger after the movement"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Correct or reduce the contract sum of a billing chain",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}/cancel": {
+      "post": {
+        "operationId": "NxBillingChainController_cancel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cancelled billing chain"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Cancel a billing chain that has no booked invoices",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}/members": {
+      "post": {
+        "operationId": "NxBillingChainController_addMember",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBillingChainMemberDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new draft invoice of the chain"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Add a progress, partial, cumulative or final invoice to a billing chain",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}/supplements": {
+      "post": {
+        "operationId": "NxBillingChainController_addSupplement",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupplementOfferDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new Nachtrag, as a draft offer"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a supplement (Nachtrag) on a contract that is already being billed",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
     "/api/v1/invoicing/cancellation-invoices": {
       "post": {
         "operationId": "NxCancellationInvoiceController_createCancellationInvoice",
@@ -17940,6 +20908,773 @@
         "summary": "Create ZUGFeRD document for a cancellation invoice",
         "tags": [
           "Cancellation Invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/cost-categories": {
+      "get": {
+        "operationId": "NxCostCategoryController_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "includeArchived",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List the organization's cost categories (Kostenarten)",
+        "tags": [
+          "CostCategory",
+          "Invoicing",
+          "Cost Categories"
+        ]
+      },
+      "post": {
+        "operationId": "NxCostCategoryController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCostCategoryDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a cost category",
+        "tags": [
+          "CostCategory",
+          "Invoicing",
+          "Cost Categories"
+        ]
+      }
+    },
+    "/api/v1/invoicing/cost-categories/{id}": {
+      "delete": {
+        "operationId": "NxCostCategoryController_archive",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Archive a cost category",
+        "tags": [
+          "CostCategory",
+          "Invoicing",
+          "Cost Categories"
+        ]
+      },
+      "patch": {
+        "operationId": "NxCostCategoryController_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCostCategoryDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Update a cost category",
+        "tags": [
+          "CostCategory",
+          "Invoicing",
+          "Cost Categories"
+        ]
+      }
+    },
+    "/api/v1/invoicing/credit-notes": {
+      "post": {
+        "operationId": "NxCreditNoteController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCreditNoteDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The issued credit note"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Issue a credit note crediting part of a booked or paid invoice",
+        "tags": [
+          "CreditNote",
+          "Invoicing",
+          "Credit notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/credit-notes/of-invoice/{id}": {
+      "get": {
+        "operationId": "NxCreditNoteController_ofInvoice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The credit notes issued against the invoice, with what each credits"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Credit notes issued against an invoice",
+        "tags": [
+          "CreditNote",
+          "Invoicing",
+          "Credit notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/credit-notes/query": {
+      "post": {
+        "operationId": "NxCreditNoteController_query",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TablePaginatorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Paginated list of credit notes, each with the invoice it credits"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Query credit notes (Gutschriften) with pagination and filters",
+        "tags": [
+          "CreditNote",
+          "Invoicing",
+          "Credit notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/credit-notes/{id}": {
+      "get": {
+        "operationId": "NxCreditNoteController_byId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get a credit note by ID",
+        "tags": [
+          "CreditNote",
+          "Invoicing",
+          "Credit notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/delivery-notes": {
+      "post": {
+        "operationId": "NxDeliveryNoteController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeliveryNoteDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new draft delivery note"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a delivery note, from an offer / order confirmation / invoice or free",
+        "tags": [
+          "DeliveryNote",
+          "Invoicing",
+          "Delivery notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/delivery-notes/invoice": {
+      "post": {
+        "operationId": "NxDeliveryNoteController_invoice",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvoiceFromDeliveryNotesDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new draft invoice billing the open quantities"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a draft invoice from the open quantities of delivery notes",
+        "tags": [
+          "DeliveryNote",
+          "Invoicing",
+          "Delivery notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/delivery-notes/query": {
+      "post": {
+        "operationId": "NxDeliveryNoteController_query",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TablePaginatorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Paginated list of delivery notes"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Query delivery notes with pagination and filters",
+        "tags": [
+          "DeliveryNote",
+          "Invoicing",
+          "Delivery notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/delivery-notes/{id}": {
+      "get": {
+        "operationId": "NxDeliveryNoteController_byId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get a delivery note by ID",
+        "tags": [
+          "DeliveryNote",
+          "Invoicing",
+          "Delivery notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/delivery-notes/{id}/deliver": {
+      "post": {
+        "operationId": "NxDeliveryNoteController_deliver",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkDeliveredDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The delivered note, PDF regenerated with the signature block"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Mark a booked delivery note as delivered, optionally with the on-site signature",
+        "tags": [
+          "DeliveryNote",
+          "Invoicing",
+          "Delivery notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/delivery-notes/{id}/open-quantities": {
+      "get": {
+        "operationId": "NxDeliveryNoteController_openQuantities",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per line: delivered, invoiced and still open quantity"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Open (not yet invoiced) quantities of a delivery note",
+        "tags": [
+          "DeliveryNote",
+          "Invoicing",
+          "Delivery notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/document-layouts": {
+      "get": {
+        "operationId": "NxDocumentLayoutController_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "includeArchived",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List the organization's document layouts (presets and own)",
+        "tags": [
+          "DocumentLayout",
+          "Invoicing",
+          "Document Layouts"
+        ]
+      },
+      "post": {
+        "operationId": "NxDocumentLayoutController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDocumentLayoutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a document layout from a preset or an existing layout",
+        "tags": [
+          "DocumentLayout",
+          "Invoicing",
+          "Document Layouts"
+        ]
+      }
+    },
+    "/api/v1/invoicing/document-layouts/{id}": {
+      "get": {
+        "operationId": "NxDocumentLayoutController_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get one document layout",
+        "tags": [
+          "DocumentLayout",
+          "Invoicing",
+          "Document Layouts"
+        ]
+      },
+      "patch": {
+        "operationId": "NxDocumentLayoutController_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDocumentLayoutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Update a document layout",
+        "tags": [
+          "DocumentLayout",
+          "Invoicing",
+          "Document Layouts"
+        ]
+      }
+    },
+    "/api/v1/invoicing/document-links/resolved/{type}/{id}": {
+      "get": {
+        "operationId": "NxDocumentLinkController_links",
+        "parameters": [
+          {
+            "description": "invoice | offer | cancellation | billing_chain | dunning",
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The document's links with the counterpart resolved (number, title, state)"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Linked documents of an invoicing document",
+        "tags": [
+          "DocumentLink",
+          "Invoicing"
         ]
       }
     },
@@ -18465,6 +22200,41 @@
         ]
       }
     },
+    "/api/v1/invoicing/invoices/{id}/regenerate-pdf": {
+      "post": {
+        "operationId": "NxInvoiceController_regenerateInvoicePdf",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Regenerate the stored PDF of an invoice",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
     "/api/v1/invoicing/invoices/{id}/restore": {
       "post": {
         "operationId": "NxInvoiceController_restoreInvoiceById",
@@ -18584,6 +22354,189 @@
         ]
       }
     },
+    "/api/v1/invoicing/invoices/{id}/time-entries": {
+      "get": {
+        "operationId": "NxInvoiceController_getInvoiceTimeEntries",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The time entries billed on this invoice"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List the time entries billed on an invoice",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/invoices/{id}/time-entries/attach": {
+      "post": {
+        "operationId": "NxInvoiceController_attachTimeEntries",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachTimeEntriesDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The created invoice lines"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "409": {
+            "description": "One or more entries are already invoiced"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Turn time entries into invoice lines and mark them billed",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/invoices/{id}/time-entries/preview": {
+      "post": {
+        "operationId": "NxInvoiceController_previewTimeEntries",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachTimeEntriesDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Proposed invoice lines plus the entries that cannot be billed"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Preview the invoice lines a set of time entries would produce",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/invoices/{id}/time-entries/{linkId}": {
+      "delete": {
+        "operationId": "NxInvoiceController_detachTimeEntry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "path",
+            "name": "linkId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Whether a link was removed"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Detach a time entry from an invoice line",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
     "/api/v1/invoicing/invoices/{id}/validate-xinvoice": {
       "post": {
         "operationId": "NxInvoiceController_validateXInvoice",
@@ -18686,6 +22639,384 @@
         "summary": "Create ZUGFeRD document for an invoice",
         "tags": [
           "Invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/measurement-sheets": {
+      "post": {
+        "operationId": "NxMeasurementSheetController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMeasurementSheetDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new draft Aufmaß"
+          },
+          "400": {
+            "description": "A measurement formula the grammar refuses"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create an Aufmaß from measured positions",
+        "tags": [
+          "MeasurementSheet",
+          "Invoicing",
+          "Measurement sheets"
+        ]
+      }
+    },
+    "/api/v1/invoicing/measurement-sheets/consumed-by/{invoiceId}": {
+      "get": {
+        "operationId": "NxMeasurementSheetController_consumedBy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invoiceId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Aufmaße this invoice billed from, and how much of each row it took"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "The measured quantities an invoice was built from",
+        "tags": [
+          "MeasurementSheet",
+          "Invoicing",
+          "Measurement sheets"
+        ]
+      }
+    },
+    "/api/v1/invoicing/measurement-sheets/invoice": {
+      "post": {
+        "operationId": "NxMeasurementSheetController_invoice",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvoiceFromMeasurementSheetsDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new draft invoice"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "409": {
+            "description": "Nothing is left to bill, or more was requested than was measured"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a draft invoice from the open quantities of booked / signed Aufmaße",
+        "tags": [
+          "MeasurementSheet",
+          "Invoicing",
+          "Measurement sheets"
+        ]
+      }
+    },
+    "/api/v1/invoicing/measurement-sheets/line-preview": {
+      "post": {
+        "operationId": "NxMeasurementSheetController_linePreview",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewMeasurementLinesDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The merged, priced lines a measured selection would become"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Preview the invoice lines a measured selection would become",
+        "tags": [
+          "MeasurementSheet",
+          "Invoicing",
+          "Measurement sheets"
+        ]
+      }
+    },
+    "/api/v1/invoicing/measurement-sheets/open-quantities": {
+      "post": {
+        "operationId": "NxMeasurementSheetController_openQuantities",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewMeasurementQuantitiesDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The measured quantities of the issued Aufmaße, with what is billed and what is open"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List the still-open measured quantities of a project",
+        "tags": [
+          "MeasurementSheet",
+          "Invoicing",
+          "Measurement sheets"
+        ]
+      }
+    },
+    "/api/v1/invoicing/measurement-sheets/query": {
+      "post": {
+        "operationId": "NxMeasurementSheetController_query",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TablePaginatorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Paginated list of measurement sheets"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Query Aufmaße with pagination and filters",
+        "tags": [
+          "MeasurementSheet",
+          "Invoicing",
+          "Measurement sheets"
+        ]
+      }
+    },
+    "/api/v1/invoicing/measurement-sheets/{id}": {
+      "get": {
+        "operationId": "NxMeasurementSheetController_byId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get an Aufmaß by ID",
+        "tags": [
+          "MeasurementSheet",
+          "Invoicing",
+          "Measurement sheets"
+        ]
+      }
+    },
+    "/api/v1/invoicing/measurement-sheets/{id}/sign": {
+      "post": {
+        "operationId": "NxMeasurementSheetController_sign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkDeliveredDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The signed sheet, PDF regenerated with the signature block"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Record the on-site signature on a booked Aufmaß",
+        "tags": [
+          "MeasurementSheet",
+          "Invoicing",
+          "Measurement sheets"
+        ]
+      }
+    },
+    "/api/v1/invoicing/measurement-sheets/{id}/summary": {
+      "get": {
+        "operationId": "NxMeasurementSheetController_summary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "What the sheet measures, what of it is billed, and whether it can still be billed"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Measured quantities of an Aufmaß and their billing state",
+        "tags": [
+          "MeasurementSheet",
+          "Invoicing",
+          "Measurement sheets"
         ]
       }
     },
@@ -19201,6 +23532,55 @@
         ]
       }
     },
+    "/api/v1/invoicing/offers/{id}/order-confirmation": {
+      "post": {
+        "operationId": "NxOfferController_createOrderConfirmation",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderConfirmationDTO"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "description": "The order confirmation (an offer-table row with its own AB number)"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create the order confirmation (Auftragsbestätigung) of a booked or accepted offer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
     "/api/v1/invoicing/offers/{id}/preview": {
       "get": {
         "operationId": "NxOfferController_getOfferPreview",
@@ -19509,6 +23889,47 @@
         ]
       }
     },
+    "/api/v1/invoicing/order-confirmations/query": {
+      "post": {
+        "operationId": "NxOrderConfirmationController_query",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TablePaginatorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Paginated list of order confirmations, each with the offer it was created from"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Query order confirmations with pagination and filters",
+        "tags": [
+          "OrderConfirmation",
+          "Invoicing",
+          "Order confirmations"
+        ]
+      }
+    },
     "/api/v1/invoicing/payments/create-for-invoice/{id}": {
       "post": {
         "operationId": "NxIncomingPaymentController_createPayment",
@@ -19660,6 +24081,32 @@
             "schema": {
               "nullable": true,
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "typeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offerTypeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withoutProject",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           },
           {
@@ -19819,13 +24266,48 @@
         ],
         "responses": {
           "200": {
-            "description": "Total paid retrieved successfully"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvoicePaymentSummaryDto"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Payment summary retrieved successfully"
           },
           "401": {
             "description": "Unauthorized - Invalid or missing API key/token"
           },
           "403": {
             "description": "Forbidden - Insufficient scopes"
+          },
+          "404": {
+            "description": "Invoice not found"
           },
           "429": {
             "description": "Too Many Requests - Rate limit exceeded"
@@ -19836,7 +24318,7 @@
             "api-key": []
           }
         ],
-        "summary": "Get total paid amount for an invoice",
+        "summary": "Get the paid, credited and open amounts of an invoice",
         "tags": [
           "Payments"
         ]
@@ -19880,6 +24362,739 @@
         "summary": "Delete a payment",
         "tags": [
           "Payments"
+        ]
+      }
+    },
+    "/api/v1/invoicing/performance-records": {
+      "post": {
+        "operationId": "NxPerformanceRecordController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePerformanceRecordDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new draft Leistungsschein"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a Leistungsschein from tracked work plus authored material lines",
+        "tags": [
+          "PerformanceRecord",
+          "Invoicing",
+          "Performance records"
+        ]
+      }
+    },
+    "/api/v1/invoicing/performance-records/invoice": {
+      "post": {
+        "operationId": "NxPerformanceRecordController_invoice",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvoiceFromPerformanceRecordsDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new draft Regie invoice"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "409": {
+            "description": "Some of the documented hours are already billed, or the record is flat-rated"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a draft Regie invoice from booked / signed Leistungsscheine",
+        "tags": [
+          "PerformanceRecord",
+          "Invoicing",
+          "Performance records"
+        ]
+      }
+    },
+    "/api/v1/invoicing/performance-records/query": {
+      "post": {
+        "operationId": "NxPerformanceRecordController_query",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TablePaginatorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Paginated list of performance records"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Query Leistungsscheine with pagination and filters",
+        "tags": [
+          "PerformanceRecord",
+          "Invoicing",
+          "Performance records"
+        ]
+      }
+    },
+    "/api/v1/invoicing/performance-records/work-preview": {
+      "post": {
+        "operationId": "NxPerformanceRecordController_workPreview",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewPerformanceWorkDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The lines a Leistungsschein for this window would carry, plus what is excluded and why"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Preview the tracked work a Leistungsschein would document",
+        "tags": [
+          "PerformanceRecord",
+          "Invoicing",
+          "Performance records"
+        ]
+      }
+    },
+    "/api/v1/invoicing/performance-records/{id}": {
+      "get": {
+        "operationId": "NxPerformanceRecordController_byId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get a Leistungsschein by ID",
+        "tags": [
+          "PerformanceRecord",
+          "Invoicing",
+          "Performance records"
+        ]
+      }
+    },
+    "/api/v1/invoicing/performance-records/{id}/sign": {
+      "post": {
+        "operationId": "NxPerformanceRecordController_sign",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkDeliveredDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The signed record, PDF regenerated with the signature block"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Record the on-site signature on a booked Leistungsschein",
+        "tags": [
+          "PerformanceRecord",
+          "Invoicing",
+          "Performance records"
+        ]
+      }
+    },
+    "/api/v1/invoicing/performance-records/{id}/summary": {
+      "get": {
+        "operationId": "NxPerformanceRecordController_summary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The hours the record documents, which of them are billed, and whether it can still be billed"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Documented hours of a Leistungsschein and their billing state",
+        "tags": [
+          "PerformanceRecord",
+          "Invoicing",
+          "Performance records"
+        ]
+      }
+    },
+    "/api/v1/invoicing/proforma-invoices": {
+      "post": {
+        "operationId": "NxProformaInvoiceController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProformaInvoiceDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The created pro-forma invoice"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a pro-forma invoice from an offer or order confirmation",
+        "tags": [
+          "ProformaInvoice",
+          "Invoicing",
+          "Pro-forma invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/proforma-invoices/invoice": {
+      "post": {
+        "operationId": "NxProformaInvoiceController_toInvoice",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvoiceFromProformaDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The invoice created from the pro-forma invoice"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Turn a booked pro-forma invoice into a real invoice",
+        "tags": [
+          "ProformaInvoice",
+          "Invoicing",
+          "Pro-forma invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/proforma-invoices/query": {
+      "post": {
+        "operationId": "NxProformaInvoiceController_query",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TablePaginatorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Paginated list of pro-forma invoices"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Query pro-forma invoices (Proformarechnungen) with pagination and filters",
+        "tags": [
+          "ProformaInvoice",
+          "Invoicing",
+          "Pro-forma invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/proforma-invoices/{id}": {
+      "get": {
+        "operationId": "NxProformaInvoiceController_byId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get a pro-forma invoice by ID",
+        "tags": [
+          "ProformaInvoice",
+          "Invoicing",
+          "Pro-forma invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/recurring-schedules": {
+      "get": {
+        "operationId": "NxRecurringScheduleController_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The organization's recurring invoice series"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List recurring invoice series (Serienrechnungen)",
+        "tags": [
+          "RecurringSchedule",
+          "Invoicing",
+          "Recurring"
+        ]
+      },
+      "post": {
+        "operationId": "NxRecurringScheduleController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRecurringScheduleDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The created series"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a recurring invoice series from an existing invoice or from a customer plus lines",
+        "tags": [
+          "RecurringSchedule",
+          "Invoicing",
+          "Recurring"
+        ]
+      }
+    },
+    "/api/v1/invoicing/recurring-schedules/preview": {
+      "post": {
+        "operationId": "NxRecurringScheduleController_previewDraft",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewRecurringDraftDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The invoices this rhythm would issue"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Work out which invoices a recurring rhythm would issue, without creating a series",
+        "tags": [
+          "RecurringSchedule",
+          "Invoicing",
+          "Recurring"
+        ]
+      }
+    },
+    "/api/v1/invoicing/recurring-schedules/revenue-forecast": {
+      "get": {
+        "operationId": "NxRecurringScheduleController_revenueForecast",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "months",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Committed recurring net per month from the active series"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Projected recurring revenue per month",
+        "tags": [
+          "RecurringSchedule",
+          "Invoicing",
+          "Recurring"
+        ]
+      }
+    },
+    "/api/v1/invoicing/recurring-schedules/{id}": {
+      "patch": {
+        "operationId": "NxRecurringScheduleController_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRecurringScheduleDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Change a recurring series; affects future invoices only",
+        "tags": [
+          "RecurringSchedule",
+          "Invoicing",
+          "Recurring"
+        ]
+      }
+    },
+    "/api/v1/invoicing/recurring-schedules/{id}/preview": {
+      "get": {
+        "operationId": "NxRecurringScheduleController_preview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The next invoices this series would issue"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Preview the next invoices of a recurring series",
+        "tags": [
+          "RecurringSchedule",
+          "Invoicing",
+          "Recurring"
         ]
       }
     },
@@ -21094,6 +26309,32 @@
           },
           {
             "in": "query",
+            "name": "typeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offerTypeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withoutProject",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "providerFilter",
             "required": false,
             "schema": {
@@ -21317,6 +26558,32 @@
             "schema": {
               "nullable": true,
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "typeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offerTypeFilter",
+            "required": false,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "withoutProject",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           },
           {
@@ -22065,6 +27332,42 @@
           }
         ],
         "summary": "Get project dashboard",
+        "tags": [
+          "Projects"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/drive-folder": {
+      "post": {
+        "operationId": "ProjectManagerController_getOrCreateProjectFolder",
+        "parameters": [
+          {
+            "description": "Project ID",
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get or create the project documents folder",
         "tags": [
           "Projects"
         ]
@@ -29207,6 +34510,101 @@
         ]
       }
     },
+    "/api/v1/work-manager/time-tracking/organization/{orgId}/uninvoiced": {
+      "get": {
+        "operationId": "NxTimeTrackingController_getUninvoicedTime",
+        "parameters": [
+          {
+            "description": "Organization ID",
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Only entries that finished on or after this instant",
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only entries that finished on or before this instant",
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only entries booked on this project",
+            "in": "query",
+            "name": "projectId",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Only entries whose project belongs to this customer",
+            "in": "query",
+            "name": "companyId",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Only entries tracked by this user",
+            "in": "query",
+            "name": "userId",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Only entries in this tracking category",
+            "in": "query",
+            "name": "categoryId",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unbilled billable time with revenue forecast and aging buckets"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get billable time that has not been invoiced yet",
+        "tags": [
+          "Time Tracking"
+        ]
+      }
+    },
     "/api/v1/work-manager/time-tracking/project/{projectId}/trackings/range/{start}/{end}": {
       "get": {
         "operationId": "NxTimeTrackingController_getTrackingsByProject",
@@ -30571,6 +35969,14 @@
       "name": "Asset Units"
     },
     {
+      "description": "",
+      "name": "Billing chains"
+    },
+    {
+      "description": "",
+      "name": "BillingChain"
+    },
+    {
       "description": "Manage date-specific availability overrides",
       "name": "Booking Date Overrides"
     },
@@ -30619,8 +36025,44 @@
       "name": "Contacts"
     },
     {
+      "description": "",
+      "name": "Cost Categories"
+    },
+    {
+      "description": "",
+      "name": "CostCategory"
+    },
+    {
+      "description": "",
+      "name": "Credit notes"
+    },
+    {
+      "description": "",
+      "name": "CreditNote"
+    },
+    {
       "description": "Manage sales pipeline deals",
       "name": "Deals"
+    },
+    {
+      "description": "",
+      "name": "Delivery notes"
+    },
+    {
+      "description": "",
+      "name": "DeliveryNote"
+    },
+    {
+      "description": "",
+      "name": "Document Layouts"
+    },
+    {
+      "description": "",
+      "name": "DocumentLayout"
+    },
+    {
+      "description": "",
+      "name": "DocumentLink"
     },
     {
       "description": "Manage drives, upload files, create folders",
@@ -30652,6 +36094,10 @@
     },
     {
       "description": "",
+      "name": "Invoicing"
+    },
+    {
+      "description": "",
       "name": "MailConnections"
     },
     {
@@ -30659,8 +36105,24 @@
       "name": "Mailing"
     },
     {
+      "description": "",
+      "name": "Measurement sheets"
+    },
+    {
+      "description": "",
+      "name": "MeasurementSheet"
+    },
+    {
       "description": "Create and manage offers / quotes",
       "name": "Offers"
+    },
+    {
+      "description": "",
+      "name": "Order confirmations"
+    },
+    {
+      "description": "",
+      "name": "OrderConfirmation"
     },
     {
       "description": "Manage organization details, branches, and sectors",
@@ -30671,6 +36133,14 @@
       "name": "Payments"
     },
     {
+      "description": "",
+      "name": "Performance records"
+    },
+    {
+      "description": "",
+      "name": "PerformanceRecord"
+    },
+    {
       "description": "Manage sales pipelines and stages",
       "name": "Pipelines"
     },
@@ -30679,8 +36149,24 @@
       "name": "Portfolios"
     },
     {
+      "description": "",
+      "name": "Pro-forma invoices"
+    },
+    {
+      "description": "",
+      "name": "ProformaInvoice"
+    },
+    {
       "description": "Manage projects, assignees, and portfolios",
       "name": "Projects"
+    },
+    {
+      "description": "",
+      "name": "Recurring"
+    },
+    {
+      "description": "",
+      "name": "RecurringSchedule"
     },
     {
       "description": "Manage sales tax regulation rules",
