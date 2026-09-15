@@ -318,6 +318,10 @@
             ],
             "type": "string"
           },
+          "projectId": {
+            "description": "The project of an unsaved draft, for rate resolution",
+            "type": "number"
+          },
           "rateOverrides": {
             "description": "Rate overrides keyed by tracking id",
             "type": "object"
@@ -21895,6 +21899,45 @@
           }
         ],
         "summary": "Restore multiple archived invoices",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/v1/invoicing/invoices/time-entries/preview": {
+      "post": {
+        "operationId": "NxInvoiceController_previewTimeEntriesForDraft",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachTimeEntriesDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Proposed invoice lines for a draft that is not saved yet"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Preview the invoice lines a set of time entries would produce for an unsaved draft",
         "tags": [
           "Invoices"
         ]
