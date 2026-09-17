@@ -1093,7 +1093,7 @@
       "CreateChainAmendmentDTO": {
         "properties": {
           "effectiveDate": {
-            "description": "When the change took effect for the contract. Defaults to now.",
+            "description": "When the change took effect for the contract. Defaults to now. Must lie between the contract date and today (calendar days); the server checks it against the chain.",
             "format": "date-time",
             "type": "string"
           },
@@ -2161,6 +2161,7 @@
             "type": "string"
           },
           "buyingPrice": {
+            "minimum": 0,
             "type": "number"
           },
           "calculation": {
@@ -2539,23 +2540,17 @@
         },
         "type": "object"
       },
-      "CreateOrderConfirmationDTO": {
+      "CreateOrderConfirmationBodyDTO": {
         "properties": {
           "deliveryDate": {
             "format": "date-time",
             "type": "string"
-          },
-          "offerId": {
-            "type": "number"
           },
           "title": {
             "maxLength": 255,
             "type": "string"
           }
         },
-        "required": [
-          "offerId"
-        ],
         "type": "object"
       },
       "CreatePerformanceRecordDTO": {
@@ -8453,6 +8448,10 @@
           "customer": {
             "$ref": "#/components/schemas/InvoicingCustomerDTO"
           },
+          "expectedVersion": {
+            "minimum": 1,
+            "type": "number"
+          },
           "invoice": {
             "$ref": "#/components/schemas/PatchInvoiceDetailsDTO"
           },
@@ -9227,13 +9226,17 @@
             "type": "boolean"
           },
           "indexationMonth": {
+            "description": "Month the uplift is applied in, 1-12; null removes it",
             "maximum": 12,
             "minimum": 1,
+            "nullable": true,
             "type": "number"
           },
           "indexationPct": {
+            "description": "Annual uplift in percent; null removes it",
             "maximum": 50,
             "minimum": -50,
+            "nullable": true,
             "type": "number"
           },
           "lines": {
@@ -22557,13 +22560,19 @@
         ],
         "responses": {
           "200": {
-            "description": "Whether a link was removed"
+            "description": "The link was removed"
           },
           "401": {
             "description": "Unauthorized - Invalid or missing API key/token"
           },
           "403": {
             "description": "Forbidden - Insufficient scopes"
+          },
+          "404": {
+            "description": "The link is not a live link of this invoice"
+          },
+          "409": {
+            "description": "The invoice is no longer a draft"
           },
           "429": {
             "description": "Too Many Requests - Rate limit exceeded"
@@ -23593,7 +23602,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateOrderConfirmationDTO"
+                "$ref": "#/components/schemas/CreateOrderConfirmationBodyDTO"
               }
             }
           },
