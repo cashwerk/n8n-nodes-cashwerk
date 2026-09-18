@@ -1687,6 +1687,9 @@
             "maxLength": 255,
             "type": "string"
           },
+          "projectId": {
+            "type": "number"
+          },
           "recipientName": {
             "maxLength": 255,
             "type": "string"
@@ -4204,6 +4207,9 @@
           "folderId": {
             "type": "number"
           },
+          "hasDatevDebtorNumber": {
+            "type": "boolean"
+          },
           "hasLogo": {
             "type": "boolean"
           },
@@ -6226,6 +6232,9 @@
           "email": {
             "type": "string"
           },
+          "hasDatevDebtorNumber": {
+            "type": "boolean"
+          },
           "hasLogo": {
             "type": "boolean"
           },
@@ -6598,6 +6607,53 @@
           },
           "withoutProject": {
             "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "QueryTagsDto": {
+        "properties": {
+          "archived": {
+            "default": "ACTIVE",
+            "enum": [
+              "ACTIVE",
+              "ARCHIVED",
+              "ALL"
+            ],
+            "type": "string"
+          },
+          "searchQuery": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "skip": {
+            "default": 0,
+            "minimum": 0,
+            "type": "number"
+          },
+          "sortBy": {
+            "default": "name",
+            "enum": [
+              "name",
+              "created_at",
+              "updated_at",
+              "usage"
+            ],
+            "type": "string"
+          },
+          "sortType": {
+            "default": "ASC",
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string"
+          },
+          "take": {
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "type": "number"
           }
         },
         "type": "object"
@@ -7786,6 +7842,10 @@
             "type": "string"
           },
           "companySize": {
+            "type": "string"
+          },
+          "datevDebtorNumber": {
+            "pattern": "^(\\d{4,9})?$",
             "type": "string"
           },
           "defaultBillingRate": {
@@ -23549,6 +23609,90 @@
         ]
       }
     },
+    "/api/v1/invoicing/offers/{id}/correction": {
+      "post": {
+        "operationId": "NxOfferController_startOfferCorrection",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The offer in state CORRECTION"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "409": {
+            "description": "OFFER_NOT_CORRECTABLE (state) or OFFER_CORRECTION_BLOCKED (a dependent document)"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Reopen a booked offer for correction (same number; the sent PDF is kept)",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/v1/invoicing/offers/{id}/correction/finish": {
+      "post": {
+        "operationId": "NxOfferController_finishOfferCorrection",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The offer booked again under the same number"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "409": {
+            "description": "OFFER_NOT_IN_CORRECTION"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Finish an offer correction: book it again under the same number",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
     "/api/v1/invoicing/offers/{id}/dashboard": {
       "get": {
         "operationId": "NxOfferController_fetchOfferDashboardById",
@@ -29087,6 +29231,43 @@
         ]
       }
     },
+    "/api/v1/tags/query": {
+      "post": {
+        "operationId": "NxTagsController_queryTags",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryTagsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Page through the organization's tags with search, archive filter, sorting and per-entity usage counts",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
     "/api/v1/tags/search": {
       "get": {
         "operationId": "NxTagsController_searchTagsInOrg",
@@ -29117,6 +29298,122 @@
           }
         ],
         "summary": "Search tags by name within the organization",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/tags/{id}": {
+      "delete": {
+        "operationId": "NxTagsController_deleteTag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "force",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Delete a tag; 409 with the usage counts when it is still linked, unless force=true",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/tags/{id}/archive": {
+      "post": {
+        "operationId": "NxTagsController_archiveTag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Archive a tag (hidden from pickers, kept on linked entities)",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/tags/{id}/restore": {
+      "post": {
+        "operationId": "NxTagsController_restoreTag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Restore an archived tag",
         "tags": [
           "Tags",
           "Tags"
@@ -29163,6 +29460,42 @@
           }
         ],
         "summary": "Update a tag (name and/or color)",
+        "tags": [
+          "Tags",
+          "Tags"
+        ]
+      }
+    },
+    "/api/v1/tags/{id}/usage": {
+      "get": {
+        "operationId": "NxTagsController_getTagUsage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Count the entities linked to a tag, per entity kind",
         "tags": [
           "Tags",
           "Tags"
