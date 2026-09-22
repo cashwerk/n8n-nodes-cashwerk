@@ -1218,7 +1218,18 @@
             "type": "array"
           },
           "tags": {
-            "type": "string"
+            "description": "Tag names. A string is one cell and is split on `, ; |` and newlines; an array is names that are already separated and is taken as-is.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ]
           },
           "taxNumber": {
             "type": "string"
@@ -1355,7 +1366,18 @@
             "type": "array"
           },
           "tags": {
-            "type": "string"
+            "description": "Tag names. A string is one cell and is split on `, ; |` and newlines; an array is names that are already separated and is taken as-is.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ]
           },
           "taxNumber": {
             "type": "string"
@@ -1940,6 +1962,52 @@
         "required": [
           "name",
           "memberUserIds"
+        ],
+        "type": "object"
+      },
+      "CreateImportJobDto": {
+        "properties": {
+          "entityType": {
+            "enum": [
+              "contact",
+              "company",
+              "material",
+              "service",
+              "machine",
+              "subcontract",
+              "asset_catalog",
+              "employee",
+              "time_tracking",
+              "shift_plan"
+            ],
+            "type": "string"
+          },
+          "matchField": {
+            "description": "Whitelisted per entity. Required for update and upsert.",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "create",
+              "update",
+              "upsert"
+            ],
+            "type": "string"
+          },
+          "options": {
+            "$ref": "#/components/schemas/ImportJobOptionsDto"
+          },
+          "totalRows": {
+            "description": "Rows the client will upload (max 100000)",
+            "minimum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "entityType",
+          "mode",
+          "totalRows"
         ],
         "type": "object"
       },
@@ -4119,6 +4187,187 @@
         ],
         "type": "object"
       },
+      "ExportAssetsDto": {
+        "properties": {
+          "amountMax": {
+            "nullable": true,
+            "type": "number"
+          },
+          "amountMin": {
+            "nullable": true,
+            "type": "number"
+          },
+          "articleNumber": {
+            "type": "string"
+          },
+          "assetIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "dateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "deliveryDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "driveId": {
+            "type": "number"
+          },
+          "dueDateFrom": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "dueDateTo": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "eanCode": {
+            "type": "string"
+          },
+          "folderId": {
+            "type": "number"
+          },
+          "groupIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "hasDescription": {
+            "type": "boolean"
+          },
+          "hasImage": {
+            "type": "boolean"
+          },
+          "inStock": {
+            "type": "boolean"
+          },
+          "includeArchived": {
+            "type": "boolean"
+          },
+          "manufacturerIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "maxPrice": {
+            "type": "number"
+          },
+          "minPrice": {
+            "type": "number"
+          },
+          "offerTypeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
+          "organizationId": {
+            "type": "number"
+          },
+          "priceType": {
+            "enum": [
+              "buying",
+              "selling"
+            ],
+            "type": "string"
+          },
+          "projectIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "providerFilter": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recipientFilter": {
+            "nullable": true,
+            "type": "string"
+          },
+          "searchQuery": {
+            "type": "string"
+          },
+          "selectedFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "skip": {
+            "default": 0,
+            "minimum": 0,
+            "type": "number"
+          },
+          "sortBy": {
+            "type": "string"
+          },
+          "sortType": {
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "type": "string"
+          },
+          "statusFilter": {
+            "nullable": true,
+            "type": "string"
+          },
+          "subjectFilter": {
+            "nullable": true,
+            "type": "string"
+          },
+          "supplierIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "take": {
+            "default": 10,
+            "minimum": 1,
+            "type": "number"
+          },
+          "typeFilter": {
+            "nullable": true,
+            "type": "string"
+          },
+          "unitIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "userIds": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "withoutProject": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "ExportCompaniesDto": {
         "properties": {
           "amountMax": {
@@ -4900,6 +5149,68 @@
         ],
         "type": "object"
       },
+      "ImportJobOptionsDto": {
+        "properties": {
+          "listSeparators": {
+            "description": "Separators the wizard used to split multi-value cells",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 8,
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ImportJobSourceDto"
+          },
+          "tagMode": {
+            "description": "Whether tags in the file are added to, or replace, what a matched record carries. Defaults to add.",
+            "enum": [
+              "add",
+              "replace"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ImportJobRowInputDto": {
+        "properties": {
+          "payload": {
+            "description": "The mapped row, keyed by field name",
+            "type": "object"
+          },
+          "rowIndex": {
+            "description": "0-based position in the uploaded file",
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "rowIndex",
+          "payload"
+        ],
+        "type": "object"
+      },
+      "ImportJobSourceDto": {
+        "properties": {
+          "fileName": {
+            "description": "Original file name",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "fileSize": {
+            "description": "Original file size in bytes",
+            "minimum": 0,
+            "type": "number"
+          },
+          "format": {
+            "description": "csv | xlsx | json",
+            "maxLength": 16,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "InfoBlockMmDTO": {
         "properties": {
           "right": {
@@ -4979,11 +5290,11 @@
             "type": "string"
           },
           "firstName": {
-            "minLength": 3,
+            "minLength": 1,
             "type": "string"
           },
           "lastName": {
-            "minLength": 3,
+            "minLength": 1,
             "type": "string"
           },
           "roleId": {
@@ -9744,6 +10055,22 @@
         },
         "type": "object"
       },
+      "UploadImportRowsDto": {
+        "properties": {
+          "rows": {
+            "description": "At most 1000 rows per request",
+            "items": {
+              "$ref": "#/components/schemas/ImportJobRowInputDto"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows"
+        ],
+        "type": "object"
+      },
       "WorkDayDto": {
         "properties": {
           "active": {
@@ -9953,6 +10280,100 @@
         "summary": "Permanently delete a webhook subscription",
         "tags": [
           "Webhooks"
+        ]
+      }
+    },
+    "/api/v1/assetmanager/catalog/organization/{orgId}/export/csv": {
+      "post": {
+        "operationId": "AssetCatalogController_exportCatalogToCsv",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export the whole catalogue — all four asset families — to one CSV",
+        "tags": [
+          "AssetCatalog",
+          "Asset Manager",
+          "Catalog"
+        ]
+      }
+    },
+    "/api/v1/assetmanager/catalog/organization/{orgId}/export/pdf": {
+      "post": {
+        "operationId": "AssetCatalogController_exportCatalogToPdf",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export the whole catalogue — all four asset families — to one PDF",
+        "tags": [
+          "AssetCatalog",
+          "Asset Manager",
+          "Catalog"
         ]
       }
     },
@@ -10240,6 +10661,96 @@
           }
         ],
         "summary": "Get all machines for an organization",
+        "tags": [
+          "Asset Machines"
+        ]
+      }
+    },
+    "/api/v1/assetmanager/machines/organization/{orgId}/export/csv": {
+      "post": {
+        "operationId": "AssetMachineController_exportMachinesToCsv",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export machines to CSV",
+        "tags": [
+          "Asset Machines"
+        ]
+      }
+    },
+    "/api/v1/assetmanager/machines/organization/{orgId}/export/pdf": {
+      "post": {
+        "operationId": "AssetMachineController_exportMachinesToPdf",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export machines to PDF",
         "tags": [
           "Asset Machines"
         ]
@@ -11118,6 +11629,96 @@
         ]
       }
     },
+    "/api/v1/assetmanager/materials/organization/{orgId}/export/csv": {
+      "post": {
+        "operationId": "AssetMaterialController_exportMaterialsToCsv",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export materials to CSV",
+        "tags": [
+          "Asset Materials"
+        ]
+      }
+    },
+    "/api/v1/assetmanager/materials/organization/{orgId}/export/pdf": {
+      "post": {
+        "operationId": "AssetMaterialController_exportMaterialsToPdf",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export materials to PDF",
+        "tags": [
+          "Asset Materials"
+        ]
+      }
+    },
     "/api/v1/assetmanager/materials/organization/{orgId}/query": {
       "get": {
         "operationId": "AssetMaterialController_queryMaterialsFromOrg",
@@ -11765,6 +12366,96 @@
         ]
       }
     },
+    "/api/v1/assetmanager/services/organization/{orgId}/export/csv": {
+      "post": {
+        "operationId": "AssetServiceController_exportServicesToCsv",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export services to CSV",
+        "tags": [
+          "Asset Services"
+        ]
+      }
+    },
+    "/api/v1/assetmanager/services/organization/{orgId}/export/pdf": {
+      "post": {
+        "operationId": "AssetServiceController_exportServicesToPdf",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export services to PDF",
+        "tags": [
+          "Asset Services"
+        ]
+      }
+    },
     "/api/v1/assetmanager/services/organization/{orgId}/query": {
       "get": {
         "operationId": "AssetServiceController_queryServices",
@@ -12407,6 +13098,96 @@
           }
         ],
         "summary": "Get all subcontracts for an organization",
+        "tags": [
+          "Asset Subcontracts"
+        ]
+      }
+    },
+    "/api/v1/assetmanager/subcontracts/organization/{orgId}/export/csv": {
+      "post": {
+        "operationId": "AssetSubcontractController_exportSubcontractsToCsv",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export subcontracts to CSV",
+        "tags": [
+          "Asset Subcontracts"
+        ]
+      }
+    },
+    "/api/v1/assetmanager/subcontracts/organization/{orgId}/export/pdf": {
+      "post": {
+        "operationId": "AssetSubcontractController_exportSubcontractsToPdf",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportAssetsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Export subcontracts to PDF",
         "tags": [
           "Asset Subcontracts"
         ]
@@ -18419,6 +19200,161 @@
         "summary": "Update an existing portfolio",
         "tags": [
           "Portfolios"
+        ]
+      }
+    },
+    "/api/v1/data-import/jobs": {
+      "post": {
+        "operationId": "ImportJobsController_createJob",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateImportJobDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Start an import run and receive the job to upload rows into",
+        "tags": [
+          "Data Import",
+          "Data Import"
+        ]
+      }
+    },
+    "/api/v1/data-import/jobs/{id}": {
+      "get": {
+        "operationId": "ImportJobsController_getJob",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Read an import job and its counters",
+        "tags": [
+          "Data Import",
+          "Data Import"
+        ]
+      }
+    },
+    "/api/v1/data-import/jobs/{id}/commit": {
+      "post": {
+        "operationId": "ImportJobsController_commit",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Close the upload and hand the run to the worker",
+        "tags": [
+          "Data Import",
+          "Data Import"
+        ]
+      }
+    },
+    "/api/v1/data-import/jobs/{id}/rows": {
+      "put": {
+        "operationId": "ImportJobsController_uploadRows",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadImportRowsDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Stage a slice of the file; idempotent on (job, rowIndex)",
+        "tags": [
+          "Data Import",
+          "Data Import"
         ]
       }
     },
@@ -36373,6 +37309,10 @@
       "name": "Asset Machines"
     },
     {
+      "description": "",
+      "name": "Asset Manager"
+    },
+    {
       "description": "Manage asset material items",
       "name": "Asset Materials"
     },
@@ -36387,6 +37327,10 @@
     {
       "description": "Manage asset measurement units",
       "name": "Asset Units"
+    },
+    {
+      "description": "",
+      "name": "AssetCatalog"
     },
     {
       "description": "",
@@ -36433,6 +37377,10 @@
       "name": "Cancellation Invoices"
     },
     {
+      "description": "",
+      "name": "Catalog"
+    },
+    {
       "description": "Manage team chat conversations, messages, and participants",
       "name": "Chat"
     },
@@ -36459,6 +37407,10 @@
     {
       "description": "",
       "name": "CreditNote"
+    },
+    {
+      "description": "",
+      "name": "Data Import"
     },
     {
       "description": "Manage sales pipeline deals",
