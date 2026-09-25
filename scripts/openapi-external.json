@@ -1978,9 +1978,17 @@
               "asset_catalog",
               "employee",
               "time_tracking",
-              "shift_plan"
+              "shift_plan",
+              "invoice",
+              "offer",
+              "calendar_event"
             ],
             "type": "string"
+          },
+          "fileRows": {
+            "description": "For a compound kind: rows of the source file, of which totalRows staged documents remain. A file beyond 100000 rows is refused here, whole — not row by row mid-upload.",
+            "minimum": 1,
+            "type": "number"
           },
           "matchField": {
             "description": "Whitelisted per entity. Required for update and upsert.",
