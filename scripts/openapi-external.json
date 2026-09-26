@@ -3657,7 +3657,8 @@
                 "user.archive",
                 "work_time.create",
                 "work_time.update",
-                "work_time.delete"
+                "work_time.delete",
+                "import.completed"
               ],
               "type": "string"
             },
@@ -19321,6 +19322,87 @@
       }
     },
     "/api/v1/data-import/jobs/{id}/rows": {
+      "get": {
+        "operationId": "ImportJobsController_getRows",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "PENDING",
+                  "CREATED",
+                  "UPDATED",
+                  "UNCHANGED",
+                  "MERGED",
+                  "SKIPPED",
+                  "FAILED"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Only rows that carry a reason (with status=CREATED: written with a warning)",
+            "in": "query",
+            "name": "withReason",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "The run's rows, filtered by outcome — what the panel lists",
+        "tags": [
+          "Data Import",
+          "Data Import"
+        ]
+      },
       "put": {
         "operationId": "ImportJobsController_uploadRows",
         "parameters": [
