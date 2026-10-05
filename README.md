@@ -17,6 +17,100 @@ n8n community node for the **cashwerk** API. Provides full CRUD operations acros
 npm install n8n-nodes-cashwerk
 ```
 
+## Example workflows
+
+Two workflows to paste into n8n (**Workflow → Import from clipboard**). Both use only this package
+and n8n core nodes, so they run as-is once a cashwerk credential is selected.
+
+### 1. React to a new invoice
+
+The trigger fires when an invoice is created in cashwerk; the second node reads the customer the
+invoice belongs to, so the following nodes have the company record rather than just its id.
+
+```json
+{
+  "name": "cashwerk — new invoice, with its customer",
+  "nodes": [
+    {
+      "parameters": { "authentication": "apiKey", "events": ["invoice.create"] },
+      "type": "n8n-nodes-cashwerk.cashwerkTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "id": "a1",
+      "name": "Invoice created"
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "company",
+        "operation": "get",
+        "companyId": "={{ $json.data.customer.companyId }}"
+      },
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [220, 0],
+      "id": "a2",
+      "name": "Get the customer"
+    }
+  ],
+  "connections": {
+    "Invoice created": { "main": [[{ "node": "Get the customer", "type": "main", "index": 0 }]] }
+  },
+  "settings": {},
+  "pinData": {}
+}
+```
+
+> `$json.data.customer.companyId` is the path for an invoice raised on a **company**. An invoice
+> raised on a private contact carries `contactId` instead, so branch on whichever is present if you
+> handle both.
+
+### 2. Create a company from an inbound form
+
+A webhook in, a cashwerk company out — the shape most "get a lead into the CRM" automations take.
+
+```json
+{
+  "name": "cashwerk — inbound lead to company",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "cashwerk-lead", "options": {} },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "id": "b1",
+      "name": "Lead received"
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "company",
+        "operation": "create",
+        "name": "={{ $json.body.company }}",
+        "additionalFields": {
+          "email": "={{ $json.body.email }}",
+          "phone": "={{ $json.body.phone }}"
+        }
+      },
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [220, 0],
+      "id": "b2",
+      "name": "Create company"
+    }
+  ],
+  "connections": {
+    "Lead received": { "main": [[{ "node": "Create company", "type": "main", "index": 0 }]] }
+  },
+  "settings": {},
+  "pinData": {}
+}
+```
+
+**Both work with either credential.** Set `authentication` to `oAuth2` to use the OAuth2 credential
+instead of an API key — OAuth2 is the better choice for a workflow acting for a specific person,
+because the grant can never exceed that person's own permissions in cashwerk.
+
 ## Credentials
 
 This package supports two authentication methods:
