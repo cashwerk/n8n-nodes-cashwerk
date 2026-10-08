@@ -1,6 +1,24 @@
 {
   "components": {
     "schemas": {
+      "AddChainOfferDTO": {
+        "properties": {
+          "countInContractSum": {
+            "default": true,
+            "description": "False when the contract sum already contains the offer, so it is bound without moving the sum. Default true.",
+            "type": "boolean"
+          },
+          "offerId": {
+            "description": "The accepted offer of the same project that joins the contract",
+            "minimum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "offerId"
+        ],
+        "type": "object"
+      },
       "AddCompaniesDto": {
         "properties": {
           "companyIds": {
@@ -429,6 +447,56 @@
         ],
         "type": "object"
       },
+      "ChainMemberPositionDTO": {
+        "properties": {
+          "quantity": {
+            "description": "KR: quantity to date; TR: quantity of this invoice",
+            "minimum": 0,
+            "type": "number"
+          },
+          "reason": {
+            "description": "Why a KR states less than was billed before (required then)",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "sourceLineId": {
+            "description": "Offer line id of the position, as the position ledger lists it",
+            "minimum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "sourceLineId",
+          "quantity"
+        ],
+        "type": "object"
+      },
+      "ChainPositionCorrectionDTO": {
+        "properties": {
+          "quantity": {
+            "description": "The lower quantity to date the cumulative invoice states; below the billed quantity",
+            "minimum": 0,
+            "type": "number"
+          },
+          "reason": {
+            "description": "Why the cumulative invoice states less than was billed before",
+            "maxLength": 500,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "sourceLineId": {
+            "description": "Offer line id of the position, as the position ledger lists it",
+            "minimum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "sourceLineId",
+          "quantity",
+          "reason"
+        ],
+        "type": "object"
+      },
       "CheckUserAvailabilityDto": {
         "properties": {
           "end": {
@@ -783,6 +851,13 @@
             "items": {
               "$ref": "#/components/schemas/CreateInvoiceLineDTO"
             },
+            "type": "array"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/ChainMemberPositionDTO"
+            },
+            "maxItems": 5000,
             "type": "array"
           },
           "progressPct": {
@@ -2311,6 +2386,11 @@
           },
           "shortText": {
             "type": "string"
+          },
+          "sourceLineId": {
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
           },
           "taxRate": {
             "type": "number"
@@ -5285,6 +5365,42 @@
         ],
         "type": "object"
       },
+      "InitDirectUploadDto": {
+        "properties": {
+          "fileSize": {
+            "description": "Total file size in bytes",
+            "minimum": 1,
+            "type": "number"
+          },
+          "filename": {
+            "description": "Original filename",
+            "type": "string"
+          },
+          "mimeType": {
+            "description": "MIME type of the file",
+            "type": "string"
+          },
+          "parentFolderId": {
+            "description": "Parent folder ID",
+            "type": "number"
+          },
+          "relativePath": {
+            "description": "Relative path from folder upload (e.g., \"Devices/macbook/file.png\")",
+            "type": "string"
+          },
+          "uploadId": {
+            "description": "Client-side upload ID for tracking",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename",
+          "fileSize",
+          "mimeType",
+          "uploadId"
+        ],
+        "type": "object"
+      },
       "InviteUserDto": {
         "properties": {
           "address": {
@@ -5827,6 +5943,14 @@
           },
           "contractNumber": {
             "type": "string"
+          },
+          "contractOfferIds": {
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "maxItems": 200,
+            "type": "array"
           },
           "contractSumNet": {
             "minimum": 0,
@@ -7265,6 +7389,28 @@
         ],
         "type": "object"
       },
+      "SaveProjectAddressToPortfolioDTO": {
+        "properties": {
+          "customAddress": {
+            "$ref": "#/components/schemas/CreateAddressDto"
+          },
+          "id": {
+            "type": "number"
+          },
+          "portfolioId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "portfolioName": {
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "customAddress"
+        ],
+        "type": "object"
+      },
       "SendInvoiceByMailDto": {
         "properties": {
           "bcc": {
@@ -7382,6 +7528,22 @@
           "recipientEmail",
           "connectionId",
           "mailProvider"
+        ],
+        "type": "object"
+      },
+      "SetChainPositionCorrectionsDTO": {
+        "properties": {
+          "corrections": {
+            "description": "Every lowered position of the draft; an empty list clears them",
+            "items": {
+              "$ref": "#/components/schemas/ChainPositionCorrectionDTO"
+            },
+            "maxItems": 5000,
+            "type": "array"
+          }
+        },
+        "required": [
+          "corrections"
         ],
         "type": "object"
       },
@@ -21089,6 +21251,54 @@
         ]
       }
     },
+    "/api/v1/drive/{id}/upload/direct/init": {
+      "post": {
+        "operationId": "NxDriveController_initDirectUpload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitDirectUploadDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Initialize direct-to-storage upload session",
+        "tags": [
+          "Drive"
+        ]
+      }
+    },
     "/api/v1/drive/{id}/view": {
       "get": {
         "description": "Returns drive metadata, current folder, breadcrumbs, and contents in a single optimized request",
@@ -21287,6 +21497,86 @@
           }
         ],
         "summary": "Get the billing chain of a project",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/project/{projectId}/all": {
+      "get": {
+        "operationId": "NxBillingChainController_allOfProject",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Every billing chain of the project that is not cancelled, oldest first"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List every billing chain of a project, closed earlier contracts included",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/project/{projectId}/positions": {
+      "get": {
+        "operationId": "NxBillingChainController_projectPositions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Every offer position of every non-cancelled billing chain of the project: ordered, billed, in draft, open"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get which offer positions of a project are billed and which are still open, over all its billing chains. In a cumulative chain billed is the quantity on the latest issued cumulative or final invoice (it restates the total to date, never a sum); in a sequential chain it is the sum of the issued partial invoices. Drafts are reported as inDraft, never as billed; open = ordered - billed, negative means extra quantity (Mehrmenge).",
         "tags": [
           "BillingChain",
           "Invoicing",
@@ -21514,6 +21804,155 @@
           }
         ],
         "summary": "Add a progress, partial, cumulative or final invoice to a billing chain",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}/members/{invoiceId}/position-corrections": {
+      "put": {
+        "operationId": "NxBillingChainController_setPositionCorrections",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "The draft cumulative invoice of the chain",
+            "in": "path",
+            "name": "invoiceId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetChainPositionCorrectionsDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The position ledger of the chain with the corrections recorded"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Set why a draft cumulative invoice states billed positions lower; replaces the list",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}/offers": {
+      "post": {
+        "operationId": "NxBillingChainController_addOffer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddChainOfferDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The billing chain with the offer among its contract offers"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Add a further accepted offer of the project to an open billing chain",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}/positions": {
+      "get": {
+        "operationId": "NxBillingChainController_positions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Every offer position of the chain: ordered, billed, in draft, open, with the summary"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get which offer positions of a billing chain are billed and which are still open. In a cumulative chain billed is the quantity on the latest issued cumulative or final invoice (it restates the total to date, never a sum); in a sequential chain it is the sum of the issued partial invoices. Drafts are reported as inDraft, never as billed; open = ordered - billed, negative means extra quantity (Mehrmenge).",
         "tags": [
           "BillingChain",
           "Invoicing",
@@ -28166,7 +28605,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateProjectDTO"
+                "$ref": "#/components/schemas/SaveProjectAddressToPortfolioDTO"
               }
             }
           },
@@ -28188,7 +28627,7 @@
             "api-key": []
           }
         ],
-        "summary": "Update project address with portfolio sync",
+        "summary": "Save the project address in a portfolio of the project customer and link it: the linked portfolio is updated, or with portfolioId null (or none linked) a new one is created",
         "tags": [
           "Projects"
         ]
