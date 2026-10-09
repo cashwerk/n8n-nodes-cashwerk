@@ -7534,17 +7534,19 @@
       "SetChainPositionCorrectionsDTO": {
         "properties": {
           "corrections": {
-            "description": "Every lowered position of the draft; an empty list clears them",
+            "description": "Every lowered position of the draft; an empty list clears them, left out keeps them",
             "items": {
               "$ref": "#/components/schemas/ChainPositionCorrectionDTO"
             },
             "maxItems": 5000,
             "type": "array"
+          },
+          "creditReason": {
+            "description": "Why the draft states less than the chain billed before (a credit to the customer); required to book it. Empty clears it.",
+            "maxLength": 500,
+            "type": "string"
           }
         },
-        "required": [
-          "corrections"
-        ],
         "type": "object"
       },
       "SetSectorMembersDto": {
