@@ -944,6 +944,7 @@
             "type": "string"
           },
           "locationDetails": {
+            "maxLength": 1024,
             "type": "string"
           },
           "locationType": {
@@ -2904,6 +2905,11 @@
           "customAddress": {
             "$ref": "#/components/schemas/CreateAddressDto"
           },
+          "customerOrderNumber": {
+            "maxLength": 255,
+            "nullable": true,
+            "type": "string"
+          },
           "description": {
             "type": "string"
           },
@@ -4202,6 +4208,14 @@
               "NONE"
             ],
             "type": "string"
+          },
+          "orderNumberLabel": {
+            "maxLength": 60,
+            "nullable": true,
+            "type": "string"
+          },
+          "showProjectNumber": {
+            "type": "boolean"
           },
           "tableStyle": {
             "enum": [
@@ -7415,12 +7429,14 @@
         "properties": {
           "bcc": {
             "items": {
+              "format": "email",
               "type": "string"
             },
             "type": "array"
           },
           "cc": {
             "items": {
+              "format": "email",
               "type": "string"
             },
             "type": "array"
@@ -7428,8 +7444,20 @@
           "connectionId": {
             "type": "number"
           },
+          "copyToSelf": {
+            "description": "A Bcc copy to the sender.",
+            "type": "boolean"
+          },
           "customMessage": {
             "type": "string"
+          },
+          "driveFileIds": {
+            "description": "Drive files to attach; a file that does not fit is sent as an expiring link.",
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "type": "array"
           },
           "mailProvider": {
             "type": "string"
@@ -7441,8 +7469,20 @@
           "recipientName": {
             "type": "string"
           },
+          "scheduledAt": {
+            "description": "Send time, ISO 8601; omitted or now sends right away.",
+            "type": "string"
+          },
           "subject": {
             "type": "string"
+          },
+          "to": {
+            "description": "Recipients; the first one is the primary recipient.",
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "required": [
@@ -7507,11 +7547,37 @@
       },
       "SendOfferByMailDto": {
         "properties": {
+          "bcc": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "cc": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "type": "array"
+          },
           "connectionId": {
             "type": "number"
           },
+          "copyToSelf": {
+            "description": "A Bcc copy to the sender.",
+            "type": "boolean"
+          },
           "customMessage": {
             "type": "string"
+          },
+          "driveFileIds": {
+            "description": "Drive files to attach; a file that does not fit is sent as an expiring link.",
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "type": "array"
           },
           "mailProvider": {
             "type": "string"
@@ -7520,8 +7586,20 @@
             "format": "email",
             "type": "string"
           },
+          "scheduledAt": {
+            "description": "Send time, ISO 8601; omitted or now sends right away.",
+            "type": "string"
+          },
           "subject": {
             "type": "string"
+          },
+          "to": {
+            "description": "Recipients; the first one is the primary recipient.",
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "required": [
@@ -8129,6 +8207,7 @@
             "type": "string"
           },
           "locationDetails": {
+            "maxLength": 1024,
             "type": "string"
           },
           "locationType": {
@@ -9303,6 +9382,11 @@
             ],
             "type": "string"
           },
+          "businessFieldOther": {
+            "maxLength": 100,
+            "nullable": true,
+            "type": "string"
+          },
           "ceoName": {
             "type": "string"
           },
@@ -9670,6 +9754,11 @@
           "customAddress": {
             "$ref": "#/components/schemas/CreateAddressDto"
           },
+          "customerOrderNumber": {
+            "maxLength": 255,
+            "nullable": true,
+            "type": "string"
+          },
           "defaultBillingRate": {
             "minimum": 0,
             "nullable": true,
@@ -9953,11 +10042,16 @@
         "properties": {
           "tagIds": {
             "items": {
+              "minimum": 1,
               "type": "number"
             },
-            "type": "array"
+            "type": "array",
+            "uniqueItems": true
           }
         },
+        "required": [
+          "tagIds"
+        ],
         "type": "object"
       },
       "UpdateTaskAssigneeDto": {
@@ -17769,6 +17863,45 @@
         ]
       }
     },
+    "/api/v1/crm/companies/{id}/drive-folder": {
+      "post": {
+        "operationId": "NxCompaniesController_getOrCreateCompanyFolder",
+        "parameters": [
+          {
+            "description": "Company ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The company drive folder (created if it does not exist yet)"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get or create the documents folder of a company; upload company documents into this folder",
+        "tags": [
+          "Companies"
+        ]
+      }
+    },
     "/api/v1/crm/companies/{id}/invoices": {
       "post": {
         "operationId": "NxCompaniesController_getCompanyInvoices",
@@ -18836,6 +18969,45 @@
           }
         ],
         "summary": "Get deals for a contact",
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/crm/contacts/{id}/drive-folder": {
+      "post": {
+        "operationId": "NxContactsController_getOrCreateContactFolder",
+        "parameters": [
+          {
+            "description": "Contact ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The contact drive folder (created if it does not exist yet)"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get or create the documents folder of a contact; upload contact documents into this folder",
         "tags": [
           "Contacts"
         ]
@@ -28172,6 +28344,129 @@
         "operationId": "ProjectManagerController_getProjects",
         "parameters": [
           {
+            "description": "Dynamic status ids (any of)",
+            "in": "query",
+            "name": "statusIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Customer company ids; OR-ed with customerContactIds",
+            "in": "query",
+            "name": "customerCompanyIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Customer contact ids (projects without a customer company); OR-ed with customerCompanyIds",
+            "in": "query",
+            "name": "customerContactIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Tag ids (any of)",
+            "in": "query",
+            "name": "tagIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Runtime overlap start, ISO date (YYYY-MM-DD = that day in the caller's timezone)",
+            "in": "query",
+            "name": "activeFrom",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Runtime overlap end, ISO date (YYYY-MM-DD = the whole day, inclusive)",
+            "in": "query",
+            "name": "activeTo",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Quick filters, AND-ed",
+            "in": "query",
+            "name": "quick",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "mine",
+                  "overdue",
+                  "overBudget",
+                  "negativeMargin",
+                  "unassigned"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Budget consumption band; projects without a budget never match",
+            "in": "query",
+            "name": "budgetBand",
+            "required": false,
+            "schema": {
+              "enum": [
+                "under80",
+                "80to100",
+                "over100"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Assignee user ids (any of)",
+            "in": "query",
+            "name": "userIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Restrict to these project ids",
+            "in": "query",
+            "name": "projectIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          },
+          {
             "in": "query",
             "name": "skip",
             "required": false,
@@ -28217,28 +28512,6 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "projectIds",
-            "required": false,
-            "schema": {
-              "items": {
-                "type": "number"
-              },
-              "type": "array"
-            }
-          },
-          {
-            "in": "query",
-            "name": "userIds",
-            "required": false,
-            "schema": {
-              "items": {
-                "type": "number"
-              },
-              "type": "array"
             }
           },
           {

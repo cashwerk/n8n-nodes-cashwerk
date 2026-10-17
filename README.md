@@ -296,14 +296,20 @@ Webhook subscriptions are automatically registered when the workflow is activate
 
 The package ships with ready-to-import workflow templates (`templates/`):
 
-- **Deal Won → Create Invoice** -- draft an invoice for the deal's contact as soon as a deal is marked WON
-- **Deal Won → Create Project** -- open a project linked to the contact for every won deal
-- **New Contact → Slack Notification** -- post new CRM contacts to a Slack channel
-- **Daily Invoice Summary** -- scheduled HTML report of recent invoices by email
-- **Import Contacts from CSV** -- upload a CSV via form and create one contact per row
-- **New Booking → Slack + Prep Task** -- notify the team and create a preparation task for every booking
+- **Draft a cashwerk invoice when a deal is won** -- reads the deal back for its customer, skips a deal with no contact, and drafts the invoice
+- **Create a cashwerk project when a deal is won** -- opens a project named after the deal and linked to its customer
+- **Post new cashwerk contacts to Slack** -- posts name, email and id to a channel on `contact.create`
+- **Send a daily cashwerk invoice summary report via email** -- an HTML report of the newest invoices at 08:00
+- **Import contacts into cashwerk from a CSV upload form** -- a form takes a CSV and creates one contact per row
+- **Announce a cashwerk booking in Slack and open a prep task** -- two independent branches off `booking.create`
 
-Import: n8n → Workflows → Import from file. Each template carries a sticky note with the setup steps.
+Import: n8n → Workflows → Import from file.
+
+Each file is annotated the way the n8n template library requires: one yellow overview sticky carrying
+`## How it works` and `## Setup steps`, plus grey section stickies grouping the nodes on the workflows with four
+or more of them. Tags are left empty, because the template library takes its categories from the submission form
+and a populated tag list collides on a batch import. The booking template deliberately ships an **empty task
+board column**: a column id belongs to one instance and must not travel inside a template.
 
 ## License
 
