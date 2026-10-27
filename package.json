@@ -63,7 +63,7 @@
     "n8n-workflow": "^2.8.0",
     "prettier": "^3.9.6",
     "release-it": "^20.2.1",
-    "typescript": "^5.3.0"
+    "typescript": "^7.0.2"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
