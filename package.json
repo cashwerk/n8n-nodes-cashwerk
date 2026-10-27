@@ -57,7 +57,7 @@
     "url": "git+https://github.com/cashwerk/n8n-nodes-cashwerk.git"
   },
   "devDependencies": {
-    "@n8n/node-cli": "^0.44.5",
+    "@n8n/node-cli": "^0.54.2",
     "eslint": "^9.29.0",
     "n8n-core": "^2.7.2",
     "n8n-workflow": "^2.8.0",
