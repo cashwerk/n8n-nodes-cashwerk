@@ -1,6 +1,19 @@
 {
   "components": {
     "schemas": {
+      "AcceptOfferDTO": {
+        "properties": {
+          "selection": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApplyOfferSelectionDTO"
+              }
+            ],
+            "description": "The customer's choice, applied before the offer is accepted"
+          }
+        },
+        "type": "object"
+      },
       "AddChainOfferDTO": {
         "properties": {
           "countInContractSum": {
@@ -295,6 +308,50 @@
           "success",
           "data",
           "statusCode"
+        ],
+        "type": "object"
+      },
+      "ApplyOfferSelectionDTO": {
+        "properties": {
+          "alternativeBases": {
+            "description": "For a taken alternative without a link: the Grundposition it replaces. Without one it is taken as an extra position.",
+            "items": {
+              "$ref": "#/components/schemas/OfferAlternativeBaseDTO"
+            },
+            "maxItems": 1000,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "orderRequirementLineIds": {
+            "description": "Bedarfspositionen (contingency lines) the customer orders now",
+            "example": [
+              43
+            ],
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "maxItems": 1000,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "takeAlternativeLineIds": {
+            "description": "Alternative lines the customer takes; at most one per Grundposition",
+            "example": [
+              42
+            ],
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "maxItems": 1000,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "takeAlternativeLineIds",
+          "orderRequirementLineIds"
         ],
         "type": "object"
       },
@@ -1120,6 +1177,11 @@
           },
           "color": {
             "type": "string"
+          },
+          "membersSeeAllEvents": {
+            "default": false,
+            "description": "Members of the calendar see all of its events (department calendar).",
+            "type": "boolean"
           },
           "name": {
             "type": "string"
@@ -1988,6 +2050,14 @@
           },
           "transcriptionEnabled": {
             "type": "boolean"
+          },
+          "visibility": {
+            "default": "NORMAL",
+            "enum": [
+              "NORMAL",
+              "PRIVATE"
+            ],
+            "type": "string"
           }
         },
         "required": [
@@ -2158,6 +2228,14 @@
       },
       "CreateInvoiceDTO": {
         "properties": {
+          "attachedTrackingIds": {
+            "description": "Time entries attached without a line; absent = unchanged, [] = release all",
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "type": "array"
+          },
           "customer": {
             "$ref": "#/components/schemas/InvoicingCustomerDTO"
           },
@@ -2303,6 +2381,21 @@
       },
       "CreateInvoiceLineDTO": {
         "properties": {
+          "alternativeOfLineId": {
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          },
+          "alternativeOfPosition": {
+            "maxLength": 64,
+            "nullable": true,
+            "type": "string"
+          },
+          "articleNumber": {
+            "maxLength": 100,
+            "nullable": true,
+            "type": "string"
+          },
           "assetId": {
             "type": "number"
           },
@@ -3010,6 +3103,11 @@
             ],
             "type": "string"
           },
+          "billPastOccurrences": {
+            "default": false,
+            "description": "Also bill the occurrences between startsAt and today (up to maxCatchUp at once). Default false: they are skipped.",
+            "type": "boolean"
+          },
           "billingMode": {
             "description": "ADVANCE bills the period starting at the issue date, ARREARS the one ending at it",
             "enum": [
@@ -3445,6 +3543,35 @@
         },
         "required": [
           "name"
+        ],
+        "type": "object"
+      },
+      "CreateTrackingLockDto": {
+        "properties": {
+          "fromDate": {
+            "description": "First locked day (YYYY-MM-DD), in the employee's time zone",
+            "example": "2026-09-01",
+            "type": "string"
+          },
+          "reason": {
+            "example": "Monatsabschluss September, an Lohnbuchhaltung übergeben",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "toDate": {
+            "description": "Last locked day, inclusive (YYYY-MM-DD)",
+            "example": "2026-09-30",
+            "type": "string"
+          },
+          "userId": {
+            "description": "Lock one employee only; omitted = the whole organization",
+            "minimum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "fromDate",
+          "toDate"
         ],
         "type": "object"
       },
@@ -4195,6 +4322,13 @@
             "nullable": true,
             "type": "string"
           },
+          "lineColumns": {
+            "items": {
+              "$ref": "#/components/schemas/LineColumnDTO"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
           "logoHeightMm": {
             "maximum": 60,
             "minimum": 5,
@@ -4224,6 +4358,9 @@
               "PLAIN"
             ],
             "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/LineTableTotalsDTO"
           }
         },
         "required": [
@@ -5655,6 +5792,74 @@
         },
         "type": "object"
       },
+      "LineColumnDTO": {
+        "properties": {
+          "key": {
+            "enum": [
+              "position",
+              "articleNumber",
+              "description",
+              "quantity",
+              "unit",
+              "unitPrice",
+              "discount",
+              "taxRate",
+              "total"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 40,
+            "nullable": true,
+            "type": "string"
+          },
+          "visible": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "visible"
+        ],
+        "type": "object"
+      },
+      "LineTableTotalsDTO": {
+        "properties": {
+          "accentBand": {
+            "type": "boolean"
+          },
+          "grossLabel": {
+            "maxLength": 40,
+            "nullable": true,
+            "type": "string"
+          },
+          "keepWithLastLine": {
+            "type": "boolean"
+          },
+          "netLabel": {
+            "maxLength": 40,
+            "nullable": true,
+            "type": "string"
+          },
+          "perRateVat": {
+            "type": "boolean"
+          },
+          "placement": {
+            "enum": [
+              "table",
+              "box"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "placement",
+          "perRateVat",
+          "accentBand",
+          "keepWithLastLine"
+        ],
+        "type": "object"
+      },
       "LinkEventAttachmentDto": {
         "properties": {
           "fileId": {
@@ -5862,15 +6067,55 @@
         "type": "object"
       },
       "NxSkontoValue": {
-        "properties": {},
+        "properties": {
+          "days": {
+            "description": "Days within which the discount applies",
+            "type": "number"
+          },
+          "noticeLine": {
+            "type": "string"
+          },
+          "percent": {
+            "description": "Discount in percent",
+            "type": "number"
+          }
+        },
+        "required": [
+          "days",
+          "percent"
+        ],
         "type": "object"
       },
       "NxStorageFileEntity": {
         "properties": {},
         "type": "object"
       },
+      "OfferAlternativeBaseDTO": {
+        "properties": {
+          "alternativeLineId": {
+            "description": "The taken alternative line",
+            "example": 42,
+            "minimum": 1,
+            "type": "number"
+          },
+          "baseLineId": {
+            "description": "The NORMAL line of this offer it replaces",
+            "example": 41,
+            "minimum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "alternativeLineId",
+          "baseLineId"
+        ],
+        "type": "object"
+      },
       "OfferDetailsDTO": {
         "properties": {
+          "allowCustomerSelection": {
+            "type": "boolean"
+          },
           "assigneeIds": {
             "items": {
               "type": "number"
@@ -6076,6 +6321,14 @@
           "showQRCode": {
             "type": "boolean"
           },
+          "timeEntries": {
+            "enum": [
+              "NONE",
+              "APPENDIX",
+              "APPENDIX_WITH_RATES"
+            ],
+            "type": "string"
+          },
           "xInvoice": {
             "type": "boolean"
           }
@@ -6184,6 +6437,9 @@
       },
       "PatchOfferDetailsDTO": {
         "properties": {
+          "allowCustomerSelection": {
+            "type": "boolean"
+          },
           "assigneeIds": {
             "items": {
               "type": "number"
@@ -6297,10 +6553,6 @@
             "$ref": "#/components/schemas/NxSkontoValue"
           }
         },
-        "required": [
-          "dueDate",
-          "skonto"
-        ],
         "type": "object"
       },
       "PayoutWorktimeDto": {
@@ -7389,8 +7641,28 @@
             "description": "The Cashwerk project this document belongs to",
             "type": "number"
           },
+          "submissionId": {
+            "description": "The form builder submission id (kind = submission); makes a retried callback a no-op",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "submissionStatus": {
+            "description": "The submission status in the form builder; a draft is not recorded",
+            "maxLength": 32,
+            "type": "string"
+          },
+          "submitterName": {
+            "description": "Who filled in the form (kind = submission)",
+            "maxLength": 256,
+            "type": "string"
+          },
           "templateId": {
             "description": "The form-builder template id this document was generated from",
+            "type": "string"
+          },
+          "templateName": {
+            "description": "The template name (kind = template); names the form in the project",
+            "maxLength": 256,
             "type": "string"
           }
         },
@@ -7872,6 +8144,44 @@
         "required": [
           "start",
           "end"
+        ],
+        "type": "object"
+      },
+      "TrackingLockResponseDto": {
+        "properties": {
+          "fromDate": {
+            "example": "2026-09-01",
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "lockedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lockedBy": {
+            "type": "number"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "toDate": {
+            "example": "2026-09-30",
+            "type": "string"
+          },
+          "userId": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "fromDate",
+          "toDate",
+          "lockedBy",
+          "lockedAt"
         ],
         "type": "object"
       },
@@ -8369,6 +8679,11 @@
           },
           "color": {
             "type": "string"
+          },
+          "membersSeeAllEvents": {
+            "default": false,
+            "description": "Members of the calendar see all of its events (department calendar).",
+            "type": "boolean"
           },
           "name": {
             "type": "string"
@@ -8957,6 +9272,14 @@
           },
           "transcriptionEnabled": {
             "type": "boolean"
+          },
+          "visibility": {
+            "default": "NORMAL",
+            "enum": [
+              "NORMAL",
+              "PRIVATE"
+            ],
+            "type": "string"
           }
         },
         "required": [
@@ -9068,6 +9391,14 @@
       },
       "UpdateInvoiceDTO": {
         "properties": {
+          "attachedTrackingIds": {
+            "description": "Time entries attached without a line; absent = unchanged, [] = release all",
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "type": "array"
+          },
           "customer": {
             "$ref": "#/components/schemas/InvoicingCustomerDTO"
           },
@@ -24188,6 +24519,44 @@
         ]
       }
     },
+    "/api/v1/invoicing/invoices/{id}/time-entries/chain": {
+      "get": {
+        "operationId": "NxInvoiceController_getChainTimeEntries",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The time entries billed by the other members of the chain"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List the time entries a final invoice's billing chain billed before it",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
     "/api/v1/invoicing/invoices/{id}/time-entries/preview": {
       "post": {
         "operationId": "NxInvoiceController_previewTimeEntries",
@@ -25148,6 +25517,7 @@
         "operationId": "NxOfferController_acceptOfferById",
         "parameters": [
           {
+            "description": "Offer ID",
             "in": "path",
             "name": "id",
             "required": true,
@@ -25156,6 +25526,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptOfferDTO"
+              }
+            }
+          },
+          "required": false
+        },
         "responses": {
           "401": {
             "description": "Unauthorized - Invalid or missing API key/token"
@@ -25172,7 +25552,7 @@
             "api-key": []
           }
         ],
-        "summary": "Mark a committed offer as accepted by the customer",
+        "summary": "Mark a committed offer as accepted by the customer, optionally with the alternatives and contingency items the customer chose",
         "tags": [
           "Offers"
         ]
@@ -25604,6 +25984,52 @@
           }
         ],
         "summary": "Mark a committed offer as rejected by the customer",
+        "tags": [
+          "Offers"
+        ]
+      }
+    },
+    "/api/v1/invoicing/offers/{id}/selection": {
+      "post": {
+        "operationId": "NxOfferController_applyOfferSelection",
+        "parameters": [
+          {
+            "description": "Offer ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyOfferSelectionDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Record the alternatives and contingency items the customer chose on an offer",
         "tags": [
           "Offers"
         ]
@@ -31500,9 +31926,9 @@
             "required": false,
             "schema": {
               "enum": [
+                "title",
                 "createdAt",
                 "status",
-                "title",
                 "dueDate"
               ],
               "type": "string"
@@ -31652,8 +32078,8 @@
             "required": false,
             "schema": {
               "enum": [
-                "createdAt",
                 "title",
+                "createdAt",
                 "dueDate",
                 "taskNumber",
                 "comments",
@@ -31892,8 +32318,8 @@
             "required": false,
             "schema": {
               "enum": [
-                "createdAt",
                 "title",
+                "createdAt",
                 "dueDate",
                 "taskNumber",
                 "comments",
@@ -32698,8 +33124,8 @@
             "required": false,
             "schema": {
               "enum": [
-                "createdAt",
                 "title",
+                "createdAt",
                 "dueDate",
                 "taskNumber",
                 "comments",
@@ -36610,6 +37036,319 @@
         "summary": "Update a tracking category",
         "tags": [
           "Tracking Categories"
+        ]
+      }
+    },
+    "/api/v1/work-manager/time-tracking/locks": {
+      "get": {
+        "operationId": "NxTimeTrackingLockController_list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "example": "2026-09-01",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "example": "2026-09-30",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/TrackingLockResponseDto"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List every active time-tracking lock of the organization in a date range",
+        "tags": [
+          "Time Tracking"
+        ]
+      },
+      "post": {
+        "operationId": "NxTimeTrackingLockController_lock",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTrackingLockDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TrackingLockResponseDto"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 201,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Close a day, a period or a month of time tracking, for everyone or one employee",
+        "tags": [
+          "Time Tracking"
+        ]
+      }
+    },
+    "/api/v1/work-manager/time-tracking/locks/user/{userId}": {
+      "get": {
+        "operationId": "NxTimeTrackingLockController_listForUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "example": "2026-09-01",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "example": "2026-09-30",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/TrackingLockResponseDto"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List the time-tracking locks that apply to one employee (organization-wide and personal)",
+        "tags": [
+          "Time Tracking"
+        ]
+      }
+    },
+    "/api/v1/work-manager/time-tracking/locks/{id}": {
+      "delete": {
+        "operationId": "NxTimeTrackingLockController_unlock",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TrackingLockResponseDto"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Reopen a closed time-tracking period",
+        "tags": [
+          "Time Tracking"
         ]
       }
     },
