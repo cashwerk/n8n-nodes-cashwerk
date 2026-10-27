@@ -1,25 +1,27 @@
 {
-  "name": "cashwerk – Import Contacts from CSV",
+  "name": "Import contacts into cashwerk from a CSV upload form",
   "nodes": [
     {
       "parameters": {
-        "content": "## Import Contacts from CSV\nUpload a CSV (columns: firstName, lastName, email, phone) and create one cashwerk contact per row.\n\n## Setup\n1. Add your cashwerk API credential to *Create Contact*.\n2. Replace *Read CSV* with your file source (Google Drive, FTP, HTTP …) or run manually and upload a file in the Form trigger.\n3. Map extra columns in *Create Contact* → Options.\n\n_Needs the **cashwerk** community node (`n8n-nodes-cashwerk`) and a cashwerk API key (cashwerk → Settings → API Platform)._",
-        "height": 300,
-        "width": 520,
-        "color": 5
+        "content": "## How it works\nThe workflow publishes a small upload form. Somebody drops a CSV of contacts on it, and every row is created in cashwerk as a contact. No spreadsheet goes to whoever happens to have API access, and no row is typed twice.\n\nThe Form Trigger hands the file on as binary data, the extract step turns it into one item per row, and the cashwerk node creates one contact per item. Column names in the CSV header are what the field expressions read, so the mapping is visible in the node rather than buried in code.\n\n## Setup steps\n1. Install the community node **n8n-nodes-cashwerk** (Settings → Community nodes).\n2. In cashwerk go to **Settings → API Platform** and create an API key with write access to contacts. Add it as a **cashwerk API** credential on *Create Contact*.\n3. Give your CSV the header **firstName, lastName, email, phone**, or change the expressions on *Create Contact* to match the header you have.\n4. Activate the workflow and open the form URL the trigger shows.\n\n## Limits\n- One contact per row, with no duplicate check: importing the same file twice creates the contacts twice.\n- Nothing validates the rows. A row that cashwerk rejects stops the run unless you switch on *Continue on error* on *Create Contact*.",
+        "height": 620,
+        "width": 860,
+        "color": 1
       },
-      "id": "n1",
-      "name": "Note 1",
+      "id": "sticky-overview",
+      "name": "Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -600,
-        0
+        -1020,
+        -150
       ]
     },
     {
       "parameters": {
+        "path": "b3f1a0c4-7d52-4a18-9e6b-2c5d8f41a907",
         "formTitle": "Import contacts into cashwerk",
+        "formDescription": "Upload a CSV with the columns firstName, lastName, email, phone.",
         "formFields": {
           "values": [
             {
@@ -32,14 +34,15 @@
         },
         "options": {}
       },
-      "id": "n2",
+      "id": "node-1",
       "name": "Upload CSV",
       "type": "n8n-nodes-base.formTrigger",
-      "typeVersion": 2.2,
+      "typeVersion": 2.6,
       "position": [
-        -40,
-        300
-      ]
+        0,
+        0
+      ],
+      "webhookId": "b3f1a0c4-7d52-4a18-9e6b-2c5d8f41a907"
     },
     {
       "parameters": {
@@ -47,13 +50,13 @@
         "binaryPropertyName": "CSV_file",
         "options": {}
       },
-      "id": "n3",
+      "id": "node-2",
       "name": "Read CSV",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        240,
-        300
+        220,
+        0
       ]
     },
     {
@@ -69,18 +72,18 @@
           "type": "CUSTOMER"
         }
       },
-      "id": "n4",
+      "id": "node-3",
       "name": "Create Contact",
       "type": "n8n-nodes-cashwerk.cashwerk",
       "typeVersion": 1,
       "position": [
-        520,
-        300
+        440,
+        0
       ],
       "credentials": {
         "cashwerkApi": {
           "id": "",
-          "name": "cashwerk API"
+          "name": "cashwerk account"
         }
       }
     }
@@ -113,19 +116,5 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "meta": {
-    "templateId": "cashwerk-import-contacts-from-csv",
-    "templateCredsSetupCompleted": false
-  },
-  "tags": [
-    {
-      "name": "cashwerk"
-    },
-    {
-      "name": "crm"
-    },
-    {
-      "name": "import"
-    }
-  ]
+  "tags": []
 }

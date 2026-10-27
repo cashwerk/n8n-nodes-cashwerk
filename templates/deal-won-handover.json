@@ -1,0 +1,588 @@
+{
+  "name": "Won deal to cashwerk draft invoice, project and Slack handover",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## How it works\nWhen a deal is marked as won in cashwerk, this workflow does the paperwork that normally follows by hand: it reads the deal with its positions, turns those positions into a draft invoice, opens the project, and posts the handover in Slack.\n\nThe deal's line items carry over one by one with description, quantity, unit and unit price. A deal line holds no tax rate, so the rate from **Billing Rules** is applied to every position. Above a net value you choose, a deposit percentage is billed as a single position instead of the full list; below it, every position goes on the invoice. A deal with no positions falls back to its deal value.\n\nNothing reaches the customer. The invoice stays a draft in cashwerk for someone to check and release.\n\n## Setup steps\n1. Install the community node **n8n-nodes-cashwerk** (Settings - Community nodes).\n2. In cashwerk open **Settings - API Platform**, create an API key, and add it as a **cashwerk API** credential on all five cashwerk nodes: the trigger, *Get Deal*, both invoice nodes and *Create Project*.\n3. Open **Billing Rules** and set the tax rate, the payment term in days, the deposit percentage and the net value above which a deposit is billed.\n4. Put your Slack credential and channel on *Notify Sales*.\n5. Run it once on a test deal and read the draft before you activate it.\n\n## Limits\n- Positions are copied without discounts: a per-line discount on the deal does not carry over.\n- The first contact on the deal becomes the invoice recipient; a deal without a contact is skipped.\n- **Only Once Per Deal** keeps its own history, so replaying a deal on purpose means clearing that history on the node.",
+        "height": 760,
+        "width": 880,
+        "color": 1
+      },
+      "id": "sticky-overview",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Trigger and guards\nThe trigger fires on every deal update, so the first check keeps only the ones that were just won. **Only Once Per Deal** then drops a deal it has already handled, which is what stops a second update from invoicing twice.",
+        "height": 520,
+        "width": 620,
+        "color": 7
+      },
+      "id": "sticky-s1",
+      "name": "Section 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Read the deal and the rules\n*Get Deal* loads the deal with its contacts and its positions - the webhook body carries neither. **Billing Rules** is the one node to edit: tax rate, payment term, deposit percentage, and the net value above which a deposit is billed.",
+        "height": 520,
+        "width": 400,
+        "color": 7
+      },
+      "id": "sticky-s2",
+      "name": "Section 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        580,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Decide what to bill\nA deal with no contact is skipped: an invoice needs a recipient. *Build Invoice* then maps the deal positions onto invoice positions, casts the decimal strings to numbers, applies the tax rate and works out the due date.",
+        "height": 520,
+        "width": 620,
+        "color": 7
+      },
+      "id": "sticky-s3",
+      "name": "Section 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Write it back and hand over\nOne of the two invoice nodes runs, never both. Both write a **draft**. The project is created from the same deal afterwards, and Slack gets the figures so sales can see what happened without opening cashwerk.",
+        "height": 700,
+        "width": 900,
+        "color": 7
+      },
+      "id": "sticky-s4",
+      "name": "Section 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "events": [
+          "deal.update"
+        ]
+      },
+      "id": "node-1",
+      "name": "cashwerk Trigger",
+      "type": "n8n-nodes-cashwerk.cashwerkTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.data.completionStatus }}",
+              "rightValue": "WON",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-2",
+      "name": "Deal Won?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "logic": "removeItemsWithAlreadySeenKeyValues",
+        "dedupeValue": "={{ $json.entityId }}",
+        "options": {}
+      },
+      "id": "node-3",
+      "name": "Only Once Per Deal",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "deal",
+        "operation": "get",
+        "dealId": "={{ $('cashwerk Trigger').item.json.entityId }}"
+      },
+      "id": "node-4",
+      "name": "Get Deal",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [
+        660,
+        0
+      ],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": true,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "taxRatePercent",
+              "value": 19,
+              "type": "number"
+            },
+            {
+              "id": "a2",
+              "name": "paymentTermDays",
+              "value": 14,
+              "type": "number"
+            },
+            {
+              "id": "a3",
+              "name": "depositPercent",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "a4",
+              "name": "depositFromNetValue",
+              "value": 5000,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-5",
+      "name": "Billing Rules",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.contacts && $json.contacts.length ? $json.contacts[0].id : null }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-6",
+      "name": "Has a Customer?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1100,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Deal lines arrive as decimal strings from the API, so every number is cast before use.\n// A deal line carries no tax rate, so the rate from \"Billing Rules\" is applied to all of them.\nconst deal = $('Get Deal').first().json;\nconst rules = $('Billing Rules').first().json;\nconst num = (v) => (v === null || v === undefined || v === '' ? 0 : Number(v));\n\nconst taxRate = num(rules.taxRatePercent);\nconst termDays = num(rules.paymentTermDays);\nconst depositPercent = num(rules.depositPercent);\nconst depositFrom = num(rules.depositFromNetValue);\n\nconst dealLines = Array.isArray(deal.lines) ? deal.lines : [];\nconst netFromLines = dealLines.reduce((s, l) => s + num(l.quantity) * num(l.pricePerUnit), 0);\nconst net = dealLines.length ? netFromLines : num(deal.dealValue);\nconst isDeposit = depositFrom > 0 && net >= depositFrom;\n\nconst line = (i, shortText, quantity, unit, priceBase, longText) => ({\n  positionType: 'NORMAL',\n  position: String(i),\n  shortText: shortText || 'Position',\n  longText: longText || '',\n  quantity: quantity || 1,\n  unit: unit || 'Stk',\n  priceBase: priceBase,\n  taxRate,\n});\n\nlet invoiceLines;\nif (isDeposit) {\n  invoiceLines = [\n    line(1, `Deposit ${depositPercent} % - ${deal.title}`, 1, 'Stk', (net * depositPercent) / 100),\n  ];\n} else if (dealLines.length) {\n  invoiceLines = dealLines.map((l, i) =>\n    line(i + 1, l.assetName, num(l.quantity), l.unit, num(l.pricePerUnit), l.assetDescription),\n  );\n} else {\n  invoiceLines = [line(1, deal.title, 1, 'Stk', net)];\n}\n\nconst billed = invoiceLines.reduce((s, l) => s + l.quantity * l.priceBase, 0);\nconst dueDate = new Date(Date.now() + termDays * 86400000).toISOString();\n\nreturn [\n  {\n    json: {\n      isDeposit,\n      invoice: {\n        title: isDeposit ? `Deposit invoice - ${deal.title}` : `Invoice - ${deal.title}`,\n        invoicingDate: new Date().toISOString(),\n        netGross: 'net',\n      },\n      customer: { clientType: 'PERSON', clientId: deal.contacts[0].id },\n      invoiceLines,\n      // dueDate and skonto are both required on paymentTerms, and skonto needs days and percent.\n      paymentTerms: { dueDate, skonto: { days: 0, percent: 0 } },\n      summary: {\n        dealId: deal.id,\n        dealTitle: deal.title,\n        positions: invoiceLines.length,\n        netBilled: billed,\n        currency: deal.currency || 'EUR',\n      },\n    },\n  },\n];"
+      },
+      "id": "node-7",
+      "name": "Build Invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.isDeposit }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-8",
+      "name": "Deposit or Full?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1540,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "invoice",
+        "operation": "create",
+        "invoice": "={{ JSON.stringify($json.invoice) }}",
+        "customer": "={{ JSON.stringify($json.customer) }}",
+        "additionalFields": {
+          "invoiceLines": "={{ JSON.stringify($json.invoiceLines) }}",
+          "paymentTerms": "={{ JSON.stringify($json.paymentTerms) }}"
+        }
+      },
+      "id": "node-9",
+      "name": "Create Deposit Invoice",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -140
+      ],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "invoice",
+        "operation": "create",
+        "invoice": "={{ JSON.stringify($json.invoice) }}",
+        "customer": "={{ JSON.stringify($json.customer) }}",
+        "additionalFields": {
+          "invoiceLines": "={{ JSON.stringify($json.invoiceLines) }}",
+          "paymentTerms": "={{ JSON.stringify($json.paymentTerms) }}"
+        }
+      },
+      "id": "node-10",
+      "name": "Create Full Invoice",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        140
+      ],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2
+      },
+      "id": "node-11",
+      "name": "Collect Invoice",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1980,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apiKey",
+        "resource": "project",
+        "operation": "create",
+        "name": "={{ $('Get Deal').item.json.title }}",
+        "additionalFields": {
+          "clientType": "PERSON",
+          "clientContactId": "={{ $('Get Deal').item.json.contacts[0].id }}",
+          "description": "=Opened from won deal #{{ $('Get Deal').item.json.id }}"
+        }
+      },
+      "id": "node-12",
+      "name": "Create Project",
+      "type": "n8n-nodes-cashwerk.cashwerk",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        0
+      ],
+      "credentials": {
+        "cashwerkApi": {
+          "id": "",
+          "name": "cashwerk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#sales"
+        },
+        "text": "=:handshake: *Deal won - {{ $('Build Invoice').item.json.summary.dealTitle }}*\n{{ $('Build Invoice').item.json.isDeposit ? \"Deposit invoice\" : \"Invoice\" }} drafted: {{ $('Build Invoice').item.json.summary.positions }} position(s), {{ $('Build Invoice').item.json.summary.netBilled.toFixed(2) }} {{ $('Build Invoice').item.json.summary.currency }} net\nProject opened. Both are drafts - nothing was sent.",
+        "otherOptions": {}
+      },
+      "id": "node-13",
+      "name": "Notify Sales",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2420,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "node-14",
+      "name": "Skip",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "cashwerk Trigger": {
+      "main": [
+        [
+          {
+            "node": "Deal Won?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deal Won?": {
+      "main": [
+        [
+          {
+            "node": "Only Once Per Deal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only Once Per Deal": {
+      "main": [
+        [
+          {
+            "node": "Get Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Deal": {
+      "main": [
+        [
+          {
+            "node": "Billing Rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Billing Rules": {
+      "main": [
+        [
+          {
+            "node": "Has a Customer?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has a Customer?": {
+      "main": [
+        [
+          {
+            "node": "Build Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Invoice": {
+      "main": [
+        [
+          {
+            "node": "Deposit or Full?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deposit or Full?": {
+      "main": [
+        [
+          {
+            "node": "Create Deposit Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Full Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Deposit Invoice": {
+      "main": [
+        [
+          {
+            "node": "Collect Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Full Invoice": {
+      "main": [
+        [
+          {
+            "node": "Collect Invoice",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Collect Invoice": {
+      "main": [
+        [
+          {
+            "node": "Create Project",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Project": {
+      "main": [
+        [
+          {
+            "node": "Notify Sales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

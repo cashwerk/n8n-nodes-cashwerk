@@ -1,20 +1,68 @@
 {
-  "name": "cashwerk – Deal Won → Create Invoice",
+  "name": "Draft cashwerk invoices from won deals",
   "nodes": [
     {
       "parameters": {
-        "content": "## Deal Won → Create Invoice\nWhen a deal in the sales pipeline is marked **WON**, this workflow loads the deal's contact and creates a draft invoice in cashwerk, titled after the deal.\n\n## Setup\n1. Add your cashwerk API credential to all cashwerk nodes.\n2. Activate the workflow – the trigger registers its webhook in cashwerk automatically.\n3. Optional: extend the *Create Invoice* node with invoice lines (Additional Fields → Invoice Lines).\n\n_Needs the **cashwerk** community node (`n8n-nodes-cashwerk`) and a cashwerk API key (cashwerk → Settings → API Platform)._",
-        "height": 300,
-        "width": 520,
-        "color": 5
+        "content": "## How it works\nA won deal becomes a draft invoice for the same customer, so the first billable moment is captured while the deal is still fresh. The invoice is created as a draft: a person still opens it, adds the lines and sends it.\n\nThe cashwerk Trigger subscribes to **deal.update** and the first IF reads *completionStatus* out of the event body, which costs no API call. Only a won deal is read back in full, because the customer sits on a many-to-many relation the event body does not carry. The second IF is the part worth keeping: an invoice needs a billing address, which comes from the customer, so a deal with no contact is skipped instead of being sent to the API to fail. The invoice carries today's date, the deal title and net pricing.\n\n## Setup steps\n1. Install the community node **n8n-nodes-cashwerk** (Settings → Community nodes).\n2. In cashwerk go to **Settings → API Platform** and create an API key with read access to deals and write access to invoices. Add it as a **cashwerk API** credential on all three cashwerk nodes — the trigger, *Get Deal* and *Create Invoice*.\n3. Activate the workflow. The trigger registers the webhook in cashwerk by itself.\n4. Mark a test deal as won and open the draft it produces.\n\n## Customisation\n- Change `netGross` to `gross` on *Create Invoice* for gross pricing.\n- Take the customer from the deal's company instead by using `companies[0].id` with `clientType: \"COMPANY\"`.",
+        "height": 643,
+        "width": 860,
+        "color": 1
       },
-      "id": "n1",
-      "name": "Note 1",
+      "id": "sticky-overview",
+      "name": "Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -600,
-        0
+        -1020,
+        -150
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## The deal is won\nSubscribes to deal.update and lets only completionStatus = WON through. The event body carries the deal columns, so this costs no API call.",
+        "height": 320,
+        "width": 460,
+        "color": 7
+      },
+      "id": "sticky-s1",
+      "name": "Section 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -70,
+        -150
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Find the customer\nThe deal is read back in full because the contact sits on a many-to-many relation the webhook body does not carry. An invoice needs a billing address, which comes from the customer, so a deal without a contact is skipped here rather than failing at the API.",
+        "height": 520,
+        "width": 460,
+        "color": 7
+      },
+      "id": "sticky-s2",
+      "name": "Section 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        370,
+        -150
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Draft the invoice\nCreates a draft with today's date, the deal title and net pricing. Lines and sending stay with a person.",
+        "height": 320,
+        "width": 240,
+        "color": 7
+      },
+      "id": "sticky-s3",
+      "name": "Section 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        810,
+        -150
       ]
     },
     {
@@ -23,19 +71,18 @@
           "deal.update"
         ]
       },
-      "id": "n2",
+      "id": "node-1",
       "name": "cashwerk Trigger",
       "type": "n8n-nodes-cashwerk.cashwerkTrigger",
       "typeVersion": 1,
       "position": [
-        -40,
-        300
+        0,
+        0
       ],
-      "webhookId": "",
       "credentials": {
         "cashwerkApi": {
           "id": "",
-          "name": "cashwerk API"
+          "name": "cashwerk account"
         }
       }
     },
@@ -50,7 +97,7 @@
           },
           "conditions": [
             {
-              "id": "n3",
+              "id": "c1",
               "leftValue": "={{ $json.data.completionStatus }}",
               "rightValue": "WON",
               "operator": {
@@ -63,69 +110,103 @@
         },
         "options": {}
       },
-      "id": "n4",
+      "id": "node-2",
       "name": "Deal Won?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "typeVersion": 2.3,
       "position": [
-        240,
-        300
+        220,
+        0
       ]
     },
     {
       "parameters": {
         "authentication": "apiKey",
-        "resource": "contact",
+        "resource": "deal",
         "operation": "get",
-        "contactId": "={{ $json.data.contactId }}"
+        "dealId": "={{ $('cashwerk Trigger').item.json.entityId }}"
       },
-      "id": "n5",
-      "name": "Get Contact",
+      "id": "node-3",
+      "name": "Get Deal",
       "type": "n8n-nodes-cashwerk.cashwerk",
       "typeVersion": 1,
       "position": [
-        520,
-        200
+        440,
+        0
       ],
       "credentials": {
         "cashwerkApi": {
           "id": "",
-          "name": "cashwerk API"
+          "name": "cashwerk account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.contacts && $json.contacts.length ? $json.contacts[0].id : null }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-4",
+      "name": "Has a Customer?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        660,
+        0
+      ]
     },
     {
       "parameters": {
         "authentication": "apiKey",
         "resource": "invoice",
         "operation": "create",
-        "invoice": "={{ JSON.stringify({ title: \"Invoice – \" + $('cashwerk Trigger').item.json.data.title }) }}",
-        "customer": "={{ JSON.stringify({ clientType: \"CONTACT\", clientId: $json.id }) }}"
+        "invoice": "={{ JSON.stringify({ title: \"Invoice – \" + $json.title, invoicingDate: $now.toISO(), netGross: \"net\" }) }}",
+        "customer": "={{ JSON.stringify({ clientType: \"PERSON\", clientId: $json.contacts[0].id }) }}"
       },
-      "id": "n6",
+      "id": "node-5",
       "name": "Create Invoice",
       "type": "n8n-nodes-cashwerk.cashwerk",
       "typeVersion": 1,
       "position": [
-        800,
-        200
+        880,
+        0
       ],
       "credentials": {
         "cashwerkApi": {
           "id": "",
-          "name": "cashwerk API"
+          "name": "cashwerk account"
         }
       }
     },
     {
       "parameters": {},
-      "id": "n7",
-      "name": "Not Won – Skip",
+      "id": "node-6",
+      "name": "Skip",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        520,
-        420
+        660,
+        220
       ]
     }
   ],
@@ -145,25 +226,43 @@
       "main": [
         [
           {
-            "node": "Get Contact",
+            "node": "Get Deal",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Not Won – Skip",
+            "node": "Skip",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get Contact": {
+    "Get Deal": {
+      "main": [
+        [
+          {
+            "node": "Has a Customer?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has a Customer?": {
       "main": [
         [
           {
             "node": "Create Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip",
             "type": "main",
             "index": 0
           }
@@ -175,19 +274,5 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "meta": {
-    "templateId": "cashwerk-deal-won-to-invoice",
-    "templateCredsSetupCompleted": false
-  },
-  "tags": [
-    {
-      "name": "cashwerk"
-    },
-    {
-      "name": "sales"
-    },
-    {
-      "name": "invoicing"
-    }
-  ]
+  "tags": []
 }

@@ -1,20 +1,20 @@
 {
-  "name": "cashwerk – New Booking → Slack + Prep Task",
+  "name": "Announce a cashwerk booking in Slack and open a prep task",
   "nodes": [
     {
       "parameters": {
-        "content": "## New Booking → Team Notification + Task\nWhen someone books an appointment through a cashwerk booking page, notify the team in Slack and create a preparation task in cashwerk.\n\n## Setup\n1. Add your cashwerk API credential.\n2. Connect Slack and choose the channel.\n3. Paste the ID of the board column the prep task should land in into *Create Task* → Task Board Column ID (cashwerk → Tasks → column menu).\n\n_Needs the **cashwerk** community node (`n8n-nodes-cashwerk`) and a cashwerk API key (cashwerk → Settings → API Platform)._",
-        "height": 300,
-        "width": 520,
-        "color": 5
+        "content": "## How it works\nWhen somebody books an appointment on a cashwerk booking page, two things happen at once: the team hears about it in Slack, and a task to prepare for the appointment appears on your board. The booking does not sit in a calendar waiting to be noticed.\n\nThe cashwerk Trigger subscribes to **booking.create** and registers its own webhook when the workflow is activated. The event body carries the invitee's name, their email address and the start time, so both branches run straight off the trigger with no extra API call. They are independent: Slack being down does not cost you the task.\n\n## Setup steps\n1. Install the community node **n8n-nodes-cashwerk** (Settings → Community nodes).\n2. In cashwerk go to **Settings → API Platform** and create an API key with write access to tasks. Add it as a **cashwerk API** credential on the trigger and on *Create Task*.\n3. Connect your Slack credential and pick the channel. The template points at **#bookings**.\n4. **Set the task board column on *Create Task*.** The field is deliberately empty: a board column id belongs to your instance and cannot ship inside a template.\n5. Activate the workflow and make a test booking.\n\n## Customisation\n- Add a due date to the task, or set the assignee to whoever hosts the appointment.\n- Add **booking.update** to also hear about reschedules and cancellations.",
+        "height": 597,
+        "width": 860,
+        "color": 1
       },
-      "id": "n1",
-      "name": "Note 1",
+      "id": "sticky-overview",
+      "name": "Overview",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -600,
-        0
+        -1020,
+        -150
       ]
     },
     {
@@ -23,19 +23,18 @@
           "booking.create"
         ]
       },
-      "id": "n2",
+      "id": "node-1",
       "name": "cashwerk Trigger",
       "type": "n8n-nodes-cashwerk.cashwerkTrigger",
       "typeVersion": 1,
       "position": [
-        -40,
-        300
+        0,
+        0
       ],
-      "webhookId": "",
       "credentials": {
         "cashwerkApi": {
           "id": "",
-          "name": "cashwerk API"
+          "name": "cashwerk account"
         }
       }
     },
@@ -51,13 +50,13 @@
         "text": "=:calendar: *New booking*\n{{ $json.data.inviteeName }} ({{ $json.data.inviteeEmail }})\nStart: {{ $json.data.startAt }}",
         "otherOptions": {}
       },
-      "id": "n3",
+      "id": "node-2",
       "name": "Slack",
       "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
+      "typeVersion": 2.7,
       "position": [
-        240,
-        200
+        220,
+        -110
       ]
     },
     {
@@ -68,18 +67,18 @@
         "taskBoardColumnId": "",
         "title": "=Prepare appointment: {{ $json.data.inviteeName }} · {{ $json.data.startAt }}"
       },
-      "id": "n4",
+      "id": "node-3",
       "name": "Create Task",
       "type": "n8n-nodes-cashwerk.cashwerk",
       "typeVersion": 1,
       "position": [
-        240,
-        420
+        440,
+        110
       ],
       "credentials": {
         "cashwerkApi": {
           "id": "",
-          "name": "cashwerk API"
+          "name": "cashwerk account"
         }
       }
     }
@@ -106,19 +105,5 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "meta": {
-    "templateId": "cashwerk-new-booking-notification",
-    "templateCredsSetupCompleted": false
-  },
-  "tags": [
-    {
-      "name": "cashwerk"
-    },
-    {
-      "name": "booking"
-    },
-    {
-      "name": "slack"
-    }
-  ]
+  "tags": []
 }

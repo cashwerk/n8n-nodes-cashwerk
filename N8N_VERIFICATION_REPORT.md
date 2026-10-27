@@ -101,6 +101,37 @@ n8n:generate-descriptions / check-triggers  → up to date
 - Neu: `.github/workflows/publish.yml`, `.prettierrc`, `eslint.config.mjs`, `nodes/Cashwerk/cashwerk.svg`, `nodes/Cashwerk/cashwerk.dark.svg`, dieser Report.
 - Unberührt: `scripts/openapi-external.json` (deine uncommitteten +4.497 Zeilen), `executors/chat.ts`, `README.md`, `LICENSE`, `cashwerk.png`.
 
+### 2.11 Templates for the template library (2026-10-15)
+
+Section 2 above is German; this entry and everything after it is English, per the workspace rule that anything
+labelling code is written in English. The German parts are legacy and worth translating in one pass.
+
+The Creator Portal submission went in, and `daily-invoice-summary` was submitted to the template library behind
+it. The portal asked for better sticky notes. All six templates were rebuilt for that, and checking them against
+the node's own descriptions and the server schema turned up five defects that would each have cost a review round:
+
+| File | Defect | Fix |
+|---|---|---|
+| `deal-won-to-invoice.json` | `customer.clientType: "CONTACT"` is not a `ClientType` (NONE/COMPANY/PERSON) | `"PERSON"` |
+| `deal-won-to-invoice.json` | `invoice` carried only `title`; `InvoiceDetailsDTO` requires `invoicingDate`, `title`, `netGross`, so the create 400s | all three set |
+| `deal-won-to-project.json` | `clientType: "Person"` is the display name, not the value | `"PERSON"` |
+| both deal templates | read `$json.data.contactId`; that column is `@deprecated` **and** `select: false`, and the customer hangs off a many-to-many relation | read the deal back with `deal:get` and take `contacts[0].id` |
+| `daily-invoice-summary.json` | counted `inv.status` as a string; `status` is a relation, so every invoice fell into `UNKNOWN` | `status.name`, falling back to "Without status" |
+
+Also changed: `tags` emptied (the library takes its categories from the submission form, and a populated tag
+collides on a batch import with `SQLITE_CONSTRAINT: tag_entity.name`), the custom `meta` dropped, node versions
+raised to the current defaults (If 2.3, Slack 2.7, Form Trigger 2.6, Schedule Trigger 1.4), and the Form Trigger
+given a fixed `path`, without which it opens with a missing-required-field error.
+
+Annotation now follows the library's rule: one yellow overview sticky per workflow carrying `## How it works` and
+`## Setup steps` at 180 to 240 words, plus grey (colour 7) section stickies grouping the nodes on the three
+workflows that have four or more.
+
+Verified: structure and wiring; `n8n import:workflow` loads all six; every required field of every cashwerk node
+against `dist/nodes/Cashwerk/descriptions`; every base node against the class installed in the container at the
+`typeVersion` asked for. One required field is left empty on purpose: `taskBoardColumnId` in the booking template,
+because a column id belongs to one instance and must not travel inside a template.
+
 ---
 
 ## 3. Offene Punkte / Risiken
@@ -112,7 +143,7 @@ n8n:generate-descriptions / check-triggers  → up to date
 | C | `author.email` | ✅ `milos@cashwerk.io` (= npm-Account-Mail) |
 | D | `cashwerk.png` | ✅ gelöscht |
 | E | `repository.url` | ✅ `github.com/cashwerk/n8n-nodes-cashwerk` |
-| F | Die 121 generierten Executor-Zweige sind **nicht live gegen die API getestet** (Lint/Typen/Build grün, Routen 1:1 aus der Spec). Vor dem Creator-Portal-Submit einen Smoke-Test in einer lokalen n8n-Instanz (`npm run dev`) über die wichtigsten Resources fahren. | ⚠️ offen |
+| F | The 121 generated executor branches have **never run against the API** (lint, types and build are green, routes taken 1:1 from the spec). The smoke test over the main resources in a local n8n is still outstanding; verified so far are only the operations shown in the verification video and the ones the templates use (see 2.11). | ⚠️ open |
 
 ---
 
@@ -142,12 +173,20 @@ git push origin main --follow-tags
 Der Tag startet `publish.yml` (`n8n-node release` im CI: lint → build → `npm publish` mit Provenance). Kontrolle: `gh run watch` bzw. npm-Seite → Version 1.0.1 mit „Provenance"-Badge.
 (`npm run release` lokal ist die interaktive release-it-Variante – gleiches Ergebnis.)
 
-### Schritt 4 – Creator Portal
-Auf dem n8n Creator Portal anmelden und den Node zur Verifizierung einreichen (npm-Name + Repo-URL). n8n zieht das Package von npm, prüft Provenance, Lint, UX-Guidelines und README.
+### Step 4 – Creator Portal ✅ (submitted 2026-10-15)
+The node is in for verification. The manual review is still running, so **"verified" may not be claimed anywhere**,
+marketing material included, until it comes back.
 
-### Optional – zusätzliche Sichtbarkeit ohne Code
-- 2–3 Workflow-Templates über `creators.n8n.io` einreichen (die 5 JSONs unter `templates/` sind Kandidaten).
-- Launch-Post im n8n-Community-Forum.
+### Step 5 – Template library (in progress)
+The six JSONs under `templates/` are the candidates; annotation and the defects found are in 2.11.
+`daily-invoice-summary` is submitted and waiting for the updated JSON. The other five go in one at a time.
+
+### Step 6 – Launch post in the n8n community forum
+Outstanding.
+
+### Open alongside
+- The smoke test of the generated executor branches (point F): a reviewer clicks resources that have never run.
+- The `cw_live_` reviewer key from the video shoot, and the demo contact left in the review organisation.
 
 ---
 
