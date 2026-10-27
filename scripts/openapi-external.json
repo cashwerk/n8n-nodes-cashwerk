@@ -406,6 +406,7 @@
             "items": {
               "type": "number"
             },
+            "maxItems": 500,
             "minItems": 1,
             "type": "array"
           }
@@ -6516,6 +6517,29 @@
             "type": "object"
           },
           "currencyCode": {
+            "type": "string"
+          },
+          "directDebitCreditorId": {
+            "description": "SEPA direct debit: the creditor identifier of the seller (BT-90).",
+            "example": "DE98ZZZ09999999999",
+            "maxLength": 35,
+            "type": "string"
+          },
+          "directDebitDebtorIban": {
+            "description": "SEPA direct debit: the IBAN of the account to be debited (BT-91).",
+            "example": "DE89370400440532013000",
+            "type": "string"
+          },
+          "directDebitMandateReference": {
+            "description": "SEPA direct debit: the mandate reference (BT-89).",
+            "example": "MANDAT-2026-0042",
+            "maxLength": 35,
+            "type": "string"
+          },
+          "paymentCardLastDigits": {
+            "description": "Card payment: the last 4 to 6 digits of the card (BT-87), never the full number.",
+            "example": "4242",
+            "pattern": "^\\d{4,6}$",
             "type": "string"
           },
           "paymentMethod": {
