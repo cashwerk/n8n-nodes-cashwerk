@@ -690,6 +690,12 @@
       },
       "CreateAddressDto": {
         "properties": {
+          "careOf": {
+            "description": "c/o recipient the mail is delivered to, printed as its own line under the recipient name. Without the \"c/o\" prefix; a typed prefix is removed.",
+            "example": "Hausverwaltung Müller",
+            "maxLength": 100,
+            "type": "string"
+          },
           "city": {
             "type": "string"
           },
@@ -697,6 +703,8 @@
             "type": "string"
           },
           "extra": {
+            "description": "Location inside the building, printed above the street. Not for c/o, use careOf.",
+            "example": "Hinterhaus, 3. OG",
             "type": "string"
           },
           "state": {
@@ -1133,7 +1141,7 @@
             "type": "object"
           },
           "name": {
-            "minLength": 3,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -2207,6 +2215,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "skontoAmount": {
+            "minimum": 0,
+            "type": "number"
+          },
           "status": {
             "default": "RECEIVED",
             "enum": [
@@ -2713,6 +2725,9 @@
           "footer": {
             "type": "string"
           },
+          "from": {
+            "$ref": "#/components/schemas/SourceDocumentDTO"
+          },
           "header": {
             "type": "string"
           },
@@ -2754,9 +2769,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "lines"
-        ],
         "type": "object"
       },
       "CreateOfferDTO": {
@@ -2821,6 +2833,9 @@
           },
           "footer": {
             "type": "string"
+          },
+          "from": {
+            "$ref": "#/components/schemas/SourceDocumentDTO"
           },
           "header": {
             "type": "string"
@@ -3613,6 +3628,11 @@
           "projectId": {
             "type": "number"
           },
+          "serviceAssetId": {
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          },
           "start": {
             "format": "date-time",
             "type": "string"
@@ -3682,11 +3702,11 @@
             "type": "string"
           },
           "firstName": {
-            "minLength": 3,
+            "minLength": 1,
             "type": "string"
           },
           "lastName": {
-            "minLength": 3,
+            "minLength": 1,
             "type": "string"
           },
           "organizationId": {
@@ -4271,6 +4291,14 @@
             "maximum": 14,
             "minimum": 5,
             "type": "number"
+          },
+          "deliveryAddressPlacement": {
+            "enum": [
+              "infoBlock",
+              "aboveTable",
+              "hidden"
+            ],
+            "type": "string"
           },
           "fontFamily": {
             "enum": [
@@ -5254,6 +5282,48 @@
         ],
         "type": "object"
       },
+      "FormFieldValueDto": {
+        "properties": {
+          "fieldId": {
+            "description": "The builder field id",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "type": {
+            "description": "The builder field type (text, number, checkbox, select, table, …)",
+            "maxLength": 32,
+            "type": "string"
+          },
+          "value": {
+            "description": "Text, a tick, or the chosen options; a table is its JSON-encoded rows",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ]
+          },
+          "varName": {
+            "description": "The field variable name",
+            "maxLength": 128,
+            "type": "string"
+          }
+        },
+        "required": [
+          "varName",
+          "type",
+          "value"
+        ],
+        "type": "object"
+      },
       "GetDealsFilterDto": {
         "properties": {
           "actualCloseDateEnd": {
@@ -5678,15 +5748,28 @@
       },
       "InvoicePaymentSummaryDto": {
         "properties": {
+          "absorbed": {
+            "description": "The unpaid rest of an advance that a booked final invoice claims instead, gross",
+            "example": 0,
+            "type": "number"
+          },
           "credited": {
             "description": "Gross of the booked credit notes of the invoice, as a positive number",
             "example": 1975.4,
             "type": "number"
           },
           "open": {
-            "description": "Invoice gross minus paid minus credited, never below 0",
+            "description": "Invoice gross minus paid, credited, Skonto and the rest taken over by a final invoice, never below 0",
             "example": 333.2,
             "type": "number"
+          },
+          "skonto": {
+            "description": "Skonto the customer kept with its payments, gross",
+            "example": 0,
+            "type": "number"
+          },
+          "skontoTerms": {
+            "$ref": "#/components/schemas/InvoiceSkontoSummaryDto"
           },
           "total": {
             "description": "Gross amount received on the invoice",
@@ -5697,7 +5780,60 @@
         "required": [
           "total",
           "credited",
-          "open"
+          "skonto",
+          "absorbed",
+          "open",
+          "skontoTerms"
+        ],
+        "type": "object"
+      },
+      "InvoiceSkontoSummaryDto": {
+        "properties": {
+          "days": {
+            "description": "Skonto period in days; null when the invoice offers none",
+            "example": 10,
+            "nullable": true,
+            "type": "number"
+          },
+          "deadline": {
+            "description": "The last day the Skonto applies (ISO 8601); null without terms",
+            "example": "2026-11-08T22:59:59.999Z",
+            "nullable": true,
+            "type": "string"
+          },
+          "granted": {
+            "description": "Skonto the recorded payments kept, gross",
+            "example": 0,
+            "type": "number"
+          },
+          "offeredGross": {
+            "description": "Skonto on the full claim, gross",
+            "example": 35.7,
+            "type": "number"
+          },
+          "percent": {
+            "description": "Skonto rate in percent; null when the invoice offers none",
+            "example": 2,
+            "nullable": true,
+            "type": "number"
+          },
+          "status": {
+            "description": "NOT_OFFERED, OPEN (period running), GRANTED (kept within the period), NOT_USED (paid in full without it) or MISSED (period over before the claim was settled)",
+            "enum": [
+              "NOT_OFFERED",
+              "OPEN",
+              "GRANTED",
+              "NOT_USED",
+              "MISSED"
+            ],
+            "example": "OPEN",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offeredGross",
+          "granted",
+          "status"
         ],
         "type": "object"
       },
@@ -6000,6 +6136,27 @@
         },
         "required": [
           "newStageId"
+        ],
+        "type": "object"
+      },
+      "MoveDriveItemBodyDto": {
+        "properties": {
+          "currentDriveId": {
+            "description": "The drive the file or folder is in now",
+            "type": "number"
+          },
+          "destinationDriveId": {
+            "description": "The target drive when it moves to another drive; omitted keeps the current drive",
+            "type": "number"
+          },
+          "parentFolderId": {
+            "description": "The target folder; null or omitted moves it to the top level of the drive",
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "currentDriveId"
         ],
         "type": "object"
       },
@@ -7438,6 +7595,94 @@
         },
         "type": "object"
       },
+      "ReceiptInboxDto": {
+        "properties": {
+          "address": {
+            "description": "Forward mails with receipts to this address; attachments land in the Drive",
+            "type": "string"
+          },
+          "driveId": {
+            "description": "The drive the receipts are stored in",
+            "type": "number"
+          },
+          "folderId": {
+            "description": "The folder the receipts are stored in",
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "address",
+          "driveId",
+          "folderId"
+        ],
+        "type": "object"
+      },
+      "ReceiptInboxEventDto": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "driveFileId": {
+            "description": "The stored file, or the first copy for a duplicate",
+            "nullable": true,
+            "type": "number"
+          },
+          "filename": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "reason": {
+            "enum": [
+              "sender_not_verified",
+              "sender_not_member",
+              "no_upload_permission",
+              "license_inactive",
+              "no_attachment",
+              "unsupported_type",
+              "too_large",
+              "inline_image",
+              "storage_error"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "senderEmail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "stored",
+              "duplicate",
+              "refused",
+              "skipped",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "subject": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "reason",
+          "senderEmail",
+          "subject",
+          "filename",
+          "driveFileId",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "RecomputeWorktimeAccountDto": {
         "properties": {
           "fromMonth": {
@@ -7688,6 +7933,13 @@
             "description": "The template name (kind = template); names the form in the project",
             "maxLength": 256,
             "type": "string"
+          },
+          "values": {
+            "description": "The answers of the submission (kind = submission), without signatures and photos",
+            "items": {
+              "$ref": "#/components/schemas/FormFieldValueDto"
+            },
+            "type": "array"
           }
         },
         "required": [
@@ -7943,6 +8195,37 @@
         ],
         "type": "object"
       },
+      "SourceDocumentDTO": {
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "type": {
+            "enum": [
+              "INVOICE",
+              "PARTIAL_INVOICE",
+              "CREDIT_NOTE",
+              "CANCELLATION_INVOICE",
+              "FINAL_INVOICE",
+              "DELIVERY_NOTE",
+              "OFFER",
+              "ORDER_CONFIRMATION",
+              "PROGRESS_INVOICE",
+              "CUMULATIVE_INVOICE",
+              "RECURRING_TEMPLATE",
+              "PROFORMA_INVOICE",
+              "PERFORMANCE_RECORD",
+              "MEASUREMENT_SHEET"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
       "SpecialDaySurchargeDto": {
         "properties": {
           "date": {
@@ -7991,10 +8274,18 @@
       },
       "StartTrackerRequestDto": {
         "properties": {
+          "categoryId": {
+            "minimum": 1,
+            "type": "number"
+          },
           "fromTrackingId": {
             "type": "number"
           },
           "projectId": {
+            "type": "number"
+          },
+          "serviceAssetId": {
+            "minimum": 1,
             "type": "number"
           },
           "startTime": {
@@ -8257,6 +8548,12 @@
       },
       "UpdateAddressDto": {
         "properties": {
+          "careOf": {
+            "description": "c/o recipient the mail is delivered to, printed as its own line under the recipient name. Without the \"c/o\" prefix; a typed prefix is removed.",
+            "example": "Hausverwaltung Müller",
+            "maxLength": 100,
+            "type": "string"
+          },
           "city": {
             "type": "string"
           },
@@ -8264,6 +8561,8 @@
             "type": "string"
           },
           "extra": {
+            "description": "Location inside the building, printed above the street. Not for c/o, use careOf.",
+            "example": "Hinterhaus, 3. OG",
             "type": "string"
           },
           "state": {
@@ -8288,8 +8587,7 @@
           "state",
           "stateCode",
           "city",
-          "country",
-          "extra"
+          "country"
         ],
         "type": "object"
       },
@@ -8683,7 +8981,7 @@
             "type": "object"
           },
           "name": {
-            "minLength": 3,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -9983,7 +10281,7 @@
             "type": "string"
           },
           "firstName": {
-            "minLength": 3,
+            "minLength": 1,
             "type": "string"
           },
           "gender": {
@@ -9999,7 +10297,7 @@
             "type": "string"
           },
           "lastName": {
-            "minLength": 3,
+            "minLength": 1,
             "type": "string"
           },
           "leaveDate": {
@@ -10555,6 +10853,11 @@
             "type": "string"
           },
           "projectId": {
+            "type": "number"
+          },
+          "serviceAssetId": {
+            "minimum": 1,
+            "nullable": true,
             "type": "number"
           },
           "start": {
@@ -20265,6 +20568,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveDriveItemBodyDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "401": {
             "description": "Unauthorized - Invalid or missing API key/token"
@@ -20561,6 +20874,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveDriveItemBodyDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "401": {
             "description": "Unauthorized - Invalid or missing API key/token"
@@ -20836,6 +21159,205 @@
           }
         ],
         "summary": "List all drives for the organization",
+        "tags": [
+          "Drive"
+        ]
+      }
+    },
+    "/api/v1/drive/receipt-inbox": {
+      "post": {
+        "operationId": "NxReceiptInboxController_ensure",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ReceiptInboxDto"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get the address that stores forwarded receipts in the Drive. Forward a mail there instead of uploading its attachments; files never pass through the caller.",
+        "tags": [
+          "Drive"
+        ]
+      }
+    },
+    "/api/v1/drive/receipt-inbox/events": {
+      "get": {
+        "operationId": "NxReceiptInboxController_events",
+        "parameters": [
+          {
+            "description": "Newest events to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/ReceiptInboxEventDto"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "What became of forwarded receipts, newest first: stored with its file id, duplicate, refused with the reason",
+        "tags": [
+          "Drive"
+        ]
+      }
+    },
+    "/api/v1/drive/receipt-inbox/rotate": {
+      "post": {
+        "operationId": "NxReceiptInboxController_rotate",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ReceiptInboxDto"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Replace the receipt forwarding address; the old one stops working at once",
         "tags": [
           "Drive"
         ]
@@ -28871,7 +29393,8 @@
                   "overdue",
                   "overBudget",
                   "negativeMargin",
-                  "unassigned"
+                  "unassigned",
+                  "open"
                 ],
                 "type": "string"
               },
