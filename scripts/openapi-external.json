@@ -696,6 +696,11 @@
             "maxLength": 100,
             "type": "string"
           },
+          "careOfPlain": {
+            "description": "Print the careOf line without the \"c/o\" prefix, for a department or a second name line. Default false.",
+            "example": false,
+            "type": "boolean"
+          },
           "city": {
             "type": "string"
           },
@@ -1863,6 +1868,9 @@
             "maxLength": 255,
             "type": "string"
           },
+          "taskId": {
+            "type": "number"
+          },
           "title": {
             "maxLength": 255,
             "type": "string"
@@ -2764,6 +2772,9 @@
             "maxLength": 255,
             "type": "string"
           },
+          "taskId": {
+            "type": "number"
+          },
           "title": {
             "maxLength": 255,
             "type": "string"
@@ -2966,6 +2977,9 @@
       },
       "CreateProformaInvoiceDTO": {
         "properties": {
+          "customer": {
+            "$ref": "#/components/schemas/InvoicingCustomerDTO"
+          },
           "invoicingDate": {
             "format": "date-time",
             "type": "string"
@@ -2973,14 +2987,14 @@
           "offerId": {
             "type": "number"
           },
+          "projectId": {
+            "type": "number"
+          },
           "title": {
             "maxLength": 255,
             "type": "string"
           }
         },
-        "required": [
-          "offerId"
-        ],
         "type": "object"
       },
       "CreateProjectDTO": {
@@ -3606,6 +3620,9 @@
             "type": "boolean"
           },
           "billingRateOverride": {
+            "description": "Net selling rate per hour for this entry, two decimals at most. Needs update access to the project, or the right to set category rates for an entry without a project.",
+            "maximum": 100000,
+            "minimum": 0,
             "nullable": true,
             "type": "number"
           },
@@ -3653,6 +3670,8 @@
             "type": "array"
           },
           "taskId": {
+            "description": "Task the time was worked on; must sit on the board of projectId when one is set",
+            "minimum": 1,
             "type": "number"
           },
           "type": {
@@ -5865,6 +5884,19 @@
           "shippingAddress": {
             "type": "object"
           },
+          "shippingClientId": {
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          },
+          "shippingClientType": {
+            "enum": [
+              "COMPANY",
+              "PERSON"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
           "shippingPortfolioId": {
             "type": "number"
           }
@@ -6396,6 +6428,9 @@
             "type": "string"
           },
           "retentionExchangeAllowed": {
+            "type": "boolean"
+          },
+          "retentionOnInstallments": {
             "type": "boolean"
           },
           "retentionPct": {
@@ -8052,7 +8087,7 @@
             "type": "array"
           },
           "content": {
-            "description": "Message content (text body)",
+            "description": "Message content (text body); may be empty when attachmentIds are sent",
             "type": "string"
           },
           "idempotencyKey": {
@@ -8088,9 +8123,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "content"
-        ],
         "type": "object"
       },
       "SendOfferByMailDto": {
@@ -8554,6 +8586,11 @@
             "maxLength": 100,
             "type": "string"
           },
+          "careOfPlain": {
+            "description": "Print the careOf line without the \"c/o\" prefix, for a department or a second name line. Default false.",
+            "example": false,
+            "type": "boolean"
+          },
           "city": {
             "type": "string"
           },
@@ -9009,6 +9046,20 @@
           },
           "name": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateChainRetentionDTO": {
+        "properties": {
+          "retentionOnInstallments": {
+            "type": "boolean"
+          },
+          "retentionPct": {
+            "maximum": 100,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
           }
         },
         "type": "object"
@@ -10833,6 +10884,9 @@
             "type": "boolean"
           },
           "billingRateOverride": {
+            "description": "Net selling rate per hour for this entry, two decimals at most. Needs update access to the project, or the right to set category rates for an entry without a project.",
+            "maximum": 100000,
+            "minimum": 0,
             "nullable": true,
             "type": "number"
           },
@@ -10878,6 +10932,12 @@
               "type": "number"
             },
             "type": "array"
+          },
+          "taskId": {
+            "description": "Task the time was worked on; null unlinks it",
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
           },
           "type": {
             "enum": [
@@ -17883,11 +17943,45 @@
             }
           },
           {
+            "description": "Only archived companies when true",
             "in": "query",
             "name": "includeArchived",
-            "required": true,
+            "required": false,
             "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Matches name, email or company number",
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "maxLength": 200,
               "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1 to 500); omit for the whole list",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page number, starting at 1; used with limit",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "integer"
             }
           }
         ],
@@ -17910,7 +18004,7 @@
             "api-key": []
           }
         ],
-        "summary": "List all companies for the organization",
+        "summary": "List all companies for the organization; pass limit (and page) to read one page",
         "tags": [
           "Companies"
         ]
@@ -23011,6 +23105,59 @@
         ]
       }
     },
+    "/api/v1/invoicing/billing-chains/{id}/retention": {
+      "patch": {
+        "operationId": "NxBillingChainController_updateRetention",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateChainRetentionDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The billing chain with its retention"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "409": {
+            "description": "A member of the chain is issued; the retention is locked"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Change the retention rate of a billing chain, and whether it applies to installments, before any invoice is issued",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
     "/api/v1/invoicing/billing-chains/{id}/supplements": {
       "post": {
         "operationId": "NxBillingChainController_addSupplement",
@@ -26728,6 +26875,47 @@
         "summary": "Restore an archived offer by ID",
         "tags": [
           "Offers"
+        ]
+      }
+    },
+    "/api/v1/invoicing/on-site-documents/task/{id}": {
+      "get": {
+        "operationId": "NxOnSiteDocumentController_ofTask",
+        "parameters": [
+          {
+            "description": "Task ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Leistungsscheine, Lieferscheine and Aufmaße written from the task, newest first"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List the delivery notes, performance records and measurement sheets written from a task",
+        "tags": [
+          "OnSiteDocument",
+          "Invoicing",
+          "On-site documents"
         ]
       }
     },
@@ -32473,9 +32661,9 @@
             "required": false,
             "schema": {
               "enum": [
+                "status",
                 "title",
                 "createdAt",
-                "status",
                 "dueDate"
               ],
               "type": "string"
@@ -33575,6 +33763,16 @@
       "get": {
         "operationId": "NxTasksController_searchTasks",
         "parameters": [
+          {
+            "description": "Only tasks on the board of this project",
+            "in": "query",
+            "name": "projectId",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
           {
             "in": "query",
             "name": "searchQuery",
@@ -39577,6 +39775,14 @@
     {
       "description": "Create and manage offers / quotes",
       "name": "Offers"
+    },
+    {
+      "description": "",
+      "name": "On-site documents"
+    },
+    {
+      "description": "",
+      "name": "OnSiteDocument"
     },
     {
       "description": "",
