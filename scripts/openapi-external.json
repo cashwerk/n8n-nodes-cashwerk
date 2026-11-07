@@ -3620,6 +3620,9 @@
             "type": "boolean"
           },
           "billingRateOverride": {
+            "description": "Net selling rate per hour for this entry, two decimals at most. Needs update access to the project, or the right to set category rates for an entry without a project.",
+            "maximum": 100000,
+            "minimum": 0,
             "nullable": true,
             "type": "number"
           },
@@ -3667,6 +3670,8 @@
             "type": "array"
           },
           "taskId": {
+            "description": "Task the time was worked on; must sit on the board of projectId when one is set",
+            "minimum": 1,
             "type": "number"
           },
           "type": {
@@ -10879,6 +10884,9 @@
             "type": "boolean"
           },
           "billingRateOverride": {
+            "description": "Net selling rate per hour for this entry, two decimals at most. Needs update access to the project, or the right to set category rates for an entry without a project.",
+            "maximum": 100000,
+            "minimum": 0,
             "nullable": true,
             "type": "number"
           },
@@ -10924,6 +10932,12 @@
               "type": "number"
             },
             "type": "array"
+          },
+          "taskId": {
+            "description": "Task the time was worked on; null unlinks it",
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
           },
           "type": {
             "enum": [
@@ -33749,6 +33763,16 @@
       "get": {
         "operationId": "NxTasksController_searchTasks",
         "parameters": [
+          {
+            "description": "Only tasks on the board of this project",
+            "in": "query",
+            "name": "projectId",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
           {
             "in": "query",
             "name": "searchQuery",
