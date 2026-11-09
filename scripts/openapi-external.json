@@ -4214,7 +4214,8 @@
               "RECURRING_TEMPLATE",
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
-              "MEASUREMENT_SHEET"
+              "MEASUREMENT_SHEET",
+              "RETENTION_REQUEST"
             ],
             "type": "string"
           }
@@ -5741,7 +5742,8 @@
               "RECURRING_TEMPLATE",
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
-              "MEASUREMENT_SHEET"
+              "MEASUREMENT_SHEET",
+              "RETENTION_REQUEST"
             ],
             "type": "string"
           }
@@ -6369,7 +6371,8 @@
               "RECURRING_TEMPLATE",
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
-              "MEASUREMENT_SHEET"
+              "MEASUREMENT_SHEET",
+              "RETENTION_REQUEST"
             ],
             "type": "string"
           }
@@ -6621,7 +6624,8 @@
               "RECURRING_TEMPLATE",
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
-              "MEASUREMENT_SHEET"
+              "MEASUREMENT_SHEET",
+              "RETENTION_REQUEST"
             ],
             "type": "string"
           }
@@ -6696,7 +6700,8 @@
               "RECURRING_TEMPLATE",
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
-              "MEASUREMENT_SHEET"
+              "MEASUREMENT_SHEET",
+              "RETENTION_REQUEST"
             ],
             "type": "string"
           }
@@ -7728,6 +7733,28 @@
         },
         "type": "object"
       },
+      "RecordRetentionGuaranteeDTO": {
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "guarantor": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "reference": {
+            "maxLength": 100,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "guarantor"
+        ],
+        "type": "object"
+      },
       "RecurrenceRuleDTO": {
         "properties": {
           "count": {
@@ -8247,7 +8274,8 @@
               "RECURRING_TEMPLATE",
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
-              "MEASUREMENT_SHEET"
+              "MEASUREMENT_SHEET",
+              "RETENTION_REQUEST"
             ],
             "type": "string"
           }
@@ -9052,6 +9080,17 @@
       },
       "UpdateChainRetentionDTO": {
         "properties": {
+          "finalRetentionPct": {
+            "maximum": 100,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
+          "retentionDueDate": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
           "retentionOnInstallments": {
             "type": "boolean"
           },
@@ -22729,6 +22768,85 @@
         ]
       }
     },
+    "/api/v1/invoicing/billing-chains/retentions": {
+      "get": {
+        "operationId": "NxBillingChainController_retentions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Customer, project, chain title or document number",
+            "in": "query",
+            "name": "searchQuery",
+            "required": false,
+            "schema": {
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this state; all when omitted",
+            "in": "query",
+            "name": "statusFilter",
+            "required": false,
+            "schema": {
+              "enum": [
+                "NOT_DUE",
+                "DUE",
+                "REQUESTED",
+                "PAID",
+                "GUARANTEED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Every Sicherheitseinbehalt of the organisation, due first, with counts per state"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "List the retentions (Sicherheitseinbehalte) held on final invoices",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
     "/api/v1/invoicing/billing-chains/{id}": {
       "get": {
         "operationId": "NxBillingChainController_byId",
@@ -23151,6 +23269,102 @@
           }
         ],
         "summary": "Change the retention rate of a billing chain, and whether it applies to installments, before any invoice is issued",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}/retention/guarantee": {
+      "post": {
+        "operationId": "NxBillingChainController_recordRetentionGuarantee",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordRetentionGuaranteeDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The billing chain with the guarantee recorded"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "409": {
+            "description": "The contract allows no exchange, or the retention is already requested or guaranteed"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Record the guarantee that replaces the retention of a booked final invoice",
+        "tags": [
+          "BillingChain",
+          "Invoicing",
+          "Billing chains"
+        ]
+      }
+    },
+    "/api/v1/invoicing/billing-chains/{id}/retention/request": {
+      "post": {
+        "operationId": "NxBillingChainController_requestRetention",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The drafted Anforderung des Sicherheitseinbehalts"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "409": {
+            "description": "Nothing to release, already requested, released against a guarantee, or not due yet"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Draft the letter that claims the retention of a booked final invoice once it is due",
         "tags": [
           "BillingChain",
           "Invoicing",
@@ -29540,6 +29754,15 @@
             }
           },
           {
+            "description": "Projects without a customer; OR-ed with customerCompanyIds and customerContactIds",
+            "in": "query",
+            "name": "withoutCustomer",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "description": "Tag ids (any of)",
             "in": "query",
             "name": "tagIds",
@@ -32815,10 +33038,10 @@
               "enum": [
                 "title",
                 "createdAt",
-                "dueDate",
-                "taskNumber",
                 "comments",
-                "subtasks"
+                "subtasks",
+                "dueDate",
+                "taskNumber"
               ],
               "type": "string"
             }
@@ -33055,10 +33278,10 @@
               "enum": [
                 "title",
                 "createdAt",
-                "dueDate",
-                "taskNumber",
                 "comments",
-                "subtasks"
+                "subtasks",
+                "dueDate",
+                "taskNumber"
               ],
               "type": "string"
             }
@@ -33871,10 +34094,10 @@
               "enum": [
                 "title",
                 "createdAt",
-                "dueDate",
-                "taskNumber",
                 "comments",
-                "subtasks"
+                "subtasks",
+                "dueDate",
+                "taskNumber"
               ],
               "type": "string"
             }
