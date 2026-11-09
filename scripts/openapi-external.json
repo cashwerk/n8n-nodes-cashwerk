@@ -8827,6 +8827,20 @@
         ],
         "type": "object"
       },
+      "UpdateBoardDefaultAssigneeDto": {
+        "properties": {
+          "defaultAssigneeId": {
+            "description": "Board member new tasks without an assignee go to; null clears it.",
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "defaultAssigneeId"
+        ],
+        "type": "object"
+      },
       "UpdateBoardDueDateDto": {
         "properties": {
           "dueDate": {
@@ -10501,6 +10515,11 @@
             "maxLength": 255,
             "nullable": true,
             "type": "string"
+          },
+          "defaultAssigneeId": {
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
           },
           "defaultBillingRate": {
             "minimum": 0,
@@ -33602,6 +33621,51 @@
           }
         ],
         "summary": "Get unassigned tasks for a board",
+        "tags": [
+          "Task Boards"
+        ]
+      }
+    },
+    "/api/v1/task-manager/boards/{id}/update-default-assignee": {
+      "post": {
+        "operationId": "NxTaskBoardsController_updateDefaultAssignee",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBoardDefaultAssigneeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Set or clear the board member new tasks without an assignee go to",
         "tags": [
           "Task Boards"
         ]
