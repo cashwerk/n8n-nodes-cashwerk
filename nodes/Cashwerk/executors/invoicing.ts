@@ -21,7 +21,7 @@ function addNonEmptyArray(body: IDataObject, key: string, raw: unknown): void {
 	}
 }
 
-async function resolveMailProvider(ctx: IExecuteFunctions, connectionId: number): Promise<string> {
+export async function resolveMailProvider(ctx: IExecuteFunctions, connectionId: number): Promise<string> {
 	if (connectionId === -1) return 'user_system';
 	const connections = (await cashwerkApiRequest.call(
 		ctx,

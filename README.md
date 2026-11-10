@@ -238,6 +238,7 @@ Perform operations on cashwerk entities. Supports 43 resources with 430+ operati
 |---|---|
 | **Organization** | Create Branch, Create Sector, Delete Branch, Get My Organization, Invite User, Set Sector Members, Update Headquarters, Update Sector, Upload Logo |
 | **User** | Activate, Archive, Create, Delete, Get, Get Active, Get Many, Update Address, Update Birth Place, Update Birthdate, Update Branch, Update Nationality, Update Position, Update Profile Data, Update Public Phone, Update Sector, Update Social Media, Update Timezone, Upload Avatar, Upload Header |
+| **Mail** | Cancel, Get, Get History, Get Limits, Resend, Send, Send Now, Update |
 | **Mail Connection** | Get Many |
 
 ---

@@ -55,6 +55,7 @@ import {
 	mailConnectionOperations,
 	mailConnectionFields,
 } from './descriptions/MailConnectionDescription';
+import { mailOperations, mailFields } from './descriptions/MailDescription';
 import { taxRateOperations, taxRateFields } from './descriptions/TaxRateDescription';
 import {
 	salesTaxRegulationOperations,
@@ -127,6 +128,7 @@ import {
 	executeCancellationInvoice,
 } from './executors/invoicing';
 import { executeMailConnection } from './executors/mailing';
+import { executeMail } from './executors/mail';
 import { executeDeal, executePipeline } from './executors/salesPipeline';
 import {
 	executeBooking,
@@ -200,6 +202,7 @@ export class Cashwerk implements INodeType {
 					{ name: 'Incoming Payment', value: 'incomingPayment' },
 					{ name: 'Invoice', value: 'invoice' },
 					{ name: 'Machine', value: 'machine' },
+					{ name: 'Mail', value: 'mail' },
 					{ name: 'Mail Connection', value: 'mailConnection' },
 					{ name: 'Material', value: 'material' },
 					{ name: 'Offer', value: 'offer' },
@@ -267,6 +270,8 @@ export class Cashwerk implements INodeType {
 			...incomingPaymentFields,
 			...invoiceOperations,
 			...invoiceFields,
+			...mailOperations,
+			...mailFields,
 			...mailConnectionOperations,
 			...mailConnectionFields,
 			...machineOperations,
@@ -549,6 +554,7 @@ export class Cashwerk implements INodeType {
 			driveSharing: executeDriveSharing,
 			incomingPayment: executeIncomingPayment,
 			invoice: executeInvoice,
+			mail: executeMail,
 			mailConnection: executeMailConnection,
 			machine: executeMachine,
 			material: executeMaterial,
