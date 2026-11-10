@@ -584,6 +584,105 @@
         "properties": {},
         "type": "object"
       },
+      "ComposeMailDto": {
+        "properties": {
+          "bcc": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "cc": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "connectionId": {
+            "description": "Id of one of the sender's own mail connections; the cashwerk sender is refused.",
+            "type": "number"
+          },
+          "copyToSelf": {
+            "description": "A Bcc copy to the sender.",
+            "type": "boolean"
+          },
+          "driveFileIds": {
+            "description": "Drive files to attach; a file that does not fit is sent as an expiring link.",
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "mailProvider": {
+            "enum": [
+              "system",
+              "user_system",
+              "google",
+              "microsoft",
+              "apple",
+              "user_custom"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "description": "Message HTML; formatting only, links and images are removed. An empty body is sent empty.",
+            "maxLength": 100000,
+            "type": "string"
+          },
+          "recordId": {
+            "description": "Given together with recordType, or both left out.",
+            "minimum": 1,
+            "type": "number"
+          },
+          "recordType": {
+            "description": "Given together with recordId, or both left out.",
+            "enum": [
+              "company",
+              "contact"
+            ],
+            "type": "string"
+          },
+          "referenceId": {
+            "minimum": 1,
+            "type": "number"
+          },
+          "referenceType": {
+            "enum": [
+              "project",
+              "offer",
+              "invoice",
+              "deal"
+            ],
+            "type": "string"
+          },
+          "scheduledAt": {
+            "description": "Send time, ISO 8601; omitted or now sends right away.",
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 300,
+            "type": "string"
+          },
+          "to": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "to",
+          "subject",
+          "connectionId",
+          "mailProvider"
+        ],
+        "type": "object"
+      },
       "ContentBoundsMmDTO": {
         "properties": {
           "contentBottom": {
@@ -10683,6 +10782,62 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "UpdateScheduledMailDto": {
+        "properties": {
+          "bcc": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "cc": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "copyToSelf": {
+            "description": "A Bcc copy to the sender.",
+            "type": "boolean"
+          },
+          "driveFileIds": {
+            "description": "Drive files to attach; a file that does not fit is sent as an expiring link.",
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "message": {
+            "description": "Message HTML; formatting only, links and images are removed. An empty body is sent empty.",
+            "maxLength": 100000,
+            "type": "string"
+          },
+          "scheduledAt": {
+            "description": "Send time, ISO 8601; omitted or now sends right away.",
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 300,
+            "type": "string"
+          },
+          "to": {
+            "items": {
+              "format": "email",
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "to",
+          "subject"
+        ],
         "type": "object"
       },
       "UpdateShareAccessDto": {
@@ -28776,6 +28931,309 @@
         "summary": "Update a tax rate",
         "tags": [
           "Tax Rates"
+        ]
+      }
+    },
+    "/api/v1/mailing/compose": {
+      "post": {
+        "operationId": "NxMailComposeController_compose",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComposeMailDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Queued, or scheduled when a send time is given"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Send or schedule a free mail, on a CRM company or contact or to any address; it is filed in the record's mail history. Sent only from the caller's own connected mailbox (OAuth or SMTP, see GET /mailing/connections), never from the cashwerk sender. Through the API: paid plans only, files as attachments only (no download links), and a daily and hourly budget of recipients per user shared with the app (429 when spent). Personal mail, not newsletters.",
+        "tags": [
+          "Mailing",
+          "Mailing"
+        ]
+      }
+    },
+    "/api/v1/mailing/compose/limits": {
+      "get": {
+        "operationId": "NxMailComposeController_limits",
+        "parameters": [],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "The limits every composed mail is held to: recipients, files and sizes per mail",
+        "tags": [
+          "Mailing",
+          "Mailing"
+        ]
+      }
+    },
+    "/api/v1/mailing/compose/records/{recordType}/{recordId}": {
+      "get": {
+        "operationId": "NxMailComposeController_history",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "recordType",
+            "required": true,
+            "schema": {
+              "enum": [
+                "company",
+                "contact"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "recordId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "The mails of a CRM company or contact, scheduled ones first",
+        "tags": [
+          "Mailing",
+          "Mailing"
+        ]
+      }
+    },
+    "/api/v1/mailing/compose/{id}": {
+      "get": {
+        "operationId": "NxMailComposeController_detail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "One composed mail with its status, recipients and files",
+        "tags": [
+          "Mailing",
+          "Mailing"
+        ]
+      },
+      "put": {
+        "operationId": "NxMailComposeController_update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateScheduledMailDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Change a scheduled mail of one's own; an empty send time sends it now. Sent only from the caller's own connected mailbox (OAuth or SMTP, see GET /mailing/connections), never from the cashwerk sender. Through the API: paid plans only, files as attachments only (no download links), and a daily and hourly budget of recipients per user shared with the app (429 when spent). Personal mail, not newsletters.",
+        "tags": [
+          "Mailing",
+          "Mailing"
+        ]
+      }
+    },
+    "/api/v1/mailing/compose/{id}/cancel": {
+      "post": {
+        "operationId": "NxMailComposeController_cancel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Cancel a scheduled mail of one's own; it stays in the history as cancelled",
+        "tags": [
+          "Mailing",
+          "Mailing"
+        ]
+      }
+    },
+    "/api/v1/mailing/compose/{id}/resend": {
+      "post": {
+        "operationId": "NxMailComposeController_resend",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Send an undelivered mail once more. Sent only from the caller's own connected mailbox (OAuth or SMTP, see GET /mailing/connections), never from the cashwerk sender. Through the API: paid plans only, files as attachments only (no download links), and a daily and hourly budget of recipients per user shared with the app (429 when spent). Personal mail, not newsletters.",
+        "tags": [
+          "Mailing",
+          "Mailing"
+        ]
+      }
+    },
+    "/api/v1/mailing/compose/{id}/send-now": {
+      "post": {
+        "operationId": "NxMailComposeController_sendNow",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Send a scheduled mail of one's own right away. Sent only from the caller's own connected mailbox (OAuth or SMTP, see GET /mailing/connections), never from the cashwerk sender. Through the API: paid plans only, files as attachments only (no download links), and a daily and hourly budget of recipients per user shared with the app (429 when spent). Personal mail, not newsletters.",
+        "tags": [
+          "Mailing",
+          "Mailing"
         ]
       }
     },
