@@ -576,6 +576,20 @@
         ],
         "type": "object"
       },
+      "ClosePurchaseOrderRestDTO": {
+        "properties": {
+          "reason": {
+            "description": "Why the rest will not be delivered; kept in the audit entry",
+            "example": "Artikel beim Lieferanten ausgelaufen",
+            "maxLength": 500,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
       "CompanyBranch": {
         "properties": {},
         "type": "object"
@@ -2411,7 +2425,9 @@
             "type": "string"
           },
           "pricing": {
+            "default": "AUTO",
             "enum": [
+              "AUTO",
               "FROM_ASSET",
               "FROM_SOURCE_OFFER",
               "MANUAL"
@@ -2420,8 +2436,7 @@
           }
         },
         "required": [
-          "deliveryNoteIds",
-          "pricing"
+          "deliveryNoteIds"
         ],
         "type": "object"
       },
@@ -2443,7 +2458,9 @@
             "type": "array"
           },
           "pricing": {
+            "default": "AUTO",
             "enum": [
+              "AUTO",
               "FROM_ASSET",
               "FROM_SOURCE_OFFER",
               "MANUAL"
@@ -2452,8 +2469,7 @@
           }
         },
         "required": [
-          "measurementSheetIds",
-          "pricing"
+          "measurementSheetIds"
         ],
         "type": "object"
       },
@@ -2591,6 +2607,18 @@
           },
           "priceBase": {
             "type": "number"
+          },
+          "priceConfirmed": {
+            "type": "boolean"
+          },
+          "priceSource": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PriceSourceDTO"
+              }
+            ],
+            "nullable": true,
+            "type": "object"
           },
           "productImageUrl": {
             "type": "string"
@@ -3168,6 +3196,110 @@
         ],
         "type": "object"
       },
+      "CreatePurchaseDraftsDTO": {
+        "properties": {
+          "supplierIds": {
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "maxItems": 200,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CreatePurchaseOrderDTO": {
+        "properties": {
+          "deliveryAddress": {
+            "type": "object"
+          },
+          "deliveryDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "footer": {
+            "type": "string"
+          },
+          "header": {
+            "type": "string"
+          },
+          "invoicingDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CreatePurchaseOrderLineDTO"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array"
+          },
+          "orderNumber": {
+            "maxLength": 255,
+            "type": "string"
+          },
+          "projectId": {
+            "minimum": 1,
+            "type": "number"
+          },
+          "supplierId": {
+            "minimum": 1,
+            "type": "number"
+          },
+          "title": {
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "required": [
+          "supplierId",
+          "lines"
+        ],
+        "type": "object"
+      },
+      "CreatePurchaseOrderLineDTO": {
+        "properties": {
+          "articleNumber": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "longText": {
+            "type": "string"
+          },
+          "materialId": {
+            "minimum": 1,
+            "type": "number"
+          },
+          "price": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "quantity": {
+            "maximum": 1000000,
+            "minimum": 0.01,
+            "type": "number"
+          },
+          "shortText": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "taxRate": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "unit": {
+            "maxLength": 50,
+            "type": "string"
+          }
+        },
+        "required": [
+          "quantity"
+        ],
+        "type": "object"
+      },
       "CreateRecurrenceDto": {
         "properties": {
           "count": {
@@ -3594,6 +3726,7 @@
       "CreateTaskDto": {
         "properties": {
           "assigneeId": {
+            "nullable": true,
             "type": "number"
           },
           "boardName": {
@@ -4314,7 +4447,8 @@
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
               "MEASUREMENT_SHEET",
-              "RETENTION_REQUEST"
+              "RETENTION_REQUEST",
+              "PURCHASE_ORDER"
             ],
             "type": "string"
           }
@@ -5842,7 +5976,8 @@
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
               "MEASUREMENT_SHEET",
-              "RETENTION_REQUEST"
+              "RETENTION_REQUEST",
+              "PURCHASE_ORDER"
             ],
             "type": "string"
           }
@@ -6444,7 +6579,8 @@
             "enum": [
               "OFFER",
               "COST_ESTIMATE",
-              "SUPPLEMENT"
+              "SUPPLEMENT",
+              "ORDER_FORM"
             ],
             "type": "string"
           },
@@ -6471,7 +6607,8 @@
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
               "MEASUREMENT_SHEET",
-              "RETENTION_REQUEST"
+              "RETENTION_REQUEST",
+              "PURCHASE_ORDER"
             ],
             "type": "string"
           }
@@ -6616,6 +6753,12 @@
           "showQRCode": {
             "type": "boolean"
           },
+          "signatureCustomer": {
+            "type": "boolean"
+          },
+          "signatureEmployee": {
+            "type": "boolean"
+          },
           "timeEntries": {
             "enum": [
               "NONE",
@@ -6724,7 +6867,8 @@
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
               "MEASUREMENT_SHEET",
-              "RETENTION_REQUEST"
+              "RETENTION_REQUEST",
+              "PURCHASE_ORDER"
             ],
             "type": "string"
           }
@@ -6773,7 +6917,8 @@
             "enum": [
               "OFFER",
               "COST_ESTIMATE",
-              "SUPPLEMENT"
+              "SUPPLEMENT",
+              "ORDER_FORM"
             ],
             "type": "string"
           },
@@ -6800,7 +6945,8 @@
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
               "MEASUREMENT_SHEET",
-              "RETENTION_REQUEST"
+              "RETENTION_REQUEST",
+              "PURCHASE_ORDER"
             ],
             "type": "string"
           }
@@ -7021,7 +7167,9 @@
       "PreviewMeasurementLinesDTO": {
         "properties": {
           "pricing": {
+            "default": "AUTO",
             "enum": [
+              "AUTO",
               "FROM_ASSET",
               "FROM_SOURCE_OFFER",
               "MANUAL"
@@ -7038,8 +7186,7 @@
           }
         },
         "required": [
-          "rows",
-          "pricing"
+          "rows"
         ],
         "type": "object"
       },
@@ -7141,6 +7288,199 @@
         "required": [
           "recurrence",
           "startsAt"
+        ],
+        "type": "object"
+      },
+      "PriceSourceDTO": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "ORDER_POSITION",
+              "SUPPLEMENT",
+              "ORDER_ARTICLE",
+              "HOURLY_RATE",
+              "RECORD",
+              "CATALOGUE",
+              "UNPRICED",
+              "MANUAL"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "NO_SOURCE",
+              "AMBIGUOUS_ORDER_PRICE"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "ref": {
+            "maxLength": 64,
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "PurchaseCommitmentRowDto": {
+        "properties": {
+          "committedOpen": {
+            "description": "Bestellobligo, net: max(0, ordered − max(received, invoiced))",
+            "type": "number"
+          },
+          "expectedDate": {
+            "description": "The order's delivery date, when the outflow is expected",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "grossOpen": {
+            "description": "The Bestellobligo with VAT, the cash still to pay when the goods come",
+            "type": "number"
+          },
+          "invoiced": {
+            "description": "Invoiced by the supplier, net; 0 for now",
+            "type": "number"
+          },
+          "ordered": {
+            "description": "Ordered value after the state rules (a received order: what arrived), net",
+            "type": "number"
+          },
+          "prepaid": {
+            "description": "Paid to the supplier in advance; 0 for now",
+            "type": "number"
+          },
+          "projectId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "purchaseOrderId": {
+            "type": "number"
+          },
+          "purchaseOrderNumber": {
+            "nullable": true,
+            "type": "string"
+          },
+          "received": {
+            "description": "Received value, net",
+            "type": "number"
+          },
+          "receivedNotInvoiced": {
+            "description": "Received, not invoiced by the supplier, net: max(0, received − invoiced)",
+            "type": "number"
+          },
+          "state": {
+            "enum": [
+              "DRAFT",
+              "COMMITTED",
+              "ACCEPTED",
+              "REJECTED",
+              "CANCELLED",
+              "PAID",
+              "INVOICE_CREATED",
+              "ARCHIVED",
+              "DELIVERED",
+              "CORRECTION",
+              "PARTLY_RECEIVED",
+              "RECEIVED"
+            ],
+            "type": "string"
+          },
+          "supplierId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "supplierName": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "purchaseOrderId",
+          "purchaseOrderNumber",
+          "state",
+          "projectId",
+          "supplierId",
+          "supplierName",
+          "ordered",
+          "received",
+          "committedOpen",
+          "receivedNotInvoiced",
+          "invoiced",
+          "prepaid",
+          "grossOpen",
+          "expectedDate"
+        ],
+        "type": "object"
+      },
+      "PurchaseCommitmentTotalsDto": {
+        "properties": {
+          "committed": {
+            "description": "Bestellobligo: ordered, neither received nor invoiced by the supplier, net",
+            "type": "number"
+          },
+          "invoicedBySuppliers": {
+            "description": "Invoiced by the supplier, net. 0 until supplier invoices can be linked to a purchase order",
+            "type": "number"
+          },
+          "orderCount": {
+            "description": "Purchase orders that count: sent, confirmed, partly or fully received",
+            "type": "number"
+          },
+          "prepaid": {
+            "description": "Paid to suppliers in advance, gross. 0 until outgoing payments exist; never reduces the Obligo",
+            "type": "number"
+          },
+          "receivedNotInvoiced": {
+            "description": "Received, not yet invoiced by the supplier, net",
+            "type": "number"
+          }
+        },
+        "required": [
+          "committed",
+          "receivedNotInvoiced",
+          "invoicedBySuppliers",
+          "prepaid",
+          "orderCount"
+        ],
+        "type": "object"
+      },
+      "PurchaseCommitmentsDto": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/PurchaseCommitmentRowDto"
+            },
+            "type": "array"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/PurchaseCommitmentTotalsDto"
+          }
+        },
+        "required": [
+          "rows",
+          "totals"
+        ],
+        "type": "object"
+      },
+      "PurchaseOrderReceiptLineDTO": {
+        "properties": {
+          "lineId": {
+            "minimum": 1,
+            "type": "number"
+          },
+          "quantity": {
+            "maximum": 1000000,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "lineId",
+          "quantity"
         ],
         "type": "object"
       },
@@ -7822,6 +8162,25 @@
         ],
         "type": "object"
       },
+      "ReceivePurchaseOrderDTO": {
+        "properties": {
+          "all": {
+            "type": "boolean"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderReceiptLineDTO"
+            },
+            "maxItems": 500,
+            "type": "array"
+          },
+          "receivedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "RecomputeWorktimeAccountDto": {
         "properties": {
           "fromMonth": {
@@ -8374,7 +8733,8 @@
               "PROFORMA_INVOICE",
               "PERFORMANCE_RECORD",
               "MEASUREMENT_SHEET",
-              "RETENTION_REQUEST"
+              "RETENTION_REQUEST",
+              "PURCHASE_ORDER"
             ],
             "type": "string"
           }
@@ -11006,6 +11366,23 @@
         "required": [
           "index",
           "previousIndex"
+        ],
+        "type": "object"
+      },
+      "UpdateTaskBoardColumnStatusDto": {
+        "properties": {
+          "status": {
+            "description": "Where the column's tasks appear in the task overview",
+            "enum": [
+              "OPEN",
+              "IN_PROGRESS",
+              "DONE"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
         ],
         "type": "object"
       },
@@ -28237,6 +28614,434 @@
         ]
       }
     },
+    "/api/v1/invoicing/purchase-orders": {
+      "post": {
+        "operationId": "NxPurchaseOrderController_create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePurchaseOrderDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The new draft purchase order"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create a purchase order draft to a supplier, from materials or free positions",
+        "tags": [
+          "PurchaseOrder",
+          "Invoicing",
+          "Purchase orders"
+        ]
+      }
+    },
+    "/api/v1/invoicing/purchase-orders/commitments": {
+      "get": {
+        "operationId": "NxPurchaseOrderController_commitmentsOf",
+        "parameters": [
+          {
+            "description": "Only the purchase orders of this project",
+            "in": "query",
+            "name": "projectId",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Only the purchase orders to this supplier (CRM company id)",
+            "in": "query",
+            "name": "supplierId",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Only orders expected on or before this instant, plus those without a delivery date",
+            "in": "query",
+            "name": "until",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PurchaseCommitmentsDto"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Per counted purchase order its stages, and their totals"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get the open order value (Bestellobligo) and the received-not-invoiced value per purchase order, of the organisation or of one project or supplier, with totals and the expected delivery date",
+        "tags": [
+          "PurchaseOrder",
+          "Invoicing",
+          "Purchase orders"
+        ]
+      }
+    },
+    "/api/v1/invoicing/purchase-orders/from-order/{id}": {
+      "get": {
+        "operationId": "NxPurchaseOrderController_previewFromOrder",
+        "parameters": [
+          {
+            "description": "The accepted order (offer, order form or supplement)",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Preview the purchase order drafts of an accepted order: one per supplier of its materials, the skipped positions and the drafts already made",
+        "tags": [
+          "PurchaseOrder",
+          "Invoicing",
+          "Purchase orders"
+        ]
+      },
+      "post": {
+        "operationId": "NxPurchaseOrderController_createFromOrder",
+        "parameters": [
+          {
+            "description": "The accepted order (offer, order form or supplement)",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePurchaseDraftsDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Create purchase order drafts from an accepted order, one per supplier without a draft yet (a supplier whose draft was deleted is drafted again); nothing is sent. Another run on the same order holding it longer than a few seconds returns the current plan with busy: true",
+        "tags": [
+          "PurchaseOrder",
+          "Invoicing",
+          "Purchase orders"
+        ]
+      }
+    },
+    "/api/v1/invoicing/purchase-orders/query": {
+      "post": {
+        "operationId": "NxPurchaseOrderController_query",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TablePaginatorDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Paginated list of purchase orders; each row carries `commitment` (its open value), the result `totals` over every filtered row"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Query purchase orders to suppliers with pagination and filters; each row carries its open order value (Bestellobligo) and the result the totals of every filtered row",
+        "tags": [
+          "PurchaseOrder",
+          "Invoicing",
+          "Purchase orders"
+        ]
+      }
+    },
+    "/api/v1/invoicing/purchase-orders/{id}": {
+      "get": {
+        "operationId": "NxPurchaseOrderController_byId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get a purchase order by ID, with the received quantity of each position",
+        "tags": [
+          "PurchaseOrder",
+          "Invoicing",
+          "Purchase orders"
+        ]
+      }
+    },
+    "/api/v1/invoicing/purchase-orders/{id}/close-rest": {
+      "post": {
+        "operationId": "NxPurchaseOrderController_closeRest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosePurchaseOrderRestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Close the open rest of a partly received purchase order that the supplier will not deliver, with a reason: the order counts as received and its open order value drops to 0",
+        "tags": [
+          "PurchaseOrder",
+          "Invoicing",
+          "Purchase orders"
+        ]
+      }
+    },
+    "/api/v1/invoicing/purchase-orders/{id}/confirm": {
+      "post": {
+        "operationId": "NxPurchaseOrderController_confirm",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Mark a sent purchase order as confirmed by the supplier",
+        "tags": [
+          "PurchaseOrder",
+          "Invoicing",
+          "Purchase orders"
+        ]
+      }
+    },
+    "/api/v1/invoicing/purchase-orders/{id}/receive": {
+      "post": {
+        "operationId": "NxPurchaseOrderController_receive",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceivePurchaseOrderDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Record goods received on a purchase order, per position or everything still open",
+        "tags": [
+          "PurchaseOrder",
+          "Invoicing",
+          "Purchase orders"
+        ]
+      }
+    },
     "/api/v1/invoicing/recurring-schedules": {
       "get": {
         "operationId": "NxRecurringScheduleController_list",
@@ -34424,6 +35229,51 @@
         ]
       }
     },
+    "/api/v1/task-manager/columns/{id}/update-status": {
+      "post": {
+        "operationId": "NxTaskBoardColumnsController_updateTaskBoardColumnStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskBoardColumnStatusDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Set where a task board column appears in the task overview (open, in progress, done)",
+        "tags": [
+          "Task Board Columns"
+        ]
+      }
+    },
     "/api/v1/task-manager/comments/{id}/delete": {
       "delete": {
         "operationId": "NxCommentsController_deleteComment",
@@ -40572,6 +41422,14 @@
     {
       "description": "Manage projects, assignees, and portfolios",
       "name": "Projects"
+    },
+    {
+      "description": "",
+      "name": "Purchase orders"
+    },
+    {
+      "description": "",
+      "name": "PurchaseOrder"
     },
     {
       "description": "",
