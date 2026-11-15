@@ -311,6 +311,58 @@
         ],
         "type": "object"
       },
+      "ApplicableDriveFolderTemplateResponse": {
+        "properties": {
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "kind": {
+            "enum": [
+              "PROJECT",
+              "TASK",
+              "CONTACT",
+              "COMPANY",
+              "DEAL",
+              "CALENDAR_EVENT",
+              "PERSONAL_DRIVE",
+              "FOLDER"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "nodeCount": {
+            "description": "Folders and files of the template, at every depth",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "description",
+          "nodeCount"
+        ],
+        "type": "object"
+      },
+      "ApplyDriveFolderTemplateToFolderDto": {
+        "properties": {
+          "folderId": {
+            "description": "The folder the template is applied in",
+            "minimum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "folderId"
+        ],
+        "type": "object"
+      },
       "ApplyOfferSelectionDTO": {
         "properties": {
           "alternativeBases": {
@@ -2789,6 +2841,10 @@
           "sellingPrice": {
             "type": "number"
           },
+          "stockTracked": {
+            "description": "Kept in stock (\"lagergeführt\"). Changing it needs STOCK_CORRECT. While the stock system is not active for the organisation, a value other than the stored one (a new material: false) is refused with 403 STOCK_NOT_AVAILABLE; imports leave the stored value as it is.",
+            "type": "boolean"
+          },
           "supplierId": {
             "type": "number"
           },
@@ -4459,6 +4515,292 @@
         ],
         "type": "object"
       },
+      "DocumentChainDto": {
+        "properties": {
+          "anchor": {
+            "$ref": "#/components/schemas/DocumentChainEndDto"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentChainEdgeDto"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "description": "Ordered by stage, then date",
+            "items": {
+              "$ref": "#/components/schemas/DocumentChainNodeDto"
+            },
+            "type": "array"
+          },
+          "truncated": {
+            "description": "True when the order has more documents than one answer carries",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "anchor",
+          "nodes",
+          "edges",
+          "truncated"
+        ],
+        "type": "object"
+      },
+      "DocumentChainEdgeDto": {
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "relationKind": {
+            "description": "derived_from, references, settles, cancels, duns, member_of, contract_of or supplement_of",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/DocumentChainEndDto"
+          },
+          "target": {
+            "$ref": "#/components/schemas/DocumentChainEndDto"
+          }
+        },
+        "required": [
+          "id",
+          "relationKind",
+          "source",
+          "target"
+        ],
+        "type": "object"
+      },
+      "DocumentChainEndDto": {
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "linkType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "linkType",
+          "id"
+        ],
+        "type": "object"
+      },
+      "DocumentChainNodeDto": {
+        "properties": {
+          "date": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "documentType": {
+            "description": "The document type; null for a billing chain or a dunning document",
+            "enum": [
+              "INVOICE",
+              "PARTIAL_INVOICE",
+              "CREDIT_NOTE",
+              "CANCELLATION_INVOICE",
+              "FINAL_INVOICE",
+              "DELIVERY_NOTE",
+              "OFFER",
+              "ORDER_CONFIRMATION",
+              "PROGRESS_INVOICE",
+              "CUMULATIVE_INVOICE",
+              "RECURRING_TEMPLATE",
+              "PROFORMA_INVOICE",
+              "PERFORMANCE_RECORD",
+              "MEASUREMENT_SHEET",
+              "RETENTION_REQUEST",
+              "PURCHASE_ORDER"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "linkType": {
+            "description": "Link-layer type: `invoice`, `offer`, `cancellation`, `billing_chain` or `dunning`",
+            "type": "string"
+          },
+          "number": {
+            "nullable": true,
+            "type": "string"
+          },
+          "offerType": {
+            "description": "The offer kind of an offer; null otherwise",
+            "enum": [
+              "OFFER",
+              "COST_ESTIMATE",
+              "SUPPLEMENT",
+              "ORDER_FORM"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "side": {
+            "description": "SALES for the customer side, PURCHASING for purchase orders",
+            "enum": [
+              "SALES",
+              "PURCHASING"
+            ],
+            "type": "string"
+          },
+          "stage": {
+            "description": "The stage of the order the document belongs to",
+            "enum": [
+              "ORDER",
+              "PURCHASING",
+              "DELIVERY",
+              "BILLING",
+              "CORRECTION",
+              "DUNNING"
+            ],
+            "type": "string"
+          },
+          "state": {
+            "description": "A DocumentState, or the status of a billing chain or dunning document",
+            "example": "COMMITTED",
+            "nullable": true,
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "linkType",
+          "id",
+          "documentType",
+          "offerType",
+          "number",
+          "title",
+          "state",
+          "date",
+          "stage",
+          "side"
+        ],
+        "type": "object"
+      },
+      "DocumentFollowUpBlockDto": {
+        "properties": {
+          "code": {
+            "description": "Stable code of the refusal, the one the conversion route answers with",
+            "example": "ORDER_BILLED_THROUGH_CONFIRMATION",
+            "type": "string"
+          },
+          "document": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentRefDto"
+              }
+            ],
+            "description": "The document that stands in the way, e.g. the order confirmation or the invoice that bills the order",
+            "nullable": true,
+            "type": "object"
+          },
+          "reasonContext": {
+            "description": "Values of the placeholders of that sentence",
+            "nullable": true,
+            "type": "object"
+          },
+          "reasonKey": {
+            "description": "Translation key of the sentence the conversion route answers with",
+            "example": "ERRORS.INVOICING.ORDER_BILLED_THROUGH_CONFIRMATION",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "reasonKey",
+          "reasonContext",
+          "document"
+        ],
+        "type": "object"
+      },
+      "DocumentFollowUpDto": {
+        "properties": {
+          "available": {
+            "description": "Whether the conversion route accepts the document right now",
+            "type": "boolean"
+          },
+          "billingChainId": {
+            "description": "The open billing chain an invoice of a site document joins as a Teilrechnung; null when it is a plain invoice or another follow-up",
+            "nullable": true,
+            "type": "number"
+          },
+          "blockedBy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentFollowUpBlockDto"
+              }
+            ],
+            "description": "The refusal, when not available",
+            "nullable": true,
+            "type": "object"
+          },
+          "group": {
+            "description": "The menu section: SALES (Verkauf), EXECUTION (Ausführung), BILLING (Abrechnung), PURCHASING (Einkauf), CORRECTION (Korrektur). The answer is ordered by section",
+            "enum": [
+              "SALES",
+              "EXECUTION",
+              "BILLING",
+              "PURCHASING",
+              "CORRECTION"
+            ],
+            "type": "string"
+          },
+          "offerType": {
+            "description": "The offer kind created when `to` is OFFER; null otherwise",
+            "enum": [
+              "OFFER",
+              "COST_ESTIMATE",
+              "SUPPLEMENT",
+              "ORDER_FORM"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "ruleId": {
+            "description": "Id of the conversion rule, `<from>.<to>`",
+            "example": "offer.invoice",
+            "type": "string"
+          },
+          "to": {
+            "description": "The document type created, or BILLING_CHAIN for opening the billing chain of an order",
+            "enum": [
+              "INVOICE",
+              "PARTIAL_INVOICE",
+              "CREDIT_NOTE",
+              "CANCELLATION_INVOICE",
+              "FINAL_INVOICE",
+              "DELIVERY_NOTE",
+              "OFFER",
+              "ORDER_CONFIRMATION",
+              "PROGRESS_INVOICE",
+              "CUMULATIVE_INVOICE",
+              "RECURRING_TEMPLATE",
+              "PROFORMA_INVOICE",
+              "PERFORMANCE_RECORD",
+              "MEASUREMENT_SHEET",
+              "RETENTION_REQUEST",
+              "PURCHASE_ORDER",
+              "BILLING_CHAIN"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "ruleId",
+          "to",
+          "group",
+          "offerType",
+          "available",
+          "billingChainId",
+          "blockedBy"
+        ],
+        "type": "object"
+      },
       "DocumentLayoutAreasDTO": {
         "properties": {
           "infoBlock": {
@@ -4654,6 +4996,63 @@
           "tableStyle",
           "footerColumns"
         ],
+        "type": "object"
+      },
+      "DocumentRefDto": {
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "linkType": {
+            "description": "Link-layer type: `invoice`, `offer`, `cancellation` or `billing_chain`",
+            "type": "string"
+          },
+          "number": {
+            "description": "The document number; null for a draft without one",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "linkType",
+          "id",
+          "number"
+        ],
+        "type": "object"
+      },
+      "DriveFolderTemplateApplyResponse": {
+        "properties": {
+          "created": {
+            "description": "Folders and file copies created",
+            "type": "number"
+          },
+          "reused": {
+            "description": "Nodes that were already there under their name",
+            "type": "number"
+          },
+          "skipped": {
+            "description": "Nodes left out: an empty name, a deleted master file or a failed copy",
+            "type": "number"
+          }
+        },
+        "required": [
+          "created",
+          "reused",
+          "skipped"
+        ],
+        "type": "object"
+      },
+      "DuplicateBookingEventTypeDto": {
+        "properties": {
+          "pageId": {
+            "type": "number"
+          },
+          "title": {
+            "maxLength": 140,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "EditMessageDto": {
@@ -6362,15 +6761,23 @@
       "MarkDeliveredDTO": {
         "properties": {
           "deliveredAt": {
+            "description": "When it was delivered; now when absent",
             "format": "date-time",
             "type": "string"
           },
           "recipientName": {
+            "description": "Who took the delivery on site",
             "maxLength": 255,
             "type": "string"
           },
           "signatureDataUrl": {
+            "description": "The signature as a PNG or JPEG data URL",
             "type": "string"
+          },
+          "stockLocationId": {
+            "description": "The stock location the delivered material leaves; the default location when absent. Only where deliveries book stock; needs the right to issue stock",
+            "minimum": 1,
+            "type": "number"
           }
         },
         "type": "object"
@@ -6387,6 +6794,17 @@
         },
         "required": [
           "measurementLineId"
+        ],
+        "type": "object"
+      },
+      "MoveBookingEventTypeDto": {
+        "properties": {
+          "pageId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "pageId"
         ],
         "type": "object"
       },
@@ -8173,6 +8591,11 @@
             },
             "maxItems": 500,
             "type": "array"
+          },
+          "locationId": {
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
           },
           "receivedAt": {
             "format": "date-time",
@@ -10448,6 +10871,10 @@
           "sellingPrice": {
             "type": "number"
           },
+          "stockTracked": {
+            "description": "Kept in stock (\"lagergeführt\"). Changing it needs STOCK_CORRECT. While the stock system is not active for the organisation, a value other than the stored one (a new material: false) is refused with 403 STOCK_NOT_AVAILABLE; imports leave the stored value as it is.",
+            "type": "boolean"
+          },
           "supplierId": {
             "type": "number"
           },
@@ -10910,29 +11337,7 @@
         ],
         "type": "object"
       },
-      "UpdateProjectCustomerDTO": {
-        "properties": {
-          "companyId": {
-            "type": "number"
-          },
-          "contactId": {
-            "type": "number"
-          },
-          "type": {
-            "enum": [
-              "NONE",
-              "COMPANY",
-              "PERSON"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "type"
-        ],
-        "type": "object"
-      },
-      "UpdateProjectDTO": {
+      "UpdateProjectBodyDTO": {
         "properties": {
           "assignedEmployeeIds": {
             "items": {
@@ -10996,6 +11401,8 @@
             "type": "string"
           },
           "id": {
+            "deprecated": true,
+            "description": "Ignored: the project is the one in the path.",
             "type": "number"
           },
           "name": {
@@ -11037,8 +11444,27 @@
             "type": "number"
           }
         },
+        "type": "object"
+      },
+      "UpdateProjectCustomerDTO": {
+        "properties": {
+          "companyId": {
+            "type": "number"
+          },
+          "contactId": {
+            "type": "number"
+          },
+          "type": {
+            "enum": [
+              "NONE",
+              "COMPANY",
+              "PERSON"
+            ],
+            "type": "string"
+          }
+        },
         "required": [
-          "id"
+          "type"
         ],
         "type": "object"
       },
@@ -16089,6 +16515,51 @@
         ]
       }
     },
+    "/api/v1/booking/event-types/{id}/duplicate": {
+      "post": {
+        "operationId": "NxBookingEventTypesController_duplicate",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuplicateBookingEventTypeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Copy an event type with its hosts, availability and form fields",
+        "tags": [
+          "Booking Event Types"
+        ]
+      }
+    },
     "/api/v1/booking/event-types/{id}/form-fields": {
       "put": {
         "operationId": "NxBookingEventTypesController_saveFormFields",
@@ -16129,6 +16600,51 @@
           }
         ],
         "summary": "Save form fields for an event type",
+        "tags": [
+          "Booking Event Types"
+        ]
+      }
+    },
+    "/api/v1/booking/event-types/{id}/move": {
+      "post": {
+        "operationId": "NxBookingEventTypesController_move",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveBookingEventTypeDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Move an event type and its bookings to another booking page",
         "tags": [
           "Booking Event Types"
         ]
@@ -21810,6 +22326,153 @@
         ]
       }
     },
+    "/api/v1/drive/folder-templates/applicable": {
+      "get": {
+        "operationId": "NxDriveFolderTemplatesController_applicable",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/ApplicableDriveFolderTemplateResponse"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Folder templates that can be applied to a folder",
+        "tags": [
+          "Drive"
+        ]
+      }
+    },
+    "/api/v1/drive/folder-templates/{id}/apply-to-folder": {
+      "post": {
+        "operationId": "NxDriveFolderTemplatesController_applyToFolder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyDriveFolderTemplateToFolderDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/DriveFolderTemplateApplyResponse"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "404": {
+            "description": "The template or the folder is not one of the organization's"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Apply a folder template inside a folder",
+        "tags": [
+          "Drive"
+        ]
+      }
+    },
     "/api/v1/drive/organization-possessed": {
       "get": {
         "operationId": "NxDriveController_getOrganizationPossessedDrives",
@@ -24970,6 +25633,99 @@
         ]
       }
     },
+    "/api/v1/invoicing/document-follow-ups/{type}/{id}": {
+      "get": {
+        "operationId": "NxDocumentFollowUpController_followUps",
+        "parameters": [
+          {
+            "description": "The table the document lives in: `offer` for offers of every kind and order confirmations, `cancellation` for a Storno, `invoice` for everything else",
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "enum": [
+                "invoice",
+                "offer",
+                "cancellation"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The document id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/DocumentFollowUpDto"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "One entry per follow-up the caller holds the permission for, available or refused with its reason"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "404": {
+            "description": "No such document in the caller's organisation"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Follow-up documents that can be created from an invoicing document, each available or refused with the reason",
+        "tags": [
+          "Invoicing",
+          "Invoicing"
+        ]
+      }
+    },
     "/api/v1/invoicing/document-layouts": {
       "get": {
         "operationId": "NxDocumentLayoutController_list",
@@ -25122,6 +25878,96 @@
           "DocumentLayout",
           "Invoicing",
           "Document Layouts"
+        ]
+      }
+    },
+    "/api/v1/invoicing/document-links/chain/{type}/{id}": {
+      "get": {
+        "operationId": "NxDocumentLinkController_chain",
+        "parameters": [
+          {
+            "description": "The table the document lives in: `offer` for offers of every kind and order confirmations, `cancellation` for a Storno, `invoice` for everything else",
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "enum": [
+                "invoice",
+                "offer",
+                "cancellation"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The document id",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/DocumentChainDto"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Every document of the order the document belongs to that the caller may read, across stages and both sides, with the links between them"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "404": {
+            "description": "No such document in the caller's organisation"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "The whole document chain of an order: offers, order confirmation, site documents, invoices, corrections and purchase orders, with their links",
+        "tags": [
+          "DocumentLink",
+          "Invoicing"
         ]
       }
     },
@@ -31501,7 +32347,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateProjectDTO"
+                "$ref": "#/components/schemas/UpdateProjectBodyDTO"
               }
             }
           },
@@ -32967,6 +33813,51 @@
           }
         ],
         "summary": "List offers linked to a deal",
+        "tags": [
+          "Deals"
+        ]
+      }
+    },
+    "/api/v1/sales-pipeline/deals/{dealId}/pipeline": {
+      "put": {
+        "operationId": "NxDealsController_moveDealToPipeline",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dealId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveDealStageRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Move a deal to a stage of another pipeline",
         "tags": [
           "Deals"
         ]
