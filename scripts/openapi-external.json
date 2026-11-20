@@ -440,6 +440,7 @@
               "PER_USER",
               "PER_USER_DAY",
               "PER_CATEGORY",
+              "PER_TYPE",
               "PER_TASK",
               "SINGLE_LINE"
             ],
@@ -3515,6 +3516,7 @@
               "PER_USER",
               "PER_USER_DAY",
               "PER_CATEGORY",
+              "PER_TYPE",
               "PER_TASK",
               "SINGLE_LINE"
             ],
@@ -3850,6 +3852,32 @@
       },
       "CreateTrackingCategoryDto": {
         "properties": {
+          "color": {
+            "description": "Palette key of the category colour; null clears it",
+            "enum": [
+              "secondary",
+              "primary",
+              "success",
+              "warning",
+              "help",
+              "primary400",
+              "secondary200",
+              "primary200"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "defaultType": {
+            "description": "Type an entry gets when the category is picked; null leaves the type alone",
+            "enum": [
+              "WORKTIME",
+              "PROJECTWORK",
+              "TRAVELTIME",
+              "HOMEOFFICE"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -5831,6 +5859,14 @@
       },
       "ExportReportDto": {
         "properties": {
+          "categoryIds": {
+            "description": "Only entries in one of these categories; 0 means entries without a category",
+            "items": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "type": "array"
+          },
           "driveId": {
             "type": "number"
           },
@@ -5840,8 +5876,31 @@
           "folderId": {
             "type": "number"
           },
+          "projectIds": {
+            "description": "Only entries on one of these projects",
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "type": "array"
+          },
           "startDate": {
             "type": "number"
+          },
+          "types": {
+            "description": "Only entries of one of these types (Art)",
+            "items": {
+              "enum": [
+                "WORKTIME",
+                "PROJECTWORK",
+                "TRAVELTIME",
+                "HOMEOFFICE",
+                "OVERTIME_PAYOUT",
+                "OVERTIME_VACATION"
+              ],
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "required": [
@@ -6688,6 +6747,8 @@
             "type": "number"
           },
           "projectId": {
+            "description": "null removes the project (drafts only)",
+            "nullable": true,
             "type": "number"
           },
           "statusId": {
@@ -7490,6 +7551,7 @@
               "PER_USER",
               "PER_USER_DAY",
               "PER_CATEGORY",
+              "PER_TYPE",
               "PER_TASK",
               "SINGLE_LINE"
             ],
@@ -7638,6 +7700,7 @@
               "PER_USER",
               "PER_USER_DAY",
               "PER_CATEGORY",
+              "PER_TYPE",
               "PER_TASK",
               "SINGLE_LINE"
             ],
@@ -8448,12 +8511,28 @@
       },
       "QueryTrackingMetaDto": {
         "properties": {
+          "categoryIds": {
+            "description": "Only entries in one of these categories; 0 means entries without a category",
+            "items": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "type": "array"
+          },
           "end": {
             "format": "date-time",
             "type": "string"
           },
           "limit": {
             "type": "number"
+          },
+          "projectIds": {
+            "description": "Only entries on one of these projects",
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "type": "array"
           },
           "sort": {
             "enum": [
@@ -8465,6 +8544,21 @@
           "start": {
             "format": "date-time",
             "type": "string"
+          },
+          "types": {
+            "description": "Only entries of one of these types (Art)",
+            "items": {
+              "enum": [
+                "WORKTIME",
+                "PROJECTWORK",
+                "TRAVELTIME",
+                "HOMEOFFICE",
+                "OVERTIME_PAYOUT",
+                "OVERTIME_VACATION"
+              ],
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "type": "object"
@@ -9235,6 +9329,16 @@
           },
           "taskId": {
             "type": "number"
+          },
+          "type": {
+            "description": "Type the timer runs as; without it the category default type, else WORKTIME",
+            "enum": [
+              "WORKTIME",
+              "PROJECTWORK",
+              "TRAVELTIME",
+              "HOMEOFFICE"
+            ],
+            "type": "string"
           }
         },
         "type": "object"
@@ -9371,6 +9475,33 @@
         },
         "required": [
           "boardIds"
+        ],
+        "type": "object"
+      },
+      "TimeOffPreviewResponseDto": {
+        "properties": {
+          "balance": {
+            "description": "Booked balance today, in hours; null without access to the account",
+            "example": 6,
+            "nullable": true,
+            "type": "number"
+          },
+          "balanceAfter": {
+            "description": "Balance after approval, in hours; null without access to the account",
+            "example": -10,
+            "nullable": true,
+            "type": "number"
+          },
+          "hours": {
+            "description": "Working hours the absence would take from the worktime account",
+            "example": 16,
+            "type": "number"
+          }
+        },
+        "required": [
+          "hours",
+          "balance",
+          "balanceAfter"
         ],
         "type": "object"
       },
@@ -11561,6 +11692,7 @@
               "PER_USER",
               "PER_USER_DAY",
               "PER_CATEGORY",
+              "PER_TYPE",
               "PER_TASK",
               "SINGLE_LINE"
             ],
@@ -11874,6 +12006,32 @@
       },
       "UpdateTrackingCategoryDto": {
         "properties": {
+          "color": {
+            "description": "Palette key of the category colour; null clears it",
+            "enum": [
+              "secondary",
+              "primary",
+              "success",
+              "warning",
+              "help",
+              "primary400",
+              "secondary200",
+              "primary200"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "defaultType": {
+            "description": "Type an entry gets when the category is picked; null leaves the type alone",
+            "enum": [
+              "WORKTIME",
+              "PROJECTWORK",
+              "TRAVELTIME",
+              "HOMEOFFICE"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -39034,6 +39192,109 @@
         ]
       }
     },
+    "/api/v1/work-manager/absence-planner/{userId}/time-off/preview/{start}/{end}": {
+      "get": {
+        "operationId": "NxAbsencePlannerController_getTimeOffPreview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "path",
+            "name": "start",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "path",
+            "name": "end",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "halfDay",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Absence being edited; its booked hours count as given back",
+            "in": "query",
+            "name": "excludeAbsenceId",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/TimeOffPreviewResponseDto"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Preview the worktime account hours of a compensatory absence",
+        "tags": [
+          "Absence Planner"
+        ]
+      }
+    },
     "/api/v1/work-manager/reports/organization/meta/{start}/{end}": {
       "get": {
         "operationId": "NxWorkReportsController_getOrgTrackingMeta",
@@ -40613,6 +40874,39 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "description": "Only entries of one of these types (Art); comma separated or repeated",
+            "in": "query",
+            "name": "types",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "WORKTIME",
+                  "PROJECTWORK",
+                  "TRAVELTIME",
+                  "HOMEOFFICE",
+                  "OVERTIME_PAYOUT",
+                  "OVERTIME_VACATION"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Only entries in one of these categories; 0 means entries without a category. Comma separated or repeated",
+            "in": "query",
+            "name": "categoryIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "type": "array"
+            }
           }
         ],
         "responses": {
@@ -40651,6 +40945,39 @@
             "required": true,
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "description": "Only entries of one of these types (Art); comma separated or repeated",
+            "in": "query",
+            "name": "types",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "WORKTIME",
+                  "PROJECTWORK",
+                  "TRAVELTIME",
+                  "HOMEOFFICE",
+                  "OVERTIME_PAYOUT",
+                  "OVERTIME_VACATION"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Only entries in one of these categories; 0 means entries without a category. Comma separated or repeated",
+            "in": "query",
+            "name": "categoryIds",
+            "required": false,
+            "schema": {
+              "items": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "type": "array"
             }
           },
           {
@@ -40701,7 +41028,7 @@
             }
           },
           {
-            "description": "Only entries in this tracking category",
+            "description": "Only entries in this tracking category; older alias of `categoryIds`",
             "in": "query",
             "name": "categoryId",
             "required": false,
