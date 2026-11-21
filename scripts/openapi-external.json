@@ -1497,6 +1497,13 @@
           "notes": {
             "type": "string"
           },
+          "paymentTermDays": {
+            "description": "This customer's payment term in days; overrides the organisation's. Null uses the organisation's.",
+            "maximum": 365,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
           "phone": {
             "type": "object"
           },
@@ -1633,6 +1640,13 @@
           },
           "notes": {
             "type": "string"
+          },
+          "paymentTermDays": {
+            "description": "This customer's payment term in days; overrides the organisation's. Null uses the organisation's.",
+            "maximum": 365,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
           },
           "phone": {
             "type": "object"
@@ -6744,6 +6758,8 @@
             "type": "array"
           },
           "contactUserId": {
+            "description": "The Ansprechpartner printed on the PDF, a member of the organisation; null prints none",
+            "nullable": true,
             "type": "number"
           },
           "projectId": {
@@ -10188,6 +10204,13 @@
           "notes": {
             "type": "string"
           },
+          "paymentTermDays": {
+            "description": "This customer's payment term in days; overrides the organisation's. Null uses the organisation's.",
+            "maximum": 365,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
           "phone": {
             "type": "object"
           },
@@ -10301,6 +10324,13 @@
           },
           "notes": {
             "type": "string"
+          },
+          "paymentTermDays": {
+            "description": "This customer's payment term in days; overrides the organisation's. Null uses the organisation's.",
+            "maximum": 365,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
           },
           "phone": {
             "type": "object"
@@ -11223,11 +11253,19 @@
           "minBreakTime": {
             "type": "number"
           },
+          "paymentTermDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "number"
+          },
           "phones": {
             "items": {
               "type": "object"
             },
             "type": "array"
+          },
+          "printContactPersonPhone": {
+            "type": "boolean"
           },
           "registerDepartment": {
             "type": "string"
@@ -31637,6 +31675,49 @@
         ]
       }
     },
+    "/api/v1/organization/{orgId}/update/headquarters/branch/{branchId}": {
+      "patch": {
+        "operationId": "NxOrganizationsController_setHeadquartersBranch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "path",
+            "name": "branchId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Make a branch the organization headquarters (its address becomes the sender address)",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
     "/api/v1/projects/archive-many": {
       "post": {
         "operationId": "ProjectManagerController_archiveProjects",
@@ -40902,6 +40983,7 @@
             "required": false,
             "schema": {
               "items": {
+                "maximum": 9007199254740991,
                 "minimum": 0,
                 "type": "number"
               },
@@ -40974,6 +41056,7 @@
             "required": false,
             "schema": {
               "items": {
+                "maximum": 9007199254740991,
                 "minimum": 0,
                 "type": "number"
               },
