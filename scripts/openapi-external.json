@@ -374,6 +374,19 @@
             "type": "array",
             "uniqueItems": true
           },
+          "excludedLineIds": {
+            "description": "Positions the customer does not order, as the complete set: NORMAL lines or titles (a title stands for all its positions). Absent keeps the current set; an empty list orders every position. At least one position stays ordered. The offer itself stays as sent.",
+            "example": [
+              44
+            ],
+            "items": {
+              "minimum": 1,
+              "type": "number"
+            },
+            "maxItems": 1000,
+            "type": "array",
+            "uniqueItems": true
+          },
           "orderRequirementLineIds": {
             "description": "Bedarfspositionen (contingency lines) the customer orders now",
             "example": [
@@ -498,6 +511,31 @@
           "startTime",
           "endTime",
           "timezone"
+        ],
+        "type": "object"
+      },
+      "BirthPlaceDto": {
+        "properties": {
+          "city": {
+            "description": "Town of birth",
+            "example": "Köln",
+            "maxLength": 120,
+            "type": "string"
+          },
+          "country": {
+            "description": "ISO 3166-1 alpha-2 code of the country of birth",
+            "example": "DE",
+            "type": "string"
+          },
+          "state": {
+            "description": "State, region or canton of birth",
+            "example": "Nordrhein-Westfalen",
+            "maxLength": 120,
+            "type": "string"
+          }
+        },
+        "required": [
+          "country"
         ],
         "type": "object"
       },
@@ -1519,6 +1557,20 @@
           "sector": {
             "type": "string"
           },
+          "skontoDays": {
+            "description": "Days this customer's Skonto applies; shorter than the payment term. Null with a null or 0 rate.",
+            "maximum": 364,
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          },
+          "skontoPercent": {
+            "description": "This customer's Skonto in percent, two decimals; 0 = no Skonto for this customer, null follows the organisation. Sent with skontoDays.",
+            "maximum": 100,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
           "socialMedia": {
             "items": {
               "type": "object"
@@ -1673,6 +1725,20 @@
           },
           "sector": {
             "type": "string"
+          },
+          "skontoDays": {
+            "description": "Days this customer's Skonto applies; shorter than the payment term. Null with a null or 0 rate.",
+            "maximum": 364,
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          },
+          "skontoPercent": {
+            "description": "This customer's Skonto in percent, two decimals; 0 = no Skonto for this customer, null follows the organisation. Sent with skontoDays.",
+            "maximum": 100,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
           },
           "socialMedia": {
             "items": {
@@ -9836,7 +9902,7 @@
       "UpdateBirthPlaceDto": {
         "properties": {
           "birthPlace": {
-            "type": "object"
+            "$ref": "#/components/schemas/BirthPlaceDto"
           }
         },
         "required": [
@@ -10226,6 +10292,20 @@
           "sector": {
             "type": "string"
           },
+          "skontoDays": {
+            "description": "Days this customer's Skonto applies; shorter than the payment term. Null with a null or 0 rate.",
+            "maximum": 364,
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          },
+          "skontoPercent": {
+            "description": "This customer's Skonto in percent, two decimals; 0 = no Skonto for this customer, null follows the organisation. Sent with skontoDays.",
+            "maximum": 100,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
+          },
           "socialMedia": {
             "items": {
               "type": "object"
@@ -10357,6 +10437,20 @@
           },
           "sector": {
             "type": "string"
+          },
+          "skontoDays": {
+            "description": "Days this customer's Skonto applies; shorter than the payment term. Null with a null or 0 rate.",
+            "maximum": 364,
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          },
+          "skontoPercent": {
+            "description": "This customer's Skonto in percent, two decimals; 0 = no Skonto for this customer, null follows the organisation. Sent with skontoDays.",
+            "maximum": 100,
+            "minimum": 0,
+            "nullable": true,
+            "type": "number"
           },
           "socialMedia": {
             "items": {
@@ -11253,6 +11347,11 @@
           "minBreakTime": {
             "type": "number"
           },
+          "offerValidityDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "number"
+          },
           "paymentTermDays": {
             "maximum": 365,
             "minimum": 0,
@@ -11272,6 +11371,18 @@
           },
           "registerNumber": {
             "type": "string"
+          },
+          "skontoDays": {
+            "maximum": 364,
+            "minimum": 1,
+            "nullable": true,
+            "type": "number"
+          },
+          "skontoPercent": {
+            "maximum": 100,
+            "minimum": 0.01,
+            "nullable": true,
+            "type": "number"
           },
           "socialMedia": {
             "items": {
@@ -28529,7 +28640,7 @@
             "api-key": []
           }
         ],
-        "summary": "Record the alternatives and contingency items the customer chose on an offer",
+        "summary": "Record the alternatives and contingency items the customer chose on an offer, and the positions not ordered",
         "tags": [
           "Offers"
         ]
