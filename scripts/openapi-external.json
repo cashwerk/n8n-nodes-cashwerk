@@ -3119,6 +3119,13 @@
             "format": "date-time",
             "type": "string"
           },
+          "labourFrom": {
+            "enum": [
+              "DOCUMENT",
+              "TRACKING"
+            ],
+            "type": "string"
+          },
           "linkingOptions": {
             "$ref": "#/components/schemas/LinkingOptionsDTO"
           },
@@ -3612,6 +3619,9 @@
       },
       "CreateSalesTaxRegulationDTO": {
         "properties": {
+          "alwaysAttach": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -3624,7 +3634,8 @@
               "REVERSE_CHARGE_13B",
               "INTRA_COMMUNITY",
               "SMALL_BUSINESS_19",
-              "EXEMPT"
+              "EXEMPT",
+              "EXPORT"
             ],
             "type": "string"
           },
@@ -6460,6 +6471,99 @@
         ],
         "type": "object"
       },
+      "InvoiceDefaultsModel": {
+        "properties": {
+          "constructionCertificateValidUntil": {
+            "example": "2027-03-31",
+            "nullable": true,
+            "type": "string"
+          },
+          "documentAdjustmentPercent": {
+            "nullable": true,
+            "type": "number"
+          },
+          "documentAdjustmentType": {
+            "enum": [
+              "DISCOUNT",
+              "SURCHARGE"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "documentLayoutId": {
+            "nullable": true,
+            "type": "number"
+          },
+          "einvoiceFormat": {
+            "enum": [
+              "NONE",
+              "ZUGFERD",
+              "XRECHNUNG"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "invoiceEmail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "isConstructionContractor": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "language": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lineDiscountPercent": {
+            "nullable": true,
+            "type": "number"
+          },
+          "noteIds": {
+            "items": {
+              "type": "number"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "ownerId": {
+            "type": "number"
+          },
+          "ownerType": {
+            "enum": [
+              "company",
+              "contact"
+            ],
+            "type": "string"
+          },
+          "retentionPercent": {
+            "nullable": true,
+            "type": "number"
+          },
+          "taxRegime": {
+            "enum": [
+              "STANDARD",
+              "REVERSE_CHARGE_13B",
+              "INTRA_COMMUNITY",
+              "SMALL_BUSINESS_19",
+              "EXEMPT",
+              "EXPORT"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "ownerType",
+          "ownerId"
+        ],
+        "type": "object"
+      },
       "InvoiceDetailsDTO": {
         "properties": {
           "assigneeIds": {
@@ -6492,6 +6596,22 @@
             "type": "string"
           },
           "orderNumber": {
+            "type": "string"
+          },
+          "taxExemptionReason": {
+            "maxLength": 500,
+            "nullable": true,
+            "type": "string"
+          },
+          "taxRegime": {
+            "enum": [
+              "STANDARD",
+              "REVERSE_CHARGE_13B",
+              "INTRA_COMMUNITY",
+              "SMALL_BUSINESS_19",
+              "EXEMPT",
+              "EXPORT"
+            ],
             "type": "string"
           },
           "title": {
@@ -7148,6 +7268,22 @@
           "orderNumber": {
             "type": "string"
           },
+          "taxExemptionReason": {
+            "maxLength": 500,
+            "nullable": true,
+            "type": "string"
+          },
+          "taxRegime": {
+            "enum": [
+              "STANDARD",
+              "REVERSE_CHARGE_13B",
+              "INTRA_COMMUNITY",
+              "SMALL_BUSINESS_19",
+              "EXEMPT",
+              "EXPORT"
+            ],
+            "type": "string"
+          },
           "title": {
             "maxLength": 255,
             "type": "string"
@@ -7394,6 +7530,11 @@
             "format": "date-time",
             "type": "string"
           },
+          "linesTaxRate": {
+            "maximum": 100,
+            "minimum": 0.01,
+            "type": "number"
+          },
           "measurementSketch": {
             "nullable": true,
             "type": "object"
@@ -7406,6 +7547,22 @@
             "type": "string"
           },
           "orderNumber": {
+            "type": "string"
+          },
+          "taxExemptionReason": {
+            "maxLength": 500,
+            "nullable": true,
+            "type": "string"
+          },
+          "taxRegime": {
+            "enum": [
+              "STANDARD",
+              "REVERSE_CHARGE_13B",
+              "INTRA_COMMUNITY",
+              "SMALL_BUSINESS_19",
+              "EXEMPT",
+              "EXPORT"
+            ],
             "type": "string"
           },
           "title": {
@@ -7456,6 +7613,11 @@
           "header": {
             "type": "string"
           },
+          "linesTaxRate": {
+            "maximum": 100,
+            "minimum": 0.01,
+            "type": "number"
+          },
           "netGross": {
             "enum": [
               "net",
@@ -7484,6 +7646,22 @@
             "type": "string"
           },
           "orderNumber": {
+            "type": "string"
+          },
+          "taxExemptionReason": {
+            "maxLength": 500,
+            "nullable": true,
+            "type": "string"
+          },
+          "taxRegime": {
+            "enum": [
+              "STANDARD",
+              "REVERSE_CHARGE_13B",
+              "INTRA_COMMUNITY",
+              "SMALL_BUSINESS_19",
+              "EXEMPT",
+              "EXPORT"
+            ],
             "type": "string"
           },
           "title": {
@@ -7562,6 +7740,42 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "PaymentTermDTO": {
+        "properties": {
+          "days": {
+            "description": "Days from the invoicing date to the due date.",
+            "maximum": 365,
+            "minimum": 0,
+            "type": "number"
+          },
+          "skonto": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResolvedSkontoDTO"
+              }
+            ],
+            "description": "The Skonto a new document starts with; null = none.",
+            "nullable": true,
+            "type": "object"
+          },
+          "source": {
+            "description": "Where the term comes from.",
+            "enum": [
+              "company",
+              "contact",
+              "organization",
+              "default"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "days",
+          "source",
+          "skonto"
+        ],
         "type": "object"
       },
       "PaymentTermsDTO": {
@@ -7885,6 +8099,29 @@
         },
         "required": [
           "kind"
+        ],
+        "type": "object"
+      },
+      "ProjectTagDto": {
+        "properties": {
+          "color": {
+            "description": "Tag colour (hex)",
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "description": "Tag ID",
+            "type": "number"
+          },
+          "name": {
+            "description": "Tag name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color"
         ],
         "type": "object"
       },
@@ -8932,6 +9169,240 @@
         },
         "required": [
           "stageOrders"
+        ],
+        "type": "object"
+      },
+      "ResolvedBooleanDTO": {
+        "properties": {
+          "source": {
+            "description": "The level the value comes from.",
+            "enum": [
+              "ORGANIZATION",
+              "COMPANY",
+              "CONTACT"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "source",
+          "value"
+        ],
+        "type": "object"
+      },
+      "ResolvedInvoiceDefaultsDTO": {
+        "properties": {
+          "constructionCertificateValidUntil": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResolvedStringDTO"
+              }
+            ],
+            "description": "Expiry of the USt 1 TG certificate (YYYY-MM-DD)."
+          },
+          "documentAdjustmentPercent": {
+            "$ref": "#/components/schemas/ResolvedNumberDTO"
+          },
+          "documentAdjustmentType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResolvedStringDTO"
+              }
+            ],
+            "description": "DISCOUNT or SURCHARGE."
+          },
+          "documentLayoutId": {
+            "$ref": "#/components/schemas/ResolvedNumberDTO"
+          },
+          "einvoiceFormat": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResolvedStringDTO"
+              }
+            ],
+            "description": "NONE, ZUGFERD or XRECHNUNG."
+          },
+          "invoiceEmail": {
+            "$ref": "#/components/schemas/ResolvedStringDTO"
+          },
+          "isConstructionContractor": {
+            "$ref": "#/components/schemas/ResolvedBooleanDTO"
+          },
+          "language": {
+            "$ref": "#/components/schemas/ResolvedStringDTO"
+          },
+          "lineDiscountPercent": {
+            "$ref": "#/components/schemas/ResolvedNumberDTO"
+          },
+          "noteIds": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResolvedNumberListDTO"
+              }
+            ],
+            "description": "Notes a new document attaches."
+          },
+          "paymentTerm": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentTermDTO"
+              }
+            ],
+            "description": "Payment term and Skonto, from the payment term resolution."
+          },
+          "retentionPercent": {
+            "$ref": "#/components/schemas/ResolvedNumberDTO"
+          },
+          "taxRegime": {
+            "$ref": "#/components/schemas/ResolvedTreatmentDTO"
+          },
+          "taxRegimeProposed": {
+            "description": "The treatment is proposed from the construction contractor flag, not chosen.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "taxRegime",
+          "taxRegimeProposed",
+          "isConstructionContractor",
+          "constructionCertificateValidUntil",
+          "lineDiscountPercent",
+          "documentAdjustmentType",
+          "documentAdjustmentPercent",
+          "retentionPercent",
+          "documentLayoutId",
+          "language",
+          "invoiceEmail",
+          "einvoiceFormat",
+          "noteIds",
+          "paymentTerm"
+        ],
+        "type": "object"
+      },
+      "ResolvedNumberDTO": {
+        "properties": {
+          "source": {
+            "description": "The level the value comes from.",
+            "enum": [
+              "ORGANIZATION",
+              "COMPANY",
+              "CONTACT"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "source",
+          "value"
+        ],
+        "type": "object"
+      },
+      "ResolvedNumberListDTO": {
+        "properties": {
+          "source": {
+            "description": "The level the value comes from.",
+            "enum": [
+              "ORGANIZATION",
+              "COMPANY",
+              "CONTACT"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "source",
+          "value"
+        ],
+        "type": "object"
+      },
+      "ResolvedSkontoDTO": {
+        "properties": {
+          "days": {
+            "description": "Days from the invoicing date within which the Skonto applies.",
+            "type": "number"
+          },
+          "percent": {
+            "description": "Skonto rate in percent; 0 (days 0) = the customer gets no Skonto.",
+            "type": "number"
+          },
+          "source": {
+            "description": "Where the Skonto comes from.",
+            "enum": [
+              "company",
+              "contact",
+              "organization"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "percent",
+          "days",
+          "source"
+        ],
+        "type": "object"
+      },
+      "ResolvedStringDTO": {
+        "properties": {
+          "source": {
+            "description": "The level the value comes from.",
+            "enum": [
+              "ORGANIZATION",
+              "COMPANY",
+              "CONTACT"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "value"
+        ],
+        "type": "object"
+      },
+      "ResolvedTreatmentDTO": {
+        "properties": {
+          "source": {
+            "description": "The level the value comes from.",
+            "enum": [
+              "ORGANIZATION",
+              "COMPANY",
+              "CONTACT"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "enum": [
+              "STANDARD",
+              "REVERSE_CHARGE_13B",
+              "INTRA_COMMUNITY",
+              "SMALL_BUSINESS_19",
+              "EXEMPT",
+              "EXPORT"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "value"
         ],
         "type": "object"
       },
@@ -11383,6 +11854,9 @@
             "minimum": 0.01,
             "nullable": true,
             "type": "number"
+          },
+          "smallBusiness19": {
+            "type": "boolean"
           },
           "socialMedia": {
             "items": {
@@ -20067,6 +20541,77 @@
         ]
       }
     },
+    "/api/v1/crm/companies/{id}/invoice-defaults": {
+      "get": {
+        "operationId": "NxCompaniesController_getInvoiceDefaults",
+        "parameters": [
+          {
+            "description": "Company ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvoiceDefaultsModel"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "The invoice defaults stored on a company (null = inherited)",
+        "tags": [
+          "Companies"
+        ]
+      }
+    },
     "/api/v1/crm/companies/{id}/invoices": {
       "post": {
         "operationId": "NxCompaniesController_getCompanyInvoices",
@@ -21173,6 +21718,77 @@
           }
         ],
         "summary": "Get or create the documents folder of a contact; upload contact documents into this folder",
+        "tags": [
+          "Contacts"
+        ]
+      }
+    },
+    "/api/v1/crm/contacts/{id}/invoice-defaults": {
+      "get": {
+        "operationId": "NxContactsController_getInvoiceDefaults",
+        "parameters": [
+          {
+            "description": "Contact ID",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvoiceDefaultsModel"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "The invoice defaults stored on a contact (null = inherited)",
         "tags": [
           "Contacts"
         ]
@@ -25687,6 +26303,90 @@
           "CreditNote",
           "Invoicing",
           "Credit notes"
+        ]
+      }
+    },
+    "/api/v1/invoicing/defaults": {
+      "get": {
+        "operationId": "NxTaxTreatmentController_getDefaults",
+        "parameters": [
+          {
+            "description": "CRM company the document is addressed to.",
+            "in": "query",
+            "name": "companyId",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "description": "CRM contact the document is addressed to.",
+            "in": "query",
+            "name": "contactId",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ResolvedInvoiceDefaultsDTO"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": ""
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "The defaults a new invoice or offer for a company or contact starts with, each with its level",
+        "tags": [
+          "Invoicing",
+          "Invoicing",
+          "Invoice defaults"
         ]
       }
     },
@@ -33491,6 +34191,170 @@
           }
         ],
         "summary": "Restore an archived project",
+        "tags": [
+          "Projects"
+        ]
+      }
+    },
+    "/api/v1/projects/{projectId}/tags/{tagId}": {
+      "delete": {
+        "operationId": "ProjectManagerController_removeProjectTag",
+        "parameters": [
+          {
+            "description": "Project ID",
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Tag ID of the same organization",
+            "in": "path",
+            "name": "tagId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/ProjectTagDto"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "The project's tags after the change"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Remove a tag from a project",
+        "tags": [
+          "Projects"
+        ]
+      },
+      "post": {
+        "operationId": "ProjectManagerController_addProjectTag",
+        "parameters": [
+          {
+            "description": "Project ID",
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Tag ID of the same organization",
+            "in": "path",
+            "name": "tagId",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/ProjectTagDto"
+                      },
+                      "type": "array"
+                    },
+                    "message": {
+                      "description": "Response message",
+                      "example": "OK",
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "description": "HTTP status code",
+                      "example": 200,
+                      "type": "integer"
+                    },
+                    "success": {
+                      "description": "Whether the request was successful",
+                      "example": true,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "The project's tags after the change"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key/token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient scopes"
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Add a tag to a project",
         "tags": [
           "Projects"
         ]
@@ -42754,6 +43618,10 @@
     {
       "description": "",
       "name": "Forms Documents"
+    },
+    {
+      "description": "",
+      "name": "Invoice defaults"
     },
     {
       "description": "Create, manage, book, and send invoices",
